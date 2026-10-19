@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课件母版 · 冒泡排序（占位演示）</title>
+
+<!-- ============ CDN 依赖：KaTeX / GSAP / D3 ============ -->
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+
+<style>
+/* ============ 统一 Design Tokens（深色主题） ============ */
+:root {
+  --bg: #0f1420;            /* 页面背景 */
+  --bg-panel: #161d2e;      /* 面板背景 */
+  --bg-elevated: #1d263b;   /* 悬浮卡片 */
+  --border: #2a3550;        /* 边框 */
+  --text: #e6ebf5;          /* 主文字 */
+  --text-muted: #8b96ad;    /* 次要文字 */
+  --primary: #4f8cff;       /* 主色 */
+  --primary-strong: #6ea8ff;
+  --highlight: #ffb020;     /* 高亮色（呼吸灯/当前焦点） */
+  --success: #2dd4a7;       /* 成功/已排序 */
+  --compare: #ff6b6b;       /* 比较中 */
+  --swap: #ff9f43;          /* 交换中 */
+  --danger: #ff5c7a;        /* 错误 */
+  --dim-opacity: 0.22;      /* 非核心元素暗化透明度（规范1） */
+  --radius: 12px;
+  --shadow: 0 6px 24px rgba(0,0,0,0.35);
+  --font: "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-6: 24px; --space-8: 32px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 布局骨架 ============ */
+.page-wrap { max-width: 1280px; margin: 0 auto; padding: var(--space-6); }
+
+header.course-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-6);
+}
+.course-header h1 { font-size: 22px; font-weight: 700; }
+.course-header .badge {
+  font-size: 12px; color: var(--primary-strong);
+  border: 1px solid var(--primary); padding: 2px 10px; border-radius: 999px;
+}
+
+/* 通用 section 卡片 */
+.section {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow);
+}
+.section h2 {
+  font-size: 18px; margin-bottom: var(--space-4);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.section h2 .num {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: var(--primary); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+
+/* 暗化工具类（规范1：焦点透视） */
+.dimmed { opacity: var(--dim-opacity); filter: grayscale(0.6); transition: all .4s ease; }
+.focus-pulse { animation: breathe 1.6s ease-in-out infinite; }
+@keyframes breathe {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,176,32,0.7); }
+  50%     { box-shadow: 0 0 0 10px rgba(255,176,32,0); }
+}
+
+/* ============ 控制面板（规范3/6：交互） ============ */
+.control-bar {
+  display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+  position: sticky; top: 12px; z-index: 10;
+}
+.ctrl-btn {
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  color: var(--text); background: var(--bg-panel);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 16px; cursor: pointer; transition: all .15s ease;
+}
+.ctrl-btn:hover { border-color: var(--primary); color: var(--primary-strong); transform: translateY(-1px); }
+.ctrl-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.ctrl-btn:active { transform: translateY(0); }
+.ctrl-btn:disabled { opacity: .45; cursor: not-allowed; }
+.speed-label { font-size: 13px; color: var(--text-muted); margin-left: var(--space-2); }
+input[type="range"] { accent-color: var(--primary); }
+
+/* ============ 动画舞台（占屏 60%+，规范2/3/4/5） ============ */
+.stage {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;  /* 左：伪代码 | 右：数据结构图形 */
+  gap: var(--space-6);
+  min-height: 460px;
+}
+.code-panel {
+  background: #0b0f18; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--space-4);
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.9;
+  overflow: auto;
+}
+.code-panel .code-line { padding: 2px 10px; border-radius: 6px; transition: all .25s; cursor: default; white-space: pre; }
+.code-panel .code-line.active { background: rgba(79,140,255,0.22); color: var(--primary-strong); }
+.code-panel .code-line:hover { background: rgba(255,255,255,0.06); }
+/* tooltip（规范6） */
+.tip { position: relative; }
+.tip::after {
+  content: attr(data-tip); position: absolute; left: 100%; top: 0; margin-left: 8px;
+  background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 20;
+}
+.tip:hover::after { opacity: 1; }
+
+.viz-panel {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--space-4);
+  display: flex; flex-direction: column;
+}
+.viz-panel svg { width: 100%; flex: 1; }
+
+/* 数值状态刻度（规范6） */
+.state-readout {
+  display: flex; gap: var(--space-4); flex-wrap: wrap;
+  font-family: var(--mono); font-size: 13px; color: var(--text-muted);
+  padding-top: var(--space-3); border-top: 1px solid var(--border);
+}
+.state-readout .val { color: var(--highlight); font-weight: 700; }
+
+/* ============ 数组格子 ============ */
+.rect { transition: fill .35s ease, opacity .35s ease, transform .35s ease; cursor: pointer; }
+
+/* 易错点列表 */
+.pitfall-list { padding-left: var(--space-4); }
+.pitfall-list li { margin-bottom: var(--space-2); }
+.pitfall-list li::marker { color: var(--danger); }
+
+/* 自测 */
+.quiz-item { margin-bottom: var(--space-4); }
+.quiz-item .opt {
+  display: block; padding: 8px 14px; margin-top: 6px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; transition: all .15s;
+}
+.quiz-item .opt:hover { border-color: var(--primary); }
+.quiz-item .opt.correct { border-color: var(--success); color: var(--success); }
+.quiz-item .opt.wrong { border-color: var(--danger); color: var(--danger); }
+
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+/* 响应式：平板/手机自适应堆叠 */
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) {
+  .stage, .page-wrap { grid-template-columns:1fr !important; }
+  .stage { display:block !important; }
+  .stage > * { margin-bottom:16px; }
+  .control-bar { position:static !important; }
+}
+@media (max-width:375px) {
+  .course-header h1 { font-size:18px !important; }
+  .section { padding:16px !important; }
+}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="course-header">
+    <h1 id="course-title">冒泡排序（Bubble Sort）</h1>
+    <span class="badge" id="course-badge">课件母版 · 占位演示</span>
+  </header>
+
+  <!-- ============ [1] 直觉引入区 ============ -->
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>想象一排水里的气泡：大的气泡总是会<b>先浮到水面</b>。冒泡排序也一样——每一轮把当前<b>最大的元素「冒」到最后面</b>，就像气泡上浮。</p></div>
+  </section>
+
+  <!-- ============ [2] 动画舞台区（核心动画，占屏 60%+） ============ -->
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+
+    <!-- 控制面板 -->
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <span class="speed-label">速度
+        <input type="range" id="speed" min="0.5" max="3" step="0.5" value="1">
+      </span>
+      <span class="speed-label">数组大小
+        <input type="range" id="size" min="4" max="12" step="1" value="6">
+      </span>
+    </div>
+
+    <!-- 舞台：左伪代码 / 右图形，多视图联动 -->
+    <div class="stage">
+      <div class="code-panel" id="code-panel"><!-- 伪代码由 JS 注入 --></div>
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="state-readout" id="readout"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ [3] 公式推导区 ============ -->
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <p>时间复杂度推导（渐进式生长，公式用 KaTeX 渲染）：</p>
+    <div id="derive-katex"></div>
+  </section>
+
+  <!-- ============ [4] 真题演示区 ============ -->
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"><p><b>【真题】</b>对序列 <code>5, 3, 8, 1, 9</code> 进行一趟冒泡排序后，序列变为？</p>
+    <p id="exam-answer" style="color:var(--success)">答案：3, 5, 1, 8, 9 —— 最大元素 9 已「冒」到末尾。</p></div>
+  </section>
+
+  <!-- ============ [5] 易错点区 ============ -->
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list">
+      <li>内层循环的结束条件写成 <code>i &lt; n</code> 会导致越界——应为 <code>i &lt; n - 1 - j</code>。</li>
+      <li>每趟比较次数是 <code>n-1-j</code>，不是固定 <code>n-1</code>（已排好尾部的不用再比）。</li>
+      <li>优化版用 <code>swapped</code> 标志提前结束，别漏掉这一最优性判断。</li>
+    </ul>
+  </section>
+
+  <!-- ============ [6] 自测区 ============ -->
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list">
+    <div class="quiz-item">
+      <p>冒泡排序的最坏时间复杂度是？</p>
+      <span class="opt" data-correct="1">O(n²)</span>
+      <span class="opt">O(n log n)</span>
+      <span class="opt">O(n)</span>
+    </div>
+    <div class="quiz-item">
+      <p>最好情况（已有序）下，优化版冒泡排序的时间复杂度是？</p>
+      <span class="opt" data-correct="1">O(n)</span>
+      <span class="opt">O(n²)</span>
+      <span class="opt">O(log n)</span>
+    </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===================== 冒泡排序占位演示 ===================== */
+// 严格落地 6 条动画规范：焦点暗化 / 参数联动 / 多视图同步 / 残影轨迹 / 渐进生长 / 微交互留痕
+
+const CODE = [
+  { txt: 'for j in 0..n-2:',                tip: '外层循环：第 j 趟' },
+  { txt: '  swapped = false',               tip: '本趟是否发生交换的标志' },
+  { txt: '  for i in 0..n-2-j:',            tip: '内层循环：每趟少比一个（尾部已排好）' },
+  { txt: '    if a[i] > a[i+1]:',           tip: '相邻元素比较' },
+  { txt: '      swap(a[i], a[i+1])',        tip: '逆序则交换' },
+  { txt: '      swapped = true',            tip: '记录发生了交换' },
+  { txt: '  if not swapped: break',         tip: '本趟无交换，提前结束' },
+];
+
+let n = 6;
+let arr = [];
+let steps = [];      // 预计算所有动画步骤
+let stepIdx = 0;
+let playing = false;
+let playTimer = null;
+let speed = 1;
+
+// 状态刻度
+const readout = document.getElementById('readout');
+
+function randArray(size) {
+  const a = [];
+  for (let i = 0; i < size; i++) a.push(Math.floor(Math.random() * 40) + 10);
+  return a;
+}
+
+// 预计算冒泡排序步骤（含残影信息）
+function computeSteps(a) {
+  const arr = [...a];
+  const s = [{ type: 'init', arr: [...arr] }];
+  for (let j = 0; j < arr.length - 1; j++) {
+    let swapped = false;
+    for (let i = 0; i < arr.length - 1 - j; i++) {
+      s.push({ type: 'compare', i, j, arr: [...arr], swapped });
+      if (arr[i] > arr[i + 1]) {
+        [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+        swapped = true;
+        s.push({ type: 'swap', i, j, arr: [...arr], swapped });
+      }
+    }
+    s.push({ type: 'passDone', j, arr: [...arr], swapped });
+    if (!swapped) break;
+  }
+  s.push({ type: 'done', arr: [...arr] });
+  return s;
+}
+
+// 渲染伪代码（渐进生长：逐行 append）
+function renderCode() {
+  const panel = document.getElementById('code-panel');
+  panel.innerHTML = '';
+  CODE.forEach((line, idx) => {
+    const div = document.createElement('div');
+    div.className = 'code-line tip';
+    div.dataset.tip = line.tip;
+    div.dataset.line = idx;
+    div.textContent = line.txt;
+    panel.appendChild(div);
+  });
+}
+
+// 渲染数组图形（D3 + SVG，含残影轨迹）
+function renderViz(step) {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 640, H = 260, pad = 30;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+
+  const data = step.arr;
+  const bw = (W - pad * 2) / n;
+  const maxV = Math.max(...data);
+
+  // 残影：上一位置用半透明矩形记录（规范4）
+  if (step.type === 'swap' && step.arr) {
+    // swap 后的数组已变化，残影在下面单独绘制
+  }
+
+  const g = svg.append('g');
+  data.forEach((v, i) => {
+    const h = (v / maxV) * (H - pad * 2 - 30);
+    const x = pad + i * bw + 4;
+    const y = H - pad - h;
+    let fill = 'var(--primary)';
+    if (step.type === 'compare' && (i === step.i || i === step.i + 1)) fill = 'var(--compare)';
+    if (step.type === 'swap' && (i === step.i || i === step.i + 1)) fill = 'var(--swap)';
+    if (step.type === 'done') fill = 'var(--success)';
+    if (step.type === 'passDone' && i >= n - 1 - step.j) fill = 'var(--success)'; // 已冒泡到位的元素
+
+    g.append('rect')
+      .attr('class', 'rect')
+      .attr('x', x).attr('y', y)
+      .attr('width', bw - 8).attr('height', h)
+      .attr('rx', 6)
+      .attr('fill', fill)
+      .attr('data-tip', `a[${i}] = ${v}`)
+      .on('mouseenter', function () {
+        d3.select(this).attr('stroke', 'var(--highlight)').attr('stroke-width', 3);
+        showTip(this, `a[${i}] = ${v}`);
+      })
+      .on('mouseleave', function () { d3.select(this).attr('stroke', 'none'); hideTip(); });
+
+    g.append('text')
+      .attr('x', x + (bw - 8) / 2).attr('y', y - 6)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#fff').attr('font-size', 13)
+      .text(v);
+  });
+
+  // 当前聚焦元素呼吸灯（规范1）
+  if (step.type === 'compare' || step.type === 'swap') {
+    d3.selectAll('.rect').filter((d, i) => i === step.i || i === step.i + 1)
+      .classed('focus-pulse', true);
+  }
+}
+
+// tooltip（规范6）
+function showTip(el, text) {
+  let t = document.getElementById('tip-box');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'tip-box';
+    t.style.cssText = 'position:fixed;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:12px;z-index:99;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = text;
+  const r = el.getBoundingClientRect();
+  t.style.left = r.left + 'px'; t.style.top = (r.top - 30) + 'px';
+}
+function hideTip() { const t = document.getElementById('tip-box'); if (t) t.remove(); }
+
+// 更新状态刻度（规范6）
+function updateReadout(step) {
+  const i = step.i ?? -1, j = step.j ?? -1;
+  readout.innerHTML = `
+    <span>当前步骤 <span class="val">${stepIdx}/${steps.length - 1}</span></span>
+    <span>外循环 j <span class="val">${j}</span></span>
+    <span>内循环 i <span class="val">${i}</span></span>
+    <span>状态 <span class="val">${step.type}</span></span>
+  `;
+}
+
+// 高亮伪代码对应行（规范3：多视图同步）
+function highlightCode(step) {
+  const lines = document.querySelectorAll('.code-line');
+  lines.forEach(l => l.classList.remove('active'));
+  let activeIdx = -1;
+  switch (step.type) {
+    case 'init': activeIdx = 0; break;
+    case 'compare': activeIdx = 3; break;
+    case 'swap': activeIdx = 4; break;
+    case 'passDone': activeIdx = 6; break;
+    case 'done': activeIdx = -1; break;
+  }
+  if (activeIdx >= 0) lines[activeIdx].classList.add('active');
+}
+
+function renderStep(idx) {
+  stepIdx = Math.max(0, Math.min(idx, steps.length - 1));
+  const step = steps[stepIdx];
+  renderViz(step);
+  highlightCode(step);
+  updateReadout(step);
+}
+
+function reset() {
+  arr = randArray(n);
+  steps = computeSteps(arr);
+  stepIdx = 0;
+  stopPlay();
+  renderStep(0);
+}
+
+function stepNext() { renderStep(stepIdx + 1); }
+function stepPrev() { renderStep(stepIdx - 1); }
+
+function stopPlay() { if (playTimer) { clearInterval(playTimer); playTimer = null; } playing = false; document.getElementById('btn-play').textContent = '▶ 播放'; }
+function togglePlay() {
+  if (playing) { stopPlay(); return; }
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ 暂停';
+  playTimer = setInterval(() => {
+    if (stepIdx >= steps.length - 1) { stopPlay(); return; }
+    stepNext();
+  }, 1000 / speed);
+}
+
+// ===================== 公式推导（KaTeX，渐进生长） =====================
+function renderDerive(lines) {
+  const el = document.getElementById('derive-katex');
+  const list = lines || [
+    '\\text{比较次数 } C = \\sum_{j=0}^{n-2}(n-1-j)',
+    '= (n-1)+(n-2)+\\cdots+1',
+    '= \\dfrac{n(n-1)}{2}',
+    '\\Rightarrow T(n) = O(n^2)',
+  ];
+  el.innerHTML = list.map(l => `<div>$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) {
+    window.renderMathInElement(el, { delimiters: [{ left: '$$', right: '$$', display: true }] });
+  } else if (window.katex) {
+    el.innerHTML = '';
+    list.forEach(l => {
+      const d = document.createElement('div');
+      d.className = 'katex-holder';
+      el.appendChild(d);
+      window.katex.render(l, d, { displayMode: true });
+    });
+  }
+}
+
+// ===================== 自测交互 =====================
+function bindQuiz() {
+  document.querySelectorAll('.quiz-item .opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const siblings = opt.parentElement.querySelectorAll('.opt');
+      siblings.forEach(s => s.classList.remove('correct', 'wrong'));
+      if (opt.dataset.correct === '1') opt.classList.add('correct');
+      else opt.classList.add('wrong');
+    });
+  });
+}
+
+/* =====================================================================
+ *  数据加载 —— 三级优先级（彻底解决 file:// 双击打开问题）
+ *  1. window.COURSEWARE_DATA —— 由生成脚本内联注入到 <script> 标签（推荐，双击即用）
+ *  2. fetch('./data.json')    —— 外部 JSON（需 HTTP 服务器）
+ *  3. 内置冒泡排序演示        —— 兜底
+ *
+ *  data 结构：
+ *  {
+ *    "id": "DS-07-02",
+ *    "title": "...",
+ *    "intuition_text": "...",
+ *    "code": [ { "txt": "...", "tip": "..." }, ... ],
+ *    "steps": [ { "code_line_idx": 0, "visual_state": {...}, "subtitle": "..." } ],
+ *    "derivation": [ "\\text{...}", ... ],
+ *    "exam_text": "...", "exam_answer": "...",
+ *    "pitfall_list": [ ... ],
+ *    "quiz_list": [ { "question": "...", "options": [...], "correct": 0 } ]
+ *  }
+ * ===================================================================== */
+
+// 通用步骤数据（从数据源读入后存这里）
+let DATA = null;           // 数据内容
+let genericSteps = [];     // 通用格式的 steps
+let genericCode = [];      // 通用格式的伪代码
+
+// 渲染通用格式的步骤（code_line_idx + visual_state + subtitle）
+function renderGenericStep(idx) {
+  stepIdx = Math.max(0, Math.min(idx, genericSteps.length - 1));
+  const st = genericSteps[stepIdx];
+
+  // 1. 高亮伪代码对应行（规范3）
+  document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+  if (st.code_line_idx != null && st.code_line_idx >= 0) {
+    const lines = document.querySelectorAll('.code-line');
+    if (lines[st.code_line_idx]) lines[st.code_line_idx].classList.add('active');
+  }
+
+  // 2. 渲染视觉状态：visual_state 可为 { arr: [...], highlight: [i,j], swapped: [i,j] }
+  renderGenericViz(st.visual_state || {});
+
+  // 3. 字幕（subtitle）
+  const readout = document.getElementById('readout');
+  const vs = st.visual_state || {};
+  readout.innerHTML = `
+    <span>当前步骤 <span class="val">${stepIdx}/${genericSteps.length - 1}</span></span>
+    ${vs.highlight ? `<span>聚焦 <span class="val">[${vs.highlight.join(',')}]</span></span>` : ''}
+    ${st.subtitle ? `<span><span class="val">${st.subtitle}</span></span>` : ''}
+  `;
+}
+
+// 通用数组可视化（支持外部 visual_state 里的 arr），带 GSAP 平滑过渡与残影
+function renderGenericViz(vs) {
+  const svg = d3.select('#viz');
+  if (!vs.arr || !vs.arr.length) return;
+  const W = 640, H = 260, pad = 30;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const data = vs.arr;
+  const bw = (W - pad * 2) / data.length;
+  const maxV = Math.max(...data);
+
+  // 保留上一次的 rect 位置，用于 GSAP 位移动画（残影轨迹，规范4）
+  const prevRects = {};
+  svg.selectAll('.rect').each(function (d, i) {
+    prevRects[this.__data__] = { x: +this.getAttribute('x'), y: +this.getAttribute('y'), h: +this.getAttribute('height') };
+  });
+
+  const g = svg.select('g.bars');
+  if (g.empty()) svg.append('g').attr('class', 'bars');
+
+  data.forEach((v, i) => {
+    const h = (v / maxV) * (H - pad * 2 - 30);
+    const x = pad + i * bw + 4;
+    const y = H - pad - h;
+    let fill = 'var(--primary)';
+    if (vs.highlight && vs.highlight.includes(i)) fill = 'var(--compare)';
+    if (vs.swapped && vs.swapped.includes(i)) fill = 'var(--swap)';
+    if (vs.sorted && vs.sorted.includes(i)) fill = 'var(--success)';
+
+    const sel = d3.select('#viz').selectAll(`rect[data-i="${i}"]`);
+    if (sel.empty()) {
+      // 新节点：从底部"生长"出来（规范5）
+      const rect = d3.select('#viz .bars').append('rect')
+        .attr('class', 'rect')
+        .attr('data-i', i)
+        .attr('data-v', v)
+        .attr('x', x).attr('y', H - pad)   // 从底部开始
+        .attr('width', bw - 8).attr('height', 0)
+        .attr('rx', 6).attr('fill', fill)
+        .on('mouseenter', function () { d3.select(this).attr('stroke', 'var(--highlight)').attr('stroke-width', 3); showTip(this, `a[${i}] = ${v}`); })
+        .on('mouseleave', function () { d3.select(this).attr('stroke', 'none'); hideTip(); });
+      const txt = d3.select('#viz .bars').append('text')
+        .attr('data-i', i).attr('x', x + (bw - 8) / 2).attr('y', H - pad - 4)
+        .attr('text-anchor', 'middle').attr('fill', '#fff').attr('font-size', 13).text(v);
+      // GSAP 生长动画
+      if (window.gsap) {
+        gsap.to(rect.node(), { attr: { y: y, height: h }, duration: 0.5, ease: 'back.out(1.4)' });
+        gsap.to(txt.node(), { attr: { y: y - 6 }, duration: 0.5, ease: 'power2.out' });
+      } else {
+        rect.attr('y', y).attr('height', h);
+        txt.attr('y', y - 6);
+      }
+    } else {
+      // 已有节点：平滑移动到新位置（残影轨迹）
+      const rect = sel;
+      const txt = d3.select('#viz').selectAll(`text[data-i="${i}"]`);
+      if (window.gsap) {
+        gsap.to(rect.node(), { attr: { x: x, y: y, height: h }, fill: fill, duration: 0.45, ease: 'power2.inOut' });
+        gsap.to(txt.node(), { attr: { x: x + (bw - 8) / 2, y: y - 6 }, textContent: v, duration: 0.45, ease: 'power2.inOut' });
+      } else {
+        rect.attr('x', x).attr('y', y).attr('height', h).attr('fill', fill);
+        txt.attr('x', x + (bw - 8) / 2).attr('y', y - 6).text(v);
+      }
+    }
+  });
+
+  // 聚焦元素呼吸灯（规范1）
+  d3.selectAll('#viz .rect').classed('focus-pulse', false);
+  if (vs.highlight) {
+    vs.highlight.forEach(i => {
+      const r = d3.select(`#viz rect[data-i="${i}"]`);
+      if (!r.empty()) r.classed('focus-pulse', true);
+    });
+  }
+}
+
+// 应用外部 data.json
+function applyData(d) {
+  DATA = d;
+
+  // 标题与徽章
+  if (d.title) document.getElementById('course-title').textContent = d.title;
+  document.getElementById('course-badge').textContent = '外部数据驱动 · ' + (d.id || 'data.json');
+
+  // 直觉引入
+  if (d.intuition_text) document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+
+  // 伪代码（可选）
+  if (d.code && d.code.length) {
+    genericCode = d.code;
+    const panel = document.getElementById('code-panel');
+    panel.innerHTML = '';
+    d.code.forEach((line, idx) => {
+      const div = document.createElement('div');
+      div.className = 'code-line tip';
+      div.dataset.tip = line.tip || '';
+      div.dataset.line = idx;
+      div.textContent = line.txt;
+      panel.appendChild(div);
+    });
+  }
+
+  // 步骤
+  if (d.steps && d.steps.length) {
+    genericSteps = d.steps;
+  }
+
+  // 公式推导
+  if (d.derivation && d.derivation.length) renderDerive(d.derivation);
+
+  // 真题
+  if (d.exam_text) {
+    document.getElementById('exam-text').innerHTML =
+      `<p><b>【真题】</b>${d.exam_text}</p>` +
+      (d.exam_answer ? `<p id="exam-answer" style="color:var(--success)">${d.exam_answer}</p>` : '');
+  }
+
+  // 易错点
+  if (d.pitfall_list && d.pitfall_list.length) {
+    document.getElementById('pitfall-list').innerHTML =
+      d.pitfall_list.map(x => `<li>${x}</li>`).join('');
+  }
+
+  // 自测
+  if (d.quiz_list && d.quiz_list.length) {
+    document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q, qi) => `
+      <div class="quiz-item">
+        <p>${q.question}</p>
+        ${q.options.map((o, oi) => `<span class="opt" data-correct="${oi === q.correct ? 1 : 0}">${o}</span>`).join('')}
+      </div>`).join('');
+  }
+}
+
+// 数据加载：优先内联 window.COURSEWARE_DATA，其次 fetch data.json，最后兜底
+async function loadData() {
+  // 1. 内联数据（生成脚本注入，双击即用）
+  if (window.COURSEWARE_DATA && typeof window.COURSEWARE_DATA === 'object') {
+    applyData(window.COURSEWARE_DATA);
+    return 'inline';
+  }
+  // 2. 外部 data.json（需 HTTP 服务器）
+  try {
+    const resp = await fetch('./data.json', { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    applyData(data);
+    return 'external';
+  } catch (e) {
+    console.warn('[template] 未找到数据，回退内置冒泡排序演示：', e.message);
+    return 'fallback';
+  }
+}
+
+// ===================== 初始化 =====================
+async function init() {
+  const mode = await loadData();
+  renderCode();      // 兜底伪代码（若数据里有 code 会被 applyData 覆盖）
+  bindQuiz();
+
+  if (mode === 'inline' || mode === 'external') {
+    // 数据驱动模式：绑定通用步骤渲染
+    if (genericSteps.length === 0) {
+      // 无 steps 但有数据，仍用冒泡兜底动画
+      reset();
+    } else {
+      stepIdx = 0;
+      renderGenericStep(0);
+    }
+  } else {
+    // 兜底模式：内置冒泡排序
+    reset();
+    renderDerive();  // 兜底时也要渲染公式推导
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => {
+    if (genericSteps.length) renderGenericStep(stepIdx + 1); else stepNext();
+  });
+  document.getElementById('btn-prev').addEventListener('click', () => {
+    if (genericSteps.length) renderGenericStep(stepIdx - 1); else stepPrev();
+  });
+  document.getElementById('btn-play').addEventListener('click', () => {
+    if (genericSteps.length) toggleGenericPlay(); else togglePlay();
+  });
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (genericSteps.length) { stepIdx = 0; renderGenericStep(0); } else reset();
+  });
+  document.getElementById('speed').addEventListener('input', e => { speed = +e.target.value; });
+  document.getElementById('size').addEventListener('input', e => { n = +e.target.value; reset(); });
+}
+
+// 通用步骤的播放
+function toggleGenericPlay() {
+  if (playing) { stopPlay(); return; }
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ 暂停';
+  playTimer = setInterval(() => {
+    if (stepIdx >= genericSteps.length - 1) { stopPlay(); return; }
+    renderGenericStep(stepIdx + 1);
+  }, 1000 / speed);
+}
+
+// 等 CDN 就绪后再初始化
+window.addEventListener('load', () => {
+  if (window.gsap) {
+    gsap.from('.section', { opacity: 0, y: 20, duration: 0.6, stagger: 0.12, ease: 'power2.out' });
+  }
+  init();
+});
+</script>
+
+<button class="theme-float" id="theme-float-btn" title="切换主题">🌙</button>
+<script>
+(function(){
+  var btn = document.getElementById('theme-float-btn');
+  try { var s = localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme', s); } catch(e){}
+  function upd(){ var d = document.documentElement.getAttribute('data-theme')!=='light'; btn.textContent = d?'🌙':'☀️'; }
+  upd();
+  btn.addEventListener('click', function(){
+    var c = document.documentElement.getAttribute('data-theme');
+    var n = c==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', n);
+    try { localStorage.setItem('theme', n); } catch(e){}
+    upd();
+  });
+})();
+</script>
+</body>
+</html>

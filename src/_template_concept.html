@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念型课件母版</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root {
+  --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550;
+  --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff;
+  --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a;
+  --dim-opacity:0.22; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35);
+  --font:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1200px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.dimmed { opacity:var(--dim-opacity); filter:grayscale(0.6); transition:all .4s ease; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.speed-label { font-size:13px; color:var(--text-muted); margin-left:8px; }
+input[type="range"] { accent-color:var(--primary); }
+/* 结构图舞台 */
+.stage { display:grid; grid-template-columns:1.5fr 1fr; gap:24px; min-height:400px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel svg { width:100%; height:100%; min-height:380px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:90%; overflow:hidden; text-overflow:ellipsis; }
+/* 卡片式重点高亮 */
+.card-panel { display:flex; flex-direction:column; gap:10px; }
+.key-card { background:var(--bg-elevated); border:1px solid var(--border); border-radius:10px; padding:12px 16px; transition:all .35s ease; cursor:default; }
+.key-card.active { border-color:var(--highlight); background:rgba(255,176,32,0.08); box-shadow:0 0 0 2px var(--highlight); transform:translateX(6px); }
+.key-card .k-title { font-weight:700; font-size:15px; margin-bottom:4px; color:var(--primary-strong); }
+.key-card .k-desc { font-size:13px; color:var(--text-muted); }
+/* 渐进生长节点 */
+.struct-node { cursor:pointer; transition:all .3s; }
+.struct-node:hover { filter:brightness(1.3); }
+.struct-node.dimmed-node { opacity:0.25; filter:grayscale(0.7); }
+.struct-node.active-node { stroke:var(--highlight); stroke-width:3; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+/* 响应式：平板/手机自适应堆叠 */
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) {
+  .stage, .page-wrap { grid-template-columns:1fr !important; }
+  .stage { display:block !important; }
+  .stage > * { margin-bottom:16px; }
+  .control-bar { position:static !important; }
+}
+@media (max-width:375px) {
+  .course-header h1 { font-size:18px !important; }
+  .section { padding:16px !important; }
+}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1 id="course-title">概念型课件</h1>
+    <span class="badge" id="course-badge">C级 · 图文结构</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>结构图解</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <span class="speed-label">速度 <input type="range" id="speed" min="0.5" max="3" step="0.5" value="1"></span>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="subtitle-bar" id="subtitle">点击「播放」逐步展示</div>
+      </div>
+      <div class="card-panel" id="card-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>核心要点</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<script>
+/* ==================== 概念模板数据驱动 ====================
+ * 数据源优先级：window.COURSEWARE_DATA（内联） > fetch data.json > 内置示例
+ * 结构（steps 描述结构图节点，支持渐进生长）：
+ * {
+ *   id, title, intuition_text,
+ *   structure: { type:"tree|timeline|flow|layers", nodes:[{id,label,level,parent,desc}], links:[[from,to]] },
+ *   steps: [ { reveal_nodes:[...], highlight:[...], card_idx:0, subtitle:"..." } ],
+ *   cards: [ { title, desc } ],
+ *   derivation:[...], exam_text, exam_answer, pitfall_list, quiz_list
+ * }
+ */
+let DATA = null;
+let stepIdx = 0, playing = false, playTimer = null, speed = 1;
+
+function renderCards() {
+  const panel = document.getElementById('card-panel');
+  if (!DATA.cards) return;
+  panel.innerHTML = DATA.cards.map((c, i) => `
+    <div class="key-card" data-card="${i}">
+      <div class="k-title">${c.title}</div>
+      <div class="k-desc">${c.desc}</div>
+    </div>`).join('');
+}
+
+function renderStructure(step) {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const struct = DATA.structure;
+  if (!struct) return;
+  const W = 560, H = 380;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+
+  const reveal = step ? (step.reveal_nodes || []) : [];
+  const highlight = step ? (step.highlight || []) : [];
+
+  // 计算节点位置
+  const nodes = struct.nodes;
+  const pos = {};
+  if (struct.type === 'timeline') {
+    // 时间轴：横向排列
+    const n = nodes.length;
+    nodes.forEach((node, i) => {
+      pos[node.id] = { x: 50 + i * (W - 100) / (n - 1), y: H / 2 };
+    });
+    // 画时间轴线
+    g.append('line').attr('x1',50).attr('y1',H/2).attr('x2',W-50).attr('y2',H/2)
+      .attr('stroke','var(--text-muted)').attr('stroke-width',2);
+  } else if (struct.type === 'layers') {
+    // 分层：按 level 纵向排列
+    const levels = {};
+    nodes.forEach(node => { const l = node.level||0; if(!levels[l]) levels[l]=[]; levels[l].push(node); });
+    const levelKeys = Object.keys(levels).sort((a,b)=>a-b);
+    levelKeys.forEach((lk, li) => {
+      const arr = levels[lk];
+      const y = 60 + li * (H - 120) / (levelKeys.length - 1 || 1);
+      arr.forEach((node, ni) => {
+        const x = (ni + 1) * W / (arr.length + 1);
+        pos[node.id] = { x, y };
+      });
+    });
+  } else {
+    // tree/flow：简单层级布局（按 level 分层，parent 关系）
+    const levels = {};
+    nodes.forEach(node => { const l = node.level||0; if(!levels[l]) levels[l]=[]; levels[l].push(node); });
+    const levelKeys = Object.keys(levels).sort((a,b)=>a-b);
+    levelKeys.forEach((lk, li) => {
+      const arr = levels[lk];
+      const y = 60 + li * (H - 120) / (levelKeys.length - 1 || 1);
+      arr.forEach((node, ni) => {
+        const x = (ni + 1) * W / (arr.length + 1);
+        pos[node.id] = { x, y };
+      });
+    });
+  }
+
+  // 画连线
+  (struct.links || []).forEach(([from, to]) => {
+    if (!pos[from] || !pos[to]) return;
+    const show = reveal.includes(from) && reveal.includes(to);
+    g.append('line')
+      .attr('x1',pos[from].x).attr('y1',pos[from].y)
+      .attr('x2',pos[to].x).attr('y2',pos[to].y)
+      .attr('stroke','var(--text-muted)').attr('stroke-width',1.5)
+      .attr('opacity', show ? 1 : 0)
+      .transition().duration(400).attr('opacity', show ? 1 : 0);
+  });
+
+  // 画节点（渐进生长：未 reveal 的不显示）
+  nodes.forEach(node => {
+    if (!pos[node.id]) return;
+    const isRevealed = reveal.includes(node.id);
+    const isHighlight = highlight.includes(node.id);
+    const { x, y } = pos[node.id];
+
+    const circle = g.append('g')
+      .attr('class', 'struct-node')
+      .attr('data-node', node.id)
+      .attr('transform', `translate(${x},${y})`)
+      .attr('opacity', isRevealed ? 1 : 0)
+      .on('mouseenter', function(){ showTip(this, node.desc || node.label); })
+      .on('mouseleave', hideTip);
+
+    circle.append('circle')
+      .attr('r', 22)
+      .attr('fill', isHighlight ? 'var(--highlight)' : 'var(--primary)')
+      .attr('class', isHighlight ? 'focus-pulse' : '');
+
+    circle.append('text')
+      .attr('text-anchor','middle').attr('dy','0.35em')
+      .attr('fill','#fff').attr('font-size',13).attr('font-weight','700')
+      .text(node.label.slice(0, 6));
+
+    // 完整标签（下方）
+    circle.append('text')
+      .attr('text-anchor','middle').attr('dy', 34)
+      .attr('fill', isHighlight ? 'var(--highlight)' : 'var(--text-muted)')
+      .attr('font-size', 11).text(node.label);
+
+    // 渐进生长动画
+    if (isRevealed && window.gsap) {
+      gsap.from(circle.node(), { opacity:0, scale:0.3, duration:0.5, ease:'back.out(1.6)' });
+    }
+  });
+}
+
+// tooltip
+function showTip(el, text) {
+  let t = document.getElementById('tip-box');
+  if (!t) { t=document.createElement('div'); t.id='tip-box'; t.style.cssText='position:fixed;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:13px;z-index:99;pointer-events:none;max-width:280px;'; document.body.appendChild(t); }
+  t.textContent = text;
+  const r = el.getBoundingClientRect();
+  t.style.left = r.left+'px'; t.style.top = (r.top-36)+'px';
+}
+function hideTip(){ const t=document.getElementById('tip-box'); if(t) t.remove(); }
+
+function renderStep(idx) {
+  stepIdx = Math.max(0, Math.min(idx, (DATA.steps?.length || 1) - 1));
+  const step = DATA.steps?.[stepIdx];
+  renderStructure(step);
+  // 字幕
+  document.getElementById('subtitle').textContent = step ? step.subtitle : '';
+  // 卡片高亮
+  if (step && step.card_idx != null) {
+    document.querySelectorAll('.key-card').forEach(c => c.classList.remove('active'));
+    const card = document.querySelector(`.key-card[data-card="${step.card_idx}"]`);
+    if (card) card.classList.add('active');
+  }
+  // 非核心卡片暗化（规范1）
+  document.querySelectorAll('.key-card').forEach(c => {
+    if (step && step.card_idx != null && c.dataset.card != step.card_idx) c.classList.add('dimmed');
+    else c.classList.remove('dimmed');
+  });
+}
+
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){
+  if(playing){stopPlay();return;}
+  playing=true; document.getElementById('btn-play').textContent='⏸ 暂停';
+  playTimer=setInterval(()=>{ if(stepIdx>=(DATA.steps?.length||1)-1){stopPlay();return;} stepNext(); }, 1400/speed);
+}
+
+function renderDerive(){
+  const el = document.getElementById('derive-katex');
+  const lines = DATA.derivation || [];
+  el.innerHTML = lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex){ el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent(){
+  document.getElementById('course-title').textContent = DATA.title;
+  document.getElementById('course-badge').textContent = `C级 · ${DATA.id||''}`;
+  document.getElementById('intuition-text').innerHTML = `<p>${DATA.intuition_text||''}</p>`;
+  document.getElementById('exam-text').innerHTML = (DATA.exam_text||'') + (DATA.exam_answer?`<p style="color:var(--success);margin-top:8px;">${DATA.exam_answer}</p>`:'');
+  document.getElementById('pitfall-list').innerHTML = (DATA.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = (DATA.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+  renderCards();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      const sib = opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(s=>s.classList.remove('correct','wrong'));
+      opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');
+    });
+  });
+}
+
+async function loadData(){
+  if (window.COURSEWARE_DATA && typeof window.COURSEWARE_DATA==='object'){ DATA=window.COURSEWARE_DATA; return 'inline'; }
+  try { const r = await fetch('./data.json',{cache:'no-store'}); if(!r.ok) throw 0; DATA=await r.json(); return 'external'; }
+  catch(e){ return 'fallback'; }
+}
+
+async function init(){
+  const mode = await loadData();
+  if (mode==='fallback') {
+    // 兜底示例
+    DATA = {
+      id:"CN-示例", title:"OSI 参考模型七层结构",
+      intuition_text:"网络通信就像寄快递：从「应用层」写好信，一路向下封装加「信封」，到「物理层」变成电信号发出去；对端再一路向上拆信封还原。每一层各司其职。",
+      structure:{ type:"layers", nodes:[
+        {id:"l7",label:"应用层",level:0,desc:"为应用程序提供网络服务（HTTP/DNS）"},
+        {id:"l6",label:"表示层",level:1,desc:"数据格式转换、加密解密"},
+        {id:"l5",label:"会话层",level:2,desc:"建立、管理、终止会话"},
+        {id:"l4",label:"传输层",level:3,desc:"端到端可靠传输（TCP/UDP）"},
+        {id:"l3",label:"网络层",level:4,desc:"路由选择、逻辑寻址（IP）"},
+        {id:"l2",label:"数据链路层",level:5,desc:"成帧、差错检测（MAC）"},
+        {id:"l1",label:"物理层",level:6,desc:"比特流传输、物理介质"}
+      ], links:[["l7","l6"],["l6","l5"],["l5","l4"],["l4","l3"],["l3","l2"],["l2","l1"]] },
+      steps:[
+        {reveal_nodes:["l7"],highlight:["l7"],card_idx:0,subtitle:"第1步：应用层——为用户提供服务"},
+        {reveal_nodes:["l7","l6"],highlight:["l6"],card_idx:1,subtitle:"第2步：表示层——格式转换"},
+        {reveal_nodes:["l7","l6","l5","l4","l3","l2","l1"],highlight:["l4"],card_idx:2,subtitle:"逐层向下，传输层负责端到端"},
+        {reveal_nodes:["l7","l6","l5","l4","l3","l2","l1"],highlight:["l1"],card_idx:3,subtitle:"物理层——最终变成比特流发出"}
+      ],
+      cards:[
+        {title:"应用层",desc:"最靠近用户，HTTP、DNS、SMTP 等"},
+        {title:"表示层",desc:"数据加密、压缩、格式转换"},
+        {title:"传输层",desc:"TCP/UDP，端到端可靠传输"},
+        {title:"物理层",desc:"比特流，网线、光纤、无线"}
+      ],
+      derivation:["\\text{封装：} \\text{数据} \\to \\text{段} \\to \\text{包} \\to \\text{帧} \\to \\text{比特}"],
+      exam_text:"<b>【真题·典型】</b>OSI 模型中，负责「端到端可靠传输」的是哪一层？",
+      exam_answer:"答案：传输层（第4层）。",
+      pitfall_list:["OSI 是 7 层，TCP/IP 是 4/5 层，别混淆。","物理层不负责「可靠传输」，只传比特流。"],
+      quiz_list:[{question:"OSI 模型共几层？",options:["4层","5层","7层"],correct:2}]
+    };
+    window.COURSEWARE_DATA = DATA;   // 同步到 window，供质检识别结构图
+  }
+  renderContent();
+  bindQuiz();
+  renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+  document.getElementById('speed').addEventListener('input',e=>{speed=+e.target.value;});
+}
+window.addEventListener('load',()=>{
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+
+<button class="theme-float" id="theme-float-btn" title="切换主题">🌙</button>
+<script>
+(function(){
+  var btn = document.getElementById('theme-float-btn');
+  try { var s = localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme', s); } catch(e){}
+  function upd(){ var d = document.documentElement.getAttribute('data-theme')!=='light'; btn.textContent = d?'🌙':'☀️'; }
+  upd();
+  btn.addEventListener('click', function(){
+    var c = document.documentElement.getAttribute('data-theme');
+    var n = c==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', n);
+    try { localStorage.setItem('theme', n); } catch(e){}
+    upd();
+  });
+})();
+</script>
+</body>
+</html>
