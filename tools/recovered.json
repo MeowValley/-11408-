@@ -1,0 +1,39 @@
+{
+  "MA-128": {
+    "id": "MA-128",
+    "title": "两类曲线积分、两类曲面积分",
+    "derivation": [
+      "\\text{第一类曲线：} \\int_L f\\,ds",
+      "\\text{第二类曲线：} \\int_L P\\,dx + Q\\,dy",
+      "\\text{格林：} \\oint P\\,dx+Q\\,dy = \\iint_D \\left(\\tfrac{\\partial Q}{\\partial x}-\\tfrac{\\partial P}{\\partial y}\\right)dxdy"
+    ],
+    "exam_text": "<b>【真题】</b>第一类曲线积分与第二类的本质区别是？",
+    "exam_answer": "答案：方向性。第一类对弧长无方向，第二类对坐标有方向（路径反向符号变负）。",
+    "pitfall_list": [
+      "第一类积分（弧长/面积）无方向，第二类（坐标）有方向。",
+      "格林公式连接闭曲线积分与二重积分。",
+      "高斯公式连接闭曲面积分与三重积分，斯托克斯连接曲线与曲面。"
+    ],
+    "quiz_list": [
+      {
+        "question": "第一类曲线积分有方向吗？",
+        "options": [
+          "无",
+          "有",
+          "看情况"
+        ],
+        "correct": 0
+      },
+      {
+        "question": "格林公式连接？",
+        "options": [
+          "曲线与二重",
+          "曲面与三重",
+          "曲线与曲线"
+        ],
+        "correct": 0
+      }
+    ],
+    "level": "A"
+  }
+}
