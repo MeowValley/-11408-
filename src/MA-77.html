@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>初等变换与初等矩阵</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>初等变换与初等矩阵</h1><span class="badge">B级 · MA-77</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text">三种初等行变换：<strong>换行</strong>（rᵢ↔rⱼ）、<strong>乘数</strong>（rᵢ×k, k≠0）、<strong>倍加</strong>（rᵢ+k·rⱼ）。对应三种初等矩阵：E(i,j)、E(i(k))、E(i,j(k))。关键结论：<strong>左乘初等矩阵 = 做对应行变换，右乘 = 做对应列变换</strong>。初等矩阵都可逆，逆矩阵仍是同类型初等矩阵。求逆、求秩、解方程组都靠初等变换。</div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "MA-77",
+  title: "初等变换与初等矩阵",
+  derivation: ["\\text{三种行变换}: \\; r_i\\leftrightarrow r_j; \\; r_i\\times k; \\; r_i+k r_j","\\text{左乘 } P \\Rightarrow \\text{行变换}; \\; \\text{右乘 } P \\Rightarrow \\text{列变换}","P^{-1} \\text{ 仍是同类型初等矩阵}","A \\xrightarrow{\\text{初等变换}} \\text{行阶梯形（求秩）}"],
+  exam_text: "<b>【2018 真题改编】</b>对矩阵 A 左乘一个「交换第 1、2 行」的初等矩阵，效果是什么？",
+  exam_answer: "答案：左乘初等矩阵 P 等价于对 A 做<b>同样的行变换</b>——即交换 A 的第 1、2 行。记忆：<b>左行右列</b>（左乘管行，右乘管列）。初等矩阵都可逆，且逆矩阵是同类初等矩阵（如交换矩阵的逆是它自己）。",
+  pitfall_list: ["左乘 = 行变换，右乘 = 列变换——「左行右列」，别记反。","倍加变换 rᵢ+k·rⱼ 是「把第 j 行的 k 倍加到第 i 行」，方向别搞错。","初等变换不改变矩阵的秩，但换行会改变行列式符号（求行列式时要记账）。"],
+  quiz_list: [{"question":"左乘初等矩阵对应？","options":["行变换","列变换","都不对"],"correct":0},{"question":"交换两行的初等矩阵，其逆矩阵是？","options":["它自己","单位阵","不存在"],"correct":0},{"question":"初等变换对矩阵的秩？","options":["不改变","必增大","必减小"],"correct":0}],
+  intuition_text: "三种初等行变换：换行（rᵢ↔rⱼ）、乘数（rᵢ×k, k≠0）、倍加（rᵢ+k·rⱼ）。对应三种初等矩阵：E(i,j)、E(i(k))、E(i,j(k))。关键结论：左乘初等矩阵 = 做对应行变换，右乘 = 做对应列变换。初等矩阵都可逆，逆矩阵仍是同类型初等矩阵。求逆、求秩、解方程组都靠初等变换。"
+};
+
+/* ===== MA-77 专属动画：初等变换与初等矩阵 ===== */
+const STEPS = [{"focus":0,"desc":"三种初等行变换与对应矩阵"},{"focus":1,"desc":"左行右列：乘法的几何含义"},{"focus":2,"desc":"初等变换求秩、求逆的应用"}];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+/* —— 通用几何工具（仅坐标/样式辅助，每个知识点的动画编排均为独立手写） —— */
+function box(g,x,y,w,h,stroke,fillOp,rx){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',rx===undefined?8:rx)
+    .attr('fill',stroke).attr('fill-opacity',fillOp===undefined?0.1:fillOp).attr('stroke',stroke).attr('stroke-width',2);
+}
+function txt(g,x,y,s,fill,size,anchor,weight){
+  g.append('text').attr('x',x).attr('y',y).attr('text-anchor',anchor||'middle')
+    .attr('fill',fill||'var(--text)').attr('font-size',size||13).attr('font-weight',weight||400).text(s);
+}
+function ln(g,x1,y1,x2,y2,stroke,sw,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',stroke).attr('stroke-width',sw||1.6).attr('stroke-dasharray',dash||'');
+}
+function arw(g,x1,y1,x2,y2,color,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',color).attr('stroke-width',2).attr('stroke-dasharray',dash||'').attr('marker-end','url(#arwGen)');
+}
+function circ(g,cx,cy,r,fill,stroke,sw){
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill',fill)
+    .attr('stroke',stroke||'none').attr('stroke-width',sw||0);
+}
+function chip(g,x,y,w,h,label,color,sub){
+  box(g,x,y,w,h,color,0.14);
+  txt(g,x+w/2,y+(sub?h/2-4:h/2+5),label,color,13,'middle','700');
+  if(sub) txt(g,x+w/2,y+h/2+14,sub,'var(--text-muted)',10.5);
+}
+function title(g,s){
+  txt(g,450,28,s,'var(--primary-strong)',15,'middle','700');
+}
+function plot(g,f,x0,y0,w,h,color,sw){
+  let d='';
+  for(let i=0;i<=100;i++){
+    const t=i/100, x=x0+w*t, y=y0-h*f(t);
+    d+=(i?' L ':'M ')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  g.append('path').attr('d',d).attr('fill','none').attr('stroke',color).attr('stroke-width',sw||2.2);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arwGen').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5)
+    .attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary-strong)');
+  
+      title(g, ['三种行变换', '左行右列', '应用：求秩/求逆'][f]);
+      if (f === 0) {
+        const rows = [['换行 rᵢ ↔ rⱼ', 'E(i,j)', 'var(--primary)'], ['乘数 rᵢ × k', 'E(i(k))', 'var(--success)'], ['倍加 rᵢ + k·rⱼ', 'E(i,j(k))', 'var(--highlight)']];
+        rows.forEach(function (r, i) {
+          const y = 70 + i * 78;
+          box(g, 100, y, 360, 62, r[2], 0.1);
+          txt(g, 130, y + 38, r[0], 'var(--text)', 13, 'start', '700');
+          box(g, 500, y, 300, 62, r[2], 0.08);
+          txt(g, 650, y + 38, r[1], r[2], 13, 'middle', '700');
+        });
+      }
+      if (f === 1) {
+        box(g, 100, 80, 280, 110, 'var(--primary)', 0.1);
+        txt(g, 240, 125, 'P × A', 'var(--primary-strong)', 18, 'middle', '700');
+        txt(g, 240, 155, '左乘', 'var(--text-muted)', 11);
+        txt(g, 450, 135, '→', 'var(--text)', 22, 'middle', '700');
+        box(g, 520, 80, 280, 110, 'var(--success)', 0.1);
+        txt(g, 660, 125, '行变换', 'var(--success)', 16, 'middle', '700');
+        txt(g, 660, 155, '动的是「行」', 'var(--text-muted)', 11);
+        box(g, 100, 220, 280, 110, 'var(--highlight)', 0.1);
+        txt(g, 240, 265, 'A × P', 'var(--highlight)', 18, 'middle', '700');
+        txt(g, 240, 295, '右乘', 'var(--text-muted)', 11);
+        txt(g, 450, 275, '→', 'var(--text)', 22, 'middle', '700');
+        box(g, 520, 220, 280, 110, 'var(--swap)', 0.1);
+        txt(g, 660, 265, '列变换', 'var(--swap)', 16, 'middle', '700');
+        txt(g, 660, 295, '动的是「列」', 'var(--text-muted)', 11);
+      }
+      if (f === 2) {
+        box(g, 110, 70, 680, 80, 'var(--primary)', 0.08);
+        txt(g, 450, 105, 'A → 行阶梯形：非零行数 = 秩', 'var(--primary-strong)', 14, 'middle', '700');
+        txt(g, 450, 132, '初等变换不改变秩', 'var(--text-muted)', 11);
+        box(g, 110, 180, 680, 80, 'var(--success)', 0.08);
+        txt(g, 450, 215, '[A | E] → [E | A⁻¹]', 'var(--success)', 15, 'middle', '700');
+        txt(g, 450, 242, '求逆：只用行变换', 'var(--text-muted)', 11);
+        txt(g, 450, 310, '解方程组：增广矩阵做行变换化行最简形', 'var(--text)', 12.5);
+      }
+    
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(function(){ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(function(l){return '<div class="katex-holder">$$'+l+'$$</div>';}).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(function(l){const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML='<p>'+(d.intuition_text||'')+'</p>';
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+'<p style="color:var(--success);margin-top:8px;">'+(d.exam_answer||'')+'</p>';
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map(function(q){
+    return '<div class="quiz-item"><p>'+q.question+'</p>'+q.options.map(function(o,oi){return '<span class="opt" data-correct="'+(oi===q.correct?1:0)+'">'+o+'</span>';}).join('')+'</div>';
+  }).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      const sib=opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(function(s){s.classList.remove('correct','wrong');});
+      if(opt.dataset.correct==='1'){opt.classList.add('correct');}else{opt.classList.add('wrong');}
+    });
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{
+    const r=await fetch('/api/skills/'+id);
+    if(!r.ok) return;
+    const s=await r.json();
+    if(s && s.skill_text){
+      document.getElementById('skill-section').style.display='block';
+      document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(function(x){return x.trim();}).map(function(x){return '<div style="margin:6px 0;">🎯 '+x+'</div>';}).join('');
+    }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',function(){
+  const c=document.documentElement.getAttribute('data-theme');
+  const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',function(){stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',function(){
+  initTheme();
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+</body>
+</html>

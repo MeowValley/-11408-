@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特征值与特征向量</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root{--bg:#0f1420;--bg-panel:#161d2e;--bg-elevated:#1d263b;--border:#2a3550;--text:#e6ebf5;--text-muted:#8b96ad;--primary:#4f8cff;--primary-strong:#6ea8ff;--highlight:#ffb020;--success:#2dd4a7;--compare:#ff6b6b;--swap:#ff9f43;--danger:#ff5c7a;--radius:12px;--shadow:0 6px 24px rgba(0,0,0,.35);--font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif}
+[data-theme="light"]{--bg:#f5f7fa;--bg-panel:#fff;--bg-elevated:#f0f3f8;--border:#dde3ec;--text:#1a2333;--text-muted:#6b7688;--primary:#3b82f6;--primary-strong:#2563eb;--highlight:#f59e0b;--success:#10b981;--compare:#ef4444;--swap:#f97316;--danger:#ef4444;--shadow:0 4px 16px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+.page-wrap{max-width:1280px;margin:0 auto;padding:24px}
+header.course-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px}
+.course-header h1{font-size:22px;font-weight:700}
+.course-header .badge{font-size:12px;color:var(--primary-strong);border:1px solid var(--primary);padding:2px 10px;border-radius:999px}
+.section{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow)}
+.section h2{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section h2 .num{width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.focus-pulse{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,.7)}50%{box-shadow:0 0 0 10px rgba(255,176,32,0)}}
+.control-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;position:sticky;top:12px;z-index:10}
+.ctrl-btn{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;transition:all .15s ease}
+.ctrl-btn:hover{border-color:var(--primary);color:var(--primary-strong);transform:translateY(-1px)}
+.ctrl-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.slider-group{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+.slider-group input[type=range]{accent-color:var(--highlight);width:180px}
+.slider-val{font-family:monospace;color:var(--highlight);font-weight:700;min-width:50px}
+.viz-panel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;min-height:460px}
+.viz-panel svg{width:100%;height:100%;min-height:420px}
+.subtitle-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--highlight);color:var(--highlight);padding:6px 16px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap}
+.pitfall-list{padding-left:16px}.pitfall-list li{margin-bottom:8px}.pitfall-list li::marker{color:var(--danger)}
+.quiz-item{margin-bottom:16px}.quiz-item .opt{display:block;padding:8px 14px;margin-top:6px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}.quiz-item .opt:hover{border-color:var(--primary)}.quiz-item .opt.correct{border-color:var(--success);color:var(--success)}.quiz-item .opt.wrong{border-color:var(--danger);color:var(--danger)}
+.katex-holder{margin:6px 0}
+.theme-float{position:fixed;top:14px;right:14px;z-index:9999;font-size:20px;background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}
+@media(max-width:768px){.control-bar{position:static}}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>特征值与特征向量</h1><span class="badge">A级 · MA-87</span></header>
+<section class="section" id="intuition-section"><h2><span class="num">1</span>直觉引入</h2><div id="intuition-text"><p>矩阵 A 作用在一个向量上，一般会「旋转 + 拉伸」。但有些特殊的向量，被 A 作用后<strong>方向不变，只被拉伸/压缩了 λ 倍</strong>——这些就是特征向量，λ 就是特征值。特征向量揭示了矩阵变换的「不变量方向」。</p></div></section>
+<section class="section" id="animation-section"><h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar"><button class="ctrl-btn primary" id="btn-play">▶ 播放</button><button class="ctrl-btn" id="btn-reset">↺ 重置</button><div class="slider-group"><span>向量角度 θ</span><input type="range" id="slider-theta" min="0" max="360" step="1" value="45"><span class="slider-val" id="val-theta">45°</span></div></div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle">矩阵 A 变换向量：特征向量方向不变</div></div>
+</section>
+<section class="section" id="derive-section"><h2><span class="num">3</span>公式推导</h2><div id="derive-katex"></div></section>
+<section class="section" id="exam-section"><h2><span class="num">4</span>历年真题实战</h2><div id="exam-text"></div></section>
+<section class="section" id="pitfall-section"><h2><span class="num">5</span>易错点</h2><ul class="pitfall-list" id="pitfall-list"></ul></section>
+<section class="section" id="quiz-section"><h2><span class="num">6</span>自测</h2><div id="quiz-list"></div></section>
+</div>
+<button class="theme-float" id="theme-float-btn">🌙</button>
+<script>
+window.COURSEWARE_DATA={id:"MA-87",title:"特征值与特征向量",intuition_text:"矩阵 A 作用在一个向量上，一般会「旋转 + 拉伸」。但有些特殊的向量，被 A 作用后<strong>方向不变，只被拉伸/压缩了 λ 倍</strong>——这些就是特征向量，λ 就是特征值。特征向量揭示了矩阵变换的「不变量方向」。",derivation:["A\\vec{v} = \\lambda \\vec{v}","\\det(A-\\lambda I) = 0 \\Rightarrow \\text{特征值}","A = \\begin{pmatrix} 2 & 0 \\\\ 0 & 3 \\end{pmatrix} \\Rightarrow \\lambda_1=2, \\lambda_2=3"],exam_text:"<b>【真题】</b>矩阵 A=diag(2,3) 的特征值是？",exam_answer:"答案：2 和 3。对角矩阵的特征值就是对角元素。对应特征向量是 x 轴和 y 轴方向。",pitfall_list:["特征向量是「方向不变」的向量，不是所有向量。","特征值可能是 0（矩阵不可逆）。","n 阶矩阵有 n 个特征值（含重根），但特征向量不一定有 n 个线性无关的。"],quiz_list:[{question:"特征向量被 A 作用后？",options:["方向不变","方向反转","消失","变成零向量"],correct:0},{question:"对角矩阵 diag(2,3) 的特征值是？",options:["2和3","1和1","0","无法确定"],correct:0}]};
+
+/* A = [[2,0],[0,3]]，特征向量是 x 轴和 y 轴方向，特征值 2 和 3 */
+let theta=45; // 向量角度（度）
+
+function renderViz(){
+  const svg=d3.select('#viz');svg.selectAll('*').remove();
+  const W=840,H=440;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const g=svg.append('g');
+  const cx=W/2, cy=H/2, scale=120;
+
+  // 坐标轴
+  g.append('line').attr('x1',cx-250).attr('y1',cy).attr('x2',cx+250).attr('y2',cy).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+  g.append('line').attr('x1',cx).attr('y1',cy-200).attr('x2',cx).attr('y2',cy+200).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+
+  // 原始向量 v（单位向量，角度 θ）
+  const th=theta*Math.PI/180;
+  const vx=Math.cos(th), vy=Math.sin(th);
+  // 变换后 A·v = (2vx, 3vy)
+  const avx=2*vx, avy=3*vy;
+
+  g.append('defs').append('marker').attr('id','arr').attr('viewBox','0 0 10 10').attr('refX','9').attr('refY','5').attr('markerWidth','7').attr('markerHeight','7').attr('orient','auto').append('path').attr('d','M0,0 L10,5 L0,10 Z').attr('fill','var(--primary)');
+  g.append('defs').append('marker').attr('id','arr2').attr('viewBox','0 0 10 10').attr('refX','9').attr('refY','5').attr('markerWidth','7').attr('markerHeight','7').attr('orient','auto').append('path').attr('d','M0,0 L10,5 L0,10 Z').attr('fill','var(--danger)');
+
+  // 原始向量（蓝色）
+  g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+vx*scale).attr('y2',cy-vy*scale).attr('stroke','var(--primary)').attr('stroke-width',3).attr('marker-end','url(#arr)');
+  g.append('text').attr('x',cx+vx*scale+8).attr('y',cy-vy*scale-8).attr('fill','var(--primary)').attr('font-size',13).attr('font-weight','700').text('v');
+
+  // 变换后向量（红色）
+  g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+avx*scale).attr('y2',cy-avy*scale).attr('stroke','var(--danger)').attr('stroke-width',3).attr('marker-end','url(#arr2)');
+  g.append('text').attr('x',cx+avx*scale+8).attr('y',cy-avy*scale-8).attr('fill','var(--danger)').attr('font-size',13).attr('font-weight','700').text('Av');
+
+  // 判断是否是特征向量（方向不变：x轴 θ=0/180 或 y轴 θ=90/270）
+  const isEigen = (Math.abs(Math.cos(th))<0.05 || Math.abs(Math.sin(th))<0.05);
+  g.append('text').attr('x',20).attr('y',30).attr('fill',isEigen?'var(--success)':'var(--text-muted)').attr('font-size',14).attr('font-weight','700').text(isEigen?'✓ 这是特征向量（方向不变）！':'× 不是特征向量（方向改变了）');
+
+  document.getElementById('subtitle').textContent = isEigen?'特征向量：方向不变，只拉伸 λ 倍':'普通向量：A 变换后方向改变';
+  document.getElementById('val-theta').textContent=theta+'°';
+}
+function renderAll(){renderViz()}
+function renderDerive(){const el=document.getElementById('derive-katex');const lines=window.COURSEWARE_DATA.derivation;el.innerHTML=lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');if(window.renderMathInElement)window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});else if(window.katex){el.innerHTML='';lines.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true})})}}
+function renderContent(){const d=window.COURSEWARE_DATA;document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text}</p>`;document.getElementById('exam-text').innerHTML=d.exam_text+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;document.getElementById('pitfall-list').innerHTML=d.pitfall_list.map(x=>`<li>${x}</li>`).join('');document.getElementById('quiz-list').innerHTML=d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');renderDerive()}
+function bindQuiz(){document.querySelectorAll('.quiz-item .opt').forEach(opt=>{opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong')})})}
+function initTheme(){try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}document.getElementById('theme-float-btn').textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙'}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}document.getElementById('theme-float-btn').textContent=n==='light'?'☀️':'🌙'})
+function init(){renderContent();bindQuiz();renderAll();document.getElementById('slider-theta').addEventListener('input',e=>{theta=+e.target.value;renderAll()});document.getElementById('btn-play').addEventListener('click',()=>{let p=0;const t=setInterval(()=>{p=(p+2)%360;document.getElementById('slider-theta').value=p;theta=p;renderAll()},50)});document.getElementById('btn-reset').addEventListener('click',()=>{theta=45;document.getElementById('slider-theta').value=45;renderAll()})}
+window.addEventListener('load',()=>{initTheme();if(window.gsap)gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});init()});
+</script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抽样分布（χ²、t、F 分布）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>抽样分布（χ²、t、F 分布）</h1><span class="badge">A级 · MA-118</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text">从正态总体抽样，统计量（样本均值、样本方差）也服从特定分布。三大抽样分布：<strong>χ²分布</strong>（正态变量的平方和）、<strong>t分布</strong>（均值标准化，σ 未知时用）、<strong>F分布</strong>（两个χ²之比）。它们是区间估计和假设检验的基础。</div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "MA-118",
+  title: "抽样分布（χ²、t、F 分布）",
+  derivation: ["\\chi^2(n) = \\sum_{i=1}^n Z_i^2 \\text{（正态平方和）}","t(n) = \\frac{Z}{\\sqrt{\\chi^2/n}} \\text{（均值标准化）}","F(m,n) = \\frac{\\chi^2(m)/m}{\\chi^2(n)/n} \\text{（方差比）}"],
+  exam_text: "<b>【真题】</b>t 分布与标准正态分布的关系是？",
+  exam_answer: "答案：n→∞ 时 t 分布趋近标准正态分布。t 分布尾部更厚（小样本），n 越大越接近正态。",
+  pitfall_list: ["χ² 分布：正态变量平方和，自由度为变量个数。","t 分布：n→∞ 趋近标准正态，小样本尾部更厚。","F 分布：两个 χ² 之比（各自除以自由度）。"],
+  quiz_list: [{"question":"χ²分布是？","options":["正态变量平方和","正态变量之和","均匀分布","指数分布"],"correct":0},{"question":"t分布 n→∞ 时趋近？","options":["标准正态","χ²","F分布","均匀"],"correct":0}],
+  intuition_text: "从正态总体抽样，统计量（样本均值、样本方差）也服从特定分布。三大抽样分布：χ²分布（正态变量的平方和）、t分布（均值标准化，σ 未知时用）、F分布（两个χ²之比）。它们是区间估计和假设检验的基础。"
+};
+
+/* ===== MA-118 专属动画：抽样分布（χ²、t、F 分布） ===== */
+const STEPS = [{"focus":0,"desc":"从正态总体 N(μ,σ²) 中抽样本，构造统计量 —— 统计量的分布叫「抽样分布」"},{"focus":1,"desc":"χ² 分布：n 个标准正态的平方和，自由度 n；右偏，n 越大越对称"},{"focus":2,"desc":"t 分布：Z 除以 √(χ²/n)，比正态「尾巴更厚」，n→∞ 才趋于正态"},{"focus":3,"desc":"F 分布：两个 χ² 各自除自由度再相除，右偏，用于比较两个方差"},{"focus":4,"desc":"三个分布的用途：χ² 估方差、t 检验均值、F 检验方差比"}];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+/* —— 通用几何工具（仅坐标/样式辅助，每个知识点的动画编排均为独立手写） —— */
+function box(g,x,y,w,h,stroke,fillOp,rx){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',rx===undefined?8:rx)
+    .attr('fill',stroke).attr('fill-opacity',fillOp===undefined?0.1:fillOp).attr('stroke',stroke).attr('stroke-width',2);
+}
+function txt(g,x,y,s,fill,size,anchor,weight){
+  g.append('text').attr('x',x).attr('y',y).attr('text-anchor',anchor||'middle')
+    .attr('fill',fill||'var(--text)').attr('font-size',size||13).attr('font-weight',weight||400).text(s);
+}
+function ln(g,x1,y1,x2,y2,stroke,sw,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',stroke).attr('stroke-width',sw||1.6).attr('stroke-dasharray',dash||'');
+}
+function arw(g,x1,y1,x2,y2,color,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',color).attr('stroke-width',2).attr('stroke-dasharray',dash||'').attr('marker-end','url(#arwGen)');
+}
+function circ(g,cx,cy,r,fill,stroke,sw){
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill',fill)
+    .attr('stroke',stroke||'none').attr('stroke-width',sw||0);
+}
+function chip(g,x,y,w,h,label,color,sub){
+  box(g,x,y,w,h,color,0.14);
+  txt(g,x+w/2,y+(sub?h/2-4:h/2+5),label,color,13,'middle','700');
+  if(sub) txt(g,x+w/2,y+h/2+14,sub,'var(--text-muted)',10.5);
+}
+function title(g,s){
+  txt(g,450,28,s,'var(--primary-strong)',15,'middle','700');
+}
+function plot(g,f,x0,y0,w,h,color,sw){
+  let d='';
+  for(let i=0;i<=100;i++){
+    const t=i/100, x=x0+w*t, y=y0-h*f(t);
+    d+=(i?' L ':'M ')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  g.append('path').attr('d',d).attr('fill','none').attr('stroke',color).attr('stroke-width',sw||2.2);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arwGen').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5)
+    .attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary-strong)');
+  
+    const C = ['var(--primary)', 'var(--success)', 'var(--highlight)', 'var(--danger)'];
+    const head = ['总体 → 样本 → 统计量', 'χ² 分布（卡方）', 't 分布（学生氏）', 'F 分布', '三大抽样分布的分工'];
+    title(g, head[f]);
+
+    function lgamma(z) {
+      const c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+      let x = z, y = z, t = x + 5.5;
+      t -= (x + 0.5) * Math.log(t);
+      let s = 1.000000000190015;
+      for (let j = 0; j < 6; j++) { y += 1; s += c[j] / y; }
+      return -t + Math.log(2.5066282746310005 * s / x);
+    }
+    function nrm(x) { return Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI); }
+    function chi(x, k) {
+      if (x <= 0) return 0;
+      return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.LN2 - lgamma(k / 2));
+    }
+    function tpdf(x, v) {
+      return Math.exp(lgamma((v + 1) / 2) - lgamma(v / 2)) / Math.sqrt(v * Math.PI) * Math.pow(1 + x * x / v, -(v + 1) / 2);
+    }
+    function fpdf(x, d1, d2) {
+      if (x <= 0) return 0;
+      return Math.exp(lgamma((d1 + d2) / 2) - lgamma(d1 / 2) - lgamma(d2 / 2)
+        + (d1 / 2) * Math.log(d1 / d2) + (d1 / 2 - 1) * Math.log(x)
+        - ((d1 + d2) / 2) * Math.log(1 + d1 * x / d2));
+    }
+    function axes(x0, y0, w, h, xlab) {
+      ln(g, x0, y0, x0 + w + 12, y0, 'var(--text-muted)', 1.6);
+      arw(g, x0 + w + 12, y0, x0 + w + 26, y0, 'var(--text-muted)');
+      ln(g, x0, y0, x0, y0 - h - 10, 'var(--text-muted)', 1.6);
+      arw(g, x0, y0 - h - 10, x0, y0 - h - 24, 'var(--text-muted)');
+      txt(g, x0 + w + 30, y0 + 5, xlab, 'var(--text-muted)', 11, 'start');
+    }
+
+    if (f === 0) {
+      // 总体曲线
+      axes(70, 260, 300, 150, 'x');
+      g.append('path').attr('d', (function () {
+        let d = '';
+        for (let i = 0; i <= 120; i++) {
+          const t = i / 120, x = 70 + t * 300;
+          const v = nrm((t - 0.5) * 8);
+          const y = 260 - v / 0.4 * 150;
+          d += (i ? ' L ' : 'M ') + x.toFixed(1) + ' ' + y.toFixed(1);
+        }
+        return d;
+      })()).attr('fill', 'var(--primary)').attr('fill-opacity', 0.18).attr('stroke', 'var(--primary)').attr('stroke-width', 2.4);
+      txt(g, 220, 292, '总体 X ~ N(μ, σ²)', 'var(--primary)', 12.5, 'middle', '600');
+      txt(g, 220, 96, '已知 μ、σ²（或未知）', 'var(--text-muted)', 11.5, 'middle');
+
+      // 抽样箭头
+      arw(g, 392, 180, 452, 180, 'var(--highlight)');
+      txt(g, 422, 168, '抽样', 'var(--highlight)', 11.5, 'middle', '600');
+
+      // 样本
+      box(g, 466, 96, 178, 168, 'var(--success)', 0.09);
+      txt(g, 555, 122, '样本 X₁…Xₙ', 'var(--success)', 12.5, 'middle', '700');
+      for (let i = 0; i < 5; i++) {
+        circ(g, 500 + i * 30, 160 + (i % 2) * 22, 8, 'var(--success)');
+      }
+      txt(g, 555, 226, 'n 个独立同分布', 'var(--text-muted)', 11, 'middle');
+      txt(g, 555, 248, '与总体同分布', 'var(--text-muted)', 11, 'middle');
+
+      arw(g, 654, 180, 700, 180, 'var(--highlight)');
+      txt(g, 677, 168, '构造', 'var(--highlight)', 11.5, 'middle', '600');
+
+      box(g, 712, 96, 160, 168, 'var(--highlight)', 0.12);
+      txt(g, 792, 122, '统计量', 'var(--highlight)', 12.5, 'middle', '700');
+      txt(g, 792, 152, 'X̄ = ΣXi / n', 'var(--text)', 12, 'middle');
+      txt(g, 792, 178, 'S² = Σ(Xi−X̄)²/(n−1)', 'var(--text)', 11.5, 'middle');
+      txt(g, 792, 204, '(n−1)S²/σ²', 'var(--text)', 11.5, 'middle');
+      txt(g, 792, 240, '统计量的分布', 'var(--highlight)', 11, 'middle');
+      txt(g, 792, 260, '= 抽样分布', 'var(--highlight)', 11, 'middle');
+      txt(g, 450, 356, '关键：统计量是随机变量 —— 每抽一次样就变一次，所以它有自己的分布', 'var(--text-muted)', 12, 'middle');
+    }
+
+    if (f === 1) {
+      axes(80, 300, 470, 200, 'x');
+      const ks = [[2, 'var(--primary)'], [4, 'var(--success)'], [6, 'var(--highlight)']];
+      ks.forEach(function (kk) {
+        let d = '';
+        for (let i = 1; i <= 160; i++) {
+          const xv = i / 160 * 14;
+          const v = chi(xv, kk[0]) / 0.5;
+          const x = 80 + i / 160 * 470, y = 300 - v * 200;
+          d += (i === 1 ? 'M ' : ' L ') + x.toFixed(1) + ' ' + Math.min(y, 296).toFixed(1);
+        }
+        g.append('path').attr('d', d).attr('fill', 'none').attr('stroke', kk[1]).attr('stroke-width', 2.4);
+        txt(g, 560, 110 + ks.indexOf(kk) * 26, 'χ²(' + kk[0] + ')', kk[1], 12, 'start', '700');
+      });
+      txt(g, 315, 328, '自由度 n 越大，峰值右移、曲线越对称（n>30 近似正态）', 'var(--text-muted)', 11.5, 'middle');
+      txt(g, 660, 200, '构造：', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 660, 228, 'χ² = Σ (Xi−μ)²/σ² ~ χ²(n)', 'var(--text)', 11.5, 'start');
+      txt(g, 660, 254, 'μ 未知时用 X̄ 代替：', 'var(--text-muted)', 11, 'start');
+      txt(g, 660, 280, '(n−1)S²/σ² ~ χ²(n−1)', 'var(--success)', 11.5, 'start', '600');
+      txt(g, 660, 320, '丢一个自由度，因为 S² 用掉了 X̄', 'var(--highlight)', 11, 'start');
+      txt(g, 660, 348, '用途：方差 σ² 的区间估计与检验', 'var(--text-muted)', 11, 'start');
+    }
+
+    if (f === 2) {
+      axes(80, 300, 470, 200, 'x');
+      // 正态基准
+      let dn = '';
+      for (let i = 0; i <= 160; i++) {
+        const xv = (i / 160 - 0.5) * 8;
+        const x = 80 + i / 160 * 470, y = 300 - nrm(xv) / 0.42 * 200;
+        dn += (i ? ' L ' : 'M ') + x.toFixed(1) + ' ' + y.toFixed(1);
+      }
+      g.append('path').attr('d', dn).attr('fill', 'none').attr('stroke', 'var(--text-muted)').attr('stroke-width', 1.8).attr('stroke-dasharray', '7,5');
+      const vs = [[1, 'var(--danger)'], [5, 'var(--success)']];
+      vs.forEach(function (vv) {
+        let d = '';
+        for (let i = 0; i <= 160; i++) {
+          const xv = (i / 160 - 0.5) * 8;
+          const x = 80 + i / 160 * 470, y = 300 - tpdf(xv, vv[0]) / 0.42 * 200;
+          d += (i ? ' L ' : 'M ') + x.toFixed(1) + ' ' + Math.min(y, 296).toFixed(1);
+        }
+        g.append('path').attr('d', d).attr('fill', 'none').attr('stroke', vv[1]).attr('stroke-width', 2.4);
+      });
+      txt(g, 560, 110, '— — N(0,1)', 'var(--text-muted)', 11.5, 'start', '700');
+      txt(g, 560, 136, '—— t(5)', 'var(--success)', 11.5, 'start', '700');
+      txt(g, 560, 162, '—— t(1) 柯西分布', 'var(--danger)', 11.5, 'start', '700');
+      txt(g, 315, 328, '自由度越小尾巴越厚 → 同样置信度下临界值更大', 'var(--text-muted)', 11.5, 'middle');
+      txt(g, 660, 200, '构造：', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 660, 228, 't = Z / √(χ²(n)/n) ~ t(n)', 'var(--text)', 11.5, 'start');
+      txt(g, 660, 254, '实用形式：', 'var(--text-muted)', 11, 'start');
+      txt(g, 660, 280, '(X̄−μ)/(S/√n) ~ t(n−1)', 'var(--success)', 11.5, 'start', '600');
+      txt(g, 660, 320, 'σ 未知、n 又小 → 必须用 t，不能硬套正态', 'var(--highlight)', 11, 'start');
+      txt(g, 660, 348, 'n → ∞ 时 t(n) → N(0,1)', 'var(--text-muted)', 11, 'start');
+    }
+
+    if (f === 3) {
+      axes(80, 300, 470, 200, 'x');
+      const fs = [[5, 10, 'var(--primary)'], [10, 20, 'var(--success)'], [3, 30, 'var(--danger)']];
+      fs.forEach(function (ff) {
+        let d = '';
+        for (let i = 1; i <= 200; i++) {
+          const xv = i / 200 * 5;
+          const v = fpdf(xv, ff[0], ff[1]) / 0.75;
+          const x = 80 + i / 200 * 470, y = 300 - v * 200;
+          d += (i === 1 ? 'M ' : ' L ') + x.toFixed(1) + ' ' + Math.max(Math.min(y, 296), 40).toFixed(1);
+        }
+        g.append('path').attr('d', d).attr('fill', 'none').attr('stroke', ff[2]).attr('stroke-width', 2.4);
+        txt(g, 560, 110 + fs.indexOf(ff) * 26, 'F(' + ff[0] + ',' + ff[1] + ')', ff[2], 12, 'start', '700');
+      });
+      txt(g, 315, 328, '两个自由度共同决定形状；恒为右偏（取值 ≥ 0）', 'var(--text-muted)', 11.5, 'middle');
+      txt(g, 660, 200, '构造：', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 660, 228, 'F = (χ²₁/n₁)/(χ²₂/n₂)', 'var(--text)', 11.5, 'start');
+      txt(g, 660, 254, '实用形式：', 'var(--text-muted)', 11, 'start');
+      txt(g, 660, 280, 'F = S₁²/S₂² ~ F(n₁−1, n₂−1)', 'var(--success)', 11.5, 'start', '600');
+      txt(g, 660, 316, '重要性质：1/F ~ F(n₂−1, n₁−1)', 'var(--highlight)', 11, 'start');
+      txt(g, 660, 344, '用途：两总体方差是否相等的检验', 'var(--text-muted)', 11, 'start');
+    }
+
+    if (f === 4) {
+      const cards = [
+        ['χ² 分布', 'Σ(Zi)²', '(n−1)S²/σ² ~ χ²(n−1)', '估方差 / 方差检验', 'var(--primary)'],
+        ['t 分布', 'Z / √(χ²/n)', '(X̄−μ)/(S/√n) ~ t(n−1)', 'σ 未知时检验均值', 'var(--success)'],
+        ['F 分布', '(χ²₁/n₁)/(χ²₂/n₂)', 'S₁²/S₂² ~ F(n₁−1,n₂−1)', '两个方差之比', 'var(--highlight)']
+      ];
+      cards.forEach(function (c, i) {
+        const y = 84 + i * 96;
+        g.append('rect').attr('x', 70).attr('y', y).attr('width', 760).attr('height', 82).attr('rx', 10)
+          .attr('fill', c[4]).attr('fill-opacity', 0.1).attr('stroke', c[4]).attr('stroke-width', 1.8);
+        txt(g, 92, y + 30, c[0], c[4], 14, 'start', '700');
+        txt(g, 92, y + 56, '构造：' + c[1], 'var(--text-muted)', 11.5, 'start');
+        txt(g, 330, y + 30, c[2], 'var(--text)', 12, 'start');
+        txt(g, 330, y + 56, '用途：' + c[3], 'var(--text-muted)', 11.5, 'start');
+        txt(g, 780, y + 48, '#' + (i + 1), c[4], 16, 'end', '700');
+      });
+      txt(g, 450, 372, '一根主线：正态 → 平方和得 χ² → 标准化相除得 t → 两个 χ² 相除得 F', 'var(--primary-strong)', 12, 'middle', '600');
+    }
+  
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(function(){ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(function(l){return '<div class="katex-holder">$$'+l+'$$</div>';}).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(function(l){const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML='<p>'+(d.intuition_text||'')+'</p>';
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+'<p style="color:var(--success);margin-top:8px;">'+(d.exam_answer||'')+'</p>';
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map(function(q){
+    return '<div class="quiz-item"><p>'+q.question+'</p>'+q.options.map(function(o,oi){return '<span class="opt" data-correct="'+(oi===q.correct?1:0)+'">'+o+'</span>';}).join('')+'</div>';
+  }).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      const sib=opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(function(s){s.classList.remove('correct','wrong');});
+      if(opt.dataset.correct==='1'){opt.classList.add('correct');}else{opt.classList.add('wrong');}
+    });
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{
+    const r=await fetch('/api/skills/'+id);
+    if(!r.ok) return;
+    const s=await r.json();
+    if(s && s.skill_text){
+      document.getElementById('skill-section').style.display='block';
+      document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(function(x){return x.trim();}).map(function(x){return '<div style="margin:6px 0;">🎯 '+x+'</div>';}).join('');
+    }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',function(){
+  const c=document.documentElement.getAttribute('data-theme');
+  const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',function(){stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',function(){
+  initTheme();
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>两类曲线积分、两类曲面积分</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>两类曲线积分、两类曲面积分</h1><span class="badge">A级 · MA-128</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text">曲线积分分两类：第一类（对弧长，无方向）和第二类（对坐标，有方向）；曲面积分同样分两类：对面积（无方向）与对坐标（有方向）。它们通过<strong>格林、高斯、斯托克斯公式</strong>互相联系——本质都是「边界上的积分」等于「内部区域的积分」。下面用 7 步动画把这几件事串起来。</div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "MA-128",
+  title: "两类曲线积分、两类曲面积分",
+  derivation: ["\\text{第一类曲线：} \\int_L f\\,ds","\\text{第二类曲线：} \\int_L P\\,dx + Q\\,dy","\\text{格林：} \\oint P\\,dx+Q\\,dy = \\iint_D \\left(\\tfrac{\\partial Q}{\\partial x}-\\tfrac{\\partial P}{\\partial y}\\right)dxdy"],
+  exam_text: "<b>【真题】</b>第一类曲线积分与第二类的本质区别是？",
+  exam_answer: "答案：方向性。第一类对弧长无方向，第二类对坐标有方向（路径反向符号变负）。",
+  pitfall_list: ["第一类积分（弧长/面积）无方向，第二类（坐标）有方向。","格林公式连接闭曲线积分与二重积分。","高斯公式连接闭曲面积分与三重积分，斯托克斯连接曲线与曲面。"],
+  quiz_list: [{"question":"第一类曲线积分有方向吗？","options":["无","有","看情况"],"correct":0},{"question":"格林公式连接？","options":["曲线与二重","曲面与三重","曲线与曲线"],"correct":0}],
+  intuition_text: "曲线积分分两类：第一类（对弧长，无方向）和第二类（对坐标，有方向）；曲面积分同样分两类：对面积（无方向）与对坐标（有方向）。它们通过格林、高斯、斯托克斯公式互相联系——本质都是「边界上的积分」等于「内部区域的积分」。下面用 7 步动画把这几件事串起来。"
+};
+
+/* ===== MA-128 专属动画：两类曲线积分、两类曲面积分 ===== */
+const STEPS = [{"focus":0,"desc":"先看舞台：平面曲线 L —— 曲线积分就是「沿着这条线累加」"},{"focus":1,"desc":"第一类（对弧长）：把曲线切成小弧段 ds，累加 f·ds，与方向无关"},{"focus":2,"desc":"第二类（对坐标）：ds 投影成 dx 与 dy，带方向，累加 P·dx + Q·dy"},{"focus":3,"desc":"把路径反向：dx、dy 全部变号 → 第二类积分整体变号，第一类不变"},{"focus":4,"desc":"升一维：曲面 Σ 上的第一类曲面积分 ∬f dS，dS 是「面积元」，无方向"},{"focus":5,"desc":"第二类曲面积分：曲面有正反两侧，dS 变成有向面积元，投影出 dxdy"},{"focus":6,"desc":"一张图记住四大公式：格林（平面）、高斯（闭曲面）、斯托克斯（空间曲线）"}];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+/* —— 通用几何工具（仅坐标/样式辅助，每个知识点的动画编排均为独立手写） —— */
+function box(g,x,y,w,h,stroke,fillOp,rx){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',rx===undefined?8:rx)
+    .attr('fill',stroke).attr('fill-opacity',fillOp===undefined?0.1:fillOp).attr('stroke',stroke).attr('stroke-width',2);
+}
+function txt(g,x,y,s,fill,size,anchor,weight){
+  g.append('text').attr('x',x).attr('y',y).attr('text-anchor',anchor||'middle')
+    .attr('fill',fill||'var(--text)').attr('font-size',size||13).attr('font-weight',weight||400).text(s);
+}
+function ln(g,x1,y1,x2,y2,stroke,sw,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',stroke).attr('stroke-width',sw||1.6).attr('stroke-dasharray',dash||'');
+}
+function arw(g,x1,y1,x2,y2,color,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',color).attr('stroke-width',2).attr('stroke-dasharray',dash||'').attr('marker-end','url(#arwGen)');
+}
+function circ(g,cx,cy,r,fill,stroke,sw){
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill',fill)
+    .attr('stroke',stroke||'none').attr('stroke-width',sw||0);
+}
+function chip(g,x,y,w,h,label,color,sub){
+  box(g,x,y,w,h,color,0.14);
+  txt(g,x+w/2,y+(sub?h/2-4:h/2+5),label,color,13,'middle','700');
+  if(sub) txt(g,x+w/2,y+h/2+14,sub,'var(--text-muted)',10.5);
+}
+function title(g,s){
+  txt(g,450,28,s,'var(--primary-strong)',15,'middle','700');
+}
+function plot(g,f,x0,y0,w,h,color,sw){
+  let d='';
+  for(let i=0;i<=100;i++){
+    const t=i/100, x=x0+w*t, y=y0-h*f(t);
+    d+=(i?' L ':'M ')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  g.append('path').attr('d',d).attr('fill','none').attr('stroke',color).attr('stroke-width',sw||2.2);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arwGen').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5)
+    .attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary-strong)');
+  
+    const C = ['var(--primary)', 'var(--success)', 'var(--highlight)', 'var(--danger)'];
+    const head = ['平面曲线 L：积分的舞台', '第一类：对弧长 ds（无方向）', '第二类：对坐标 dx、dy（有方向）', '路径反向 → 符号变号', '第一类曲面积分：dS 无方向', '第二类曲面积分：有向面积元', '四大公式的关系'];
+    title(g, head[f]);
+
+    function PX(x) { return 450 + x * 155; }
+    function PY(y) { return 300 - y * 78; }
+    function curveY(x) { return 0.5 * x * x - 0.35; }
+    function pathOn(color, w, dash) {
+      let d = '';
+      for (let i = 0; i <= 120; i++) {
+        const x = -1.9 + 3.8 * i / 120;
+        d += (i ? ' L ' : 'M ') + PX(x).toFixed(1) + ' ' + PY(curveY(x)).toFixed(1);
+      }
+      g.append('path').attr('d', d).attr('fill', 'none').attr('stroke', color).attr('stroke-width', w || 3).attr('stroke-dasharray', dash || '');
+    }
+    function arrowAt(x, color, dir) {
+      const y = curveY(x);
+      const slope = x; // dy/dx = x
+      const len = 0.34 * (dir || 1);
+      const ex = x + len, ey = y + slope * len;
+      g.append('line').attr('x1', PX(x)).attr('y1', PY(y)).attr('x2', PX(ex)).attr('y2', PY(ey))
+        .attr('stroke', color).attr('stroke-width', 3).attr('marker-end', 'url(#arwGen)');
+    }
+
+    if (f <= 3) {
+      // 坐标轴
+      arw(g, 120, PY(0), 810, PY(0), 'var(--text-muted)');
+      arw(g, PX(0), 350, PX(0), 70, 'var(--text-muted)');
+      txt(g, 820, PY(0) + 4, 'x', 'var(--text-muted)', 12, 'start');
+      txt(g, PX(0) + 6, 66, 'y', 'var(--text-muted)', 12, 'start');
+      pathOn('var(--primary)', 3.2);
+      txt(g, PX(1.62), PY(curveY(1.62)) - 14, 'L', 'var(--primary)', 15, 'middle', '700');
+      txt(g, 640, 96, '曲线 L：y = x²/2 − 0.35', 'var(--text-muted)', 12, 'start');
+    }
+
+    if (f === 0) {
+      // 沿曲线的采样点
+      for (let i = 0; i <= 10; i++) {
+        const x = -1.9 + 3.8 * i / 10;
+        circ(g, PX(x), PY(curveY(x)), 4, 'var(--highlight)');
+      }
+      txt(g, 460, 356, '把 L 切成很多小段，每段贡献一点 → 求和取极限 = 曲线积分', 'var(--text-muted)', 12, 'middle');
+    }
+
+    if (f === 1) {
+      // 小弧段 ds（用弦近似），画垂直方向的 f 条
+      for (let i = 0; i < 10; i++) {
+        const x1 = -1.9 + 3.8 * i / 10, x2 = -1.9 + 3.8 * (i + 1) / 10;
+        g.append('line').attr('x1', PX(x1)).attr('y1', PY(curveY(x1))).attr('x2', PX(x2)).attr('y2', PY(curveY(x2)))
+          .attr('stroke', 'var(--success)').attr('stroke-width', 5).attr('opacity', 0.55);
+        if (i % 2 === 0) txt(g, PX((x1 + x2) / 2), PY(curveY((x1 + x2) / 2)) - 12, 'ds', 'var(--success)', 11, 'middle', '700');
+      }
+      txt(g, 700, 150, '∫_L f(x,y) ds', 'var(--success)', 17, 'start', '700');
+      txt(g, 700, 178, 'ds = √(1+y′²) dx', 'var(--text-muted)', 12, 'start');
+      txt(g, 700, 204, '只跟曲线形状有关', 'var(--text-muted)', 12, 'start');
+      txt(g, 700, 230, '把 L 翻个方向，值不变', 'var(--success)', 12, 'start', '600');
+      txt(g, 460, 356, '第一类 = 「称重」：沿曲线称一遍重量，跟走的方向无关', 'var(--success)', 12, 'middle', '600');
+    }
+
+    if (f === 2) {
+      for (let i = 0; i < 6; i++) arrowAt(-1.75 + i * 0.62, 'var(--swap)', 1);
+      // dx / dy 分解三角形
+      const x0 = 0.9, y0 = curveY(x0);
+      const dx = 0.55, dy = (curveY(x0 + dx) - y0);
+      ln(g, PX(x0), PY(y0), PX(x0 + dx), PY(y0), 'var(--primary)', 2.4);
+      ln(g, PX(x0 + dx), PY(y0), PX(x0 + dx), PY(y0 + dy), 'var(--danger)', 2.4);
+      txt(g, PX(x0 + dx / 2), PY(y0) + 16, 'dx', 'var(--primary)', 12, 'middle', '700');
+      txt(g, PX(x0 + dx) + 12, PY(y0 + dy / 2), 'dy', 'var(--danger)', 12, 'start', '700');
+      txt(g, 700, 150, '∫_L P dx + Q dy', 'var(--swap)', 16, 'start', '700');
+      txt(g, 700, 178, 'dx、dy 带正负号', 'var(--text-muted)', 12, 'start');
+      txt(g, 700, 204, '箭头方向 = 积分方向', 'var(--text-muted)', 12, 'start');
+      txt(g, 700, 230, '= ∫(P cosα + Q cosβ) ds', 'var(--primary)', 11.5, 'start', '600');
+      txt(g, 460, 356, '第二类 = 「做功」：力沿路径做的功，方向和力都影响正负', 'var(--swap)', 12, 'middle', '600');
+    }
+
+    if (f === 3) {
+      for (let i = 0; i < 6; i++) arrowAt(1.75 - i * 0.62, 'var(--danger)', -1);
+      txt(g, 700, 150, '∫_{−L} P dx + Q dy', 'var(--danger)', 15, 'start', '700');
+      txt(g, 700, 178, '= − ∫_L P dx + Q dy', 'var(--danger)', 15, 'start', '700');
+      txt(g, 700, 212, '第一类：∫_{−L} f ds = ∫_L f ds', 'var(--success)', 12, 'start', '600');
+      txt(g, 700, 238, '（ds 恒为正，与方向无关）', 'var(--text-muted)', 11, 'start');
+      txt(g, 460, 356, '同一段曲线，走反方向：第二类变号，第一类不变 —— 这就是「有无方向性」', 'var(--highlight)', 12, 'middle', '600');
+    }
+
+    if (f === 4 || f === 5) {
+      // 3D 曲面片
+      const S = function (u, v) { return [452 + (u - v) * 112, 198 + (u + v) * 44 - Math.sin(u * 1.6) * 24]; };
+      const N = 6;
+      for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+          const a = S(i / N - 0.5, j / N - 0.5), b = S((i + 1) / N - 0.5, j / N - 0.5);
+          const c = S((i + 1) / N - 0.5, (j + 1) / N - 0.5), d = S(i / N - 0.5, (j + 1) / N - 0.5);
+          g.append('path').attr('d', 'M ' + a[0] + ' ' + a[1] + ' L ' + b[0] + ' ' + b[1] + ' L ' + c[0] + ' ' + c[1] + ' L ' + d[0] + ' ' + d[1] + ' Z')
+            .attr('fill', 'var(--primary)').attr('fill-opacity', 0.09).attr('stroke', 'var(--primary)').attr('stroke-width', 0.9).attr('stroke-opacity', 0.7);
+        }
+      }
+      txt(g, 452, 300, '曲面 Σ', 'var(--primary)', 13, 'middle', '700');
+
+      if (f === 4) {
+        // 面积元 dS
+        const a = S(0.06, 0.06), b = S(0.28, 0.06), c = S(0.28, 0.28), d = S(0.06, 0.28);
+        g.append('path').attr('d', 'M ' + a[0] + ' ' + a[1] + ' L ' + b[0] + ' ' + b[1] + ' L ' + c[0] + ' ' + c[1] + ' L ' + d[0] + ' ' + d[1] + ' Z')
+          .attr('fill', 'var(--success)').attr('fill-opacity', 0.55).attr('stroke', 'var(--success)').attr('stroke-width', 2);
+        txt(g, (a[0] + c[0]) / 2, (a[1] + c[1]) / 2 + 4, 'dS', 'var(--bg)', 12, 'middle', '700');
+        txt(g, 690, 140, '∬_Σ f(x,y,z) dS', 'var(--success)', 16, 'start', '700');
+        txt(g, 690, 168, 'dS：面积元，恒为正', 'var(--text-muted)', 12, 'start');
+        txt(g, 690, 194, '曲面取哪一侧都相同', 'var(--text-muted)', 12, 'start');
+        txt(g, 690, 220, 'dS = √(1+z_x²+z_y²) dxdy', 'var(--primary)', 11.5, 'start', '600');
+        txt(g, 460, 356, '第一类曲面积分 = 「给曲面刷漆」：只关心刷多少，不管朝哪面', 'var(--success)', 12, 'middle', '600');
+      }
+
+      if (f === 5) {
+        // 法向量 & 投影
+        const p0 = S(0.17, 0.17);
+        arw(g, p0[0], p0[1], p0[0] + 52, p0[1] - 62, 'var(--danger)');
+        txt(g, p0[0] + 58, p0[1] - 68, 'n（取正侧）', 'var(--danger)', 11.5, 'start', '700');
+        // 投影到 xOy：用一块示意菱形表示投影区域，虚线连到曲面上的面积元
+        const q1 = S(0.06, 0.06), q4 = S(0.06, 0.30), q3 = S(0.30, 0.30);
+        const dC = [196, 318], rx = 86, ry = 34;
+        g.append('path').attr('d', 'M ' + (dC[0] - rx) + ' ' + dC[1] + ' L ' + dC[0] + ' ' + (dC[1] - ry) + ' L ' + (dC[0] + rx) + ' ' + dC[1] + ' L ' + dC[0] + ' ' + (dC[1] + ry) + ' Z')
+          .attr('fill', 'var(--highlight)').attr('fill-opacity', 0.26).attr('stroke', 'var(--highlight)').attr('stroke-width', 1.8).attr('stroke-dasharray', '6,4');
+        txt(g, dC[0], dC[1] + 6, 'dxdy', 'var(--highlight)', 12, 'middle', '700');
+        txt(g, dC[0], dC[1] - ry - 10, '投影区域（xOy 面）', 'var(--highlight)', 11, 'middle', '600');
+        ln(g, q1[0], q1[1], dC[0] + rx, dC[1] - 6, 'var(--highlight)', 1.1, '3,4');
+        ln(g, q3[0], q3[1], dC[0] + rx, dC[1] + 6, 'var(--highlight)', 1.1, '3,4');
+        ln(g, q4[0], q4[1], dC[0] + rx - 30, dC[1] + 20, 'var(--highlight)', 1.1, '3,4');
+        txt(g, 596, 138, '∬_Σ P dydz + Q dzdx + R dxdy', 'var(--danger)', 12.5, 'start', '700');
+        txt(g, 596, 164, '有向面积元 = n dS', 'var(--text-muted)', 12, 'start');
+        txt(g, 596, 190, '换一侧 → 整体变号', 'var(--danger)', 12, 'start', '600');
+        txt(g, 596, 216, '本质是「通量」：穿过去多少', 'var(--text-muted)', 11.5, 'start');
+        txt(g, 460, 356, '第二类曲面积分 = 「数流量」：从指定一侧穿过的量，方向决定正负', 'var(--danger)', 12, 'middle', '600');
+      }
+
+
+    }
+    if (f === 6) {
+        const boxes = [
+          ['格林公式', '∮_L Pdx+Qdy = ∬_D (Q_x−P_y) dxdy', '平面闭曲线 ↔ 平面区域', 'var(--success)', 76],
+          ['高斯公式', '∬_Σ P dydz+… = ∭_Ω (P_x+Q_y+R_z) dV', '闭曲面 ↔ 空间区域', 'var(--highlight)', 168],
+          ['斯托克斯', '∮_Γ Pdx+Qdy+Rdz = ∬_Σ (∇×F)·n dS', '空间闭曲线 ↔ 曲面', 'var(--primary)', 260]
+        ];
+        boxes.forEach(function (b, i) {
+          const y = b[4];
+          g.append('rect').attr('x', 120).attr('y', y).attr('width', 660).attr('height', 82).attr('rx', 10)
+            .attr('fill', b[3]).attr('fill-opacity', 0.12).attr('stroke', b[3]).attr('stroke-width', 1.8);
+          txt(g, 140, y + 30, b[0], b[3], 14, 'start', '700');
+          txt(g, 140, y + 56, b[1], 'var(--text)', 12, 'start');
+          txt(g, 140, y + 74, b[2], 'var(--text-muted)', 11, 'start');
+        });
+        txt(g, 460, 358, '口诀：曲线看「旋」，曲面看「散」，维数升一级，边界变成区域', 'var(--text-muted)', 11.5, 'middle');
+    }
+  
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(function(){ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(function(l){return '<div class="katex-holder">$$'+l+'$$</div>';}).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(function(l){const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML='<p>'+(d.intuition_text||'')+'</p>';
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+'<p style="color:var(--success);margin-top:8px;">'+(d.exam_answer||'')+'</p>';
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map(function(q){
+    return '<div class="quiz-item"><p>'+q.question+'</p>'+q.options.map(function(o,oi){return '<span class="opt" data-correct="'+(oi===q.correct?1:0)+'">'+o+'</span>';}).join('')+'</div>';
+  }).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      const sib=opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(function(s){s.classList.remove('correct','wrong');});
+      if(opt.dataset.correct==='1'){opt.classList.add('correct');}else{opt.classList.add('wrong');}
+    });
+  });
+}
+async function loadSkill(){
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{
+    const r=await fetch('/api/skills/'+id);
+    if(!r.ok) return;
+    const s=await r.json();
+    if(s && s.skill_text){
+      document.getElementById('skill-section').style.display='block';
+      document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(function(x){return x.trim();}).map(function(x){return '<div style="margin:6px 0;">🎯 '+x+'</div>';}).join('');
+    }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',function(){
+  const c=document.documentElement.getAttribute('data-theme');
+  const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',function(){stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',function(){
+  initTheme();
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+</body>
+</html>

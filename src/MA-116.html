@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中心极限定理</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root{--bg:#0f1420;--bg-panel:#161d2e;--bg-elevated:#1d263b;--border:#2a3550;--text:#e6ebf5;--text-muted:#8b96ad;--primary:#4f8cff;--primary-strong:#6ea8ff;--highlight:#ffb020;--success:#2dd4a7;--compare:#ff6b6b;--swap:#ff9f43;--danger:#ff5c7a;--radius:12px;--shadow:0 6px 24px rgba(0,0,0,.35);--font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif}
+[data-theme="light"]{--bg:#f5f7fa;--bg-panel:#fff;--bg-elevated:#f0f3f8;--border:#dde3ec;--text:#1a2333;--text-muted:#6b7688;--primary:#3b82f6;--primary-strong:#2563eb;--highlight:#f59e0b;--success:#10b981;--compare:#ef4444;--swap:#f97316;--danger:#ef4444;--shadow:0 4px 16px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+.page-wrap{max-width:1280px;margin:0 auto;padding:24px}
+header.course-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px}
+.course-header h1{font-size:22px;font-weight:700}
+.course-header .badge{font-size:12px;color:var(--primary-strong);border:1px solid var(--primary);padding:2px 10px;border-radius:999px}
+.section{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow)}
+.section h2{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section h2 .num{width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.focus-pulse{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,.7)}50%{box-shadow:0 0 0 10px rgba(255,176,32,0)}}
+.control-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;position:sticky;top:12px;z-index:10}
+.ctrl-btn{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;transition:all .15s ease}
+.ctrl-btn:hover{border-color:var(--primary);color:var(--primary-strong);transform:translateY(-1px)}
+.ctrl-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.slider-group{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+.slider-group input[type=range]{accent-color:var(--highlight);width:180px}
+.slider-val{font-family:monospace;color:var(--highlight);font-weight:700;min-width:50px}
+.viz-panel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;min-height:460px}
+.viz-panel svg{width:100%;height:100%;min-height:420px}
+.subtitle-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--highlight);color:var(--highlight);padding:6px 16px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap}
+.pitfall-list{padding-left:16px}.pitfall-list li{margin-bottom:8px}.pitfall-list li::marker{color:var(--danger)}
+.quiz-item{margin-bottom:16px}.quiz-item .opt{display:block;padding:8px 14px;margin-top:6px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}.quiz-item .opt:hover{border-color:var(--primary)}.quiz-item .opt.correct{border-color:var(--success);color:var(--success)}.quiz-item .opt.wrong{border-color:var(--danger);color:var(--danger)}
+.katex-holder{margin:6px 0}
+.theme-float{position:fixed;top:14px;right:14px;z-index:9999;font-size:20px;background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}
+@media(max-width:768px){.control-bar{position:static}}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>中心极限定理</h1><span class="badge">A级 · MA-116</span></header>
+<section class="section" id="intuition-section"><h2><span class="num">1</span>直觉引入</h2><div id="intuition-text"><p>抛硬币：抛 1 次结果不是 0 就是 1，很不确定；但抛 100 次，正面次数「几乎总是」在 50 附近，且分布接近<strong>正态分布（钟形曲线）</strong>。中心极限定理说：大量独立同分布随机变量之和（或均值），近似服从正态分布，不管原来是什么分布。</p></div></section>
+<section class="section" id="animation-section"><h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar"><button class="ctrl-btn primary" id="btn-play">▶ 播放</button><button class="ctrl-btn" id="btn-reset">↺ 重置</button><div class="slider-group"><span>样本量 n</span><input type="range" id="slider-n" min="1" max="100" step="1" value="5"><span class="slider-val" id="val-n">5</span></div></div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle">抛 n 次硬币，正面次数的分布（n 越大越接近正态）</div></div>
+</section>
+<section class="section" id="derive-section"><h2><span class="num">3</span>公式推导</h2><div id="derive-katex"></div></section>
+<section class="section" id="exam-section"><h2><span class="num">4</span>历年真题实战</h2><div id="exam-text"></div></section>
+<section class="section" id="pitfall-section"><h2><span class="num">5</span>易错点</h2><ul class="pitfall-list" id="pitfall-list"></ul></section>
+<section class="section" id="quiz-section"><h2><span class="num">6</span>自测</h2><div id="quiz-list"></div></section>
+</div>
+<button class="theme-float" id="theme-float-btn">🌙</button>
+<script>
+window.COURSEWARE_DATA={id:"MA-116",title:"中心极限定理",intuition_text:"抛硬币：抛 1 次结果不是 0 就是 1，很不确定；但抛 100 次，正面次数「几乎总是」在 50 附近，且分布接近<strong>正态分布（钟形曲线）</strong>。中心极限定理说：大量独立同分布随机变量之和（或均值），近似服从正态分布，不管原来是什么分布。",derivation:["\\text{独立同分布 } X_i，\\; E(X)=\\mu, D(X)=\\sigma^2","\\frac{\\sum X_i - n\\mu}{\\sqrt{n}\\sigma} \\xrightarrow{d} N(0,1)","\\text{样本均值近似 } N(\\mu, \\sigma^2/n)"],exam_text:"<b>【真题】</b>中心极限定理说明，大量独立同分布随机变量之和近似服从什么分布？",exam_answer:"答案：正态分布。不论原分布是什么，n 足够大时，和（标准化后）近似标准正态分布。",pitfall_list:["中心极限定理不要求原分布是正态的（这是它的强大之处）。","要求「独立同分布」，且 n 要足够大。","大数定律说均值收敛到期望，中心极限定理说的是分布的形态（正态）。"],quiz_list:[{question:"中心极限定理的结论分布是？",options:["正态分布","均匀分布","指数分布","泊松分布"],correct:0},{question:"中心极限定理要求随机变量？",options:["独立同分布","相关","异分布","少量"],correct:0}]};
+
+let n=5;
+// 二项分布 B(n, 0.5) 的概率质量函数
+function binomPMF(k, n, p){ const C=(n,k)=>{let r=1;for(let i=0;i<k;i++)r*=(n-i)/(i+1);return r}; return C(n,k)*Math.pow(p,k)*Math.pow(1-p,n-k); }
+
+function renderViz(){
+  const svg=d3.select('#viz');svg.selectAll('*').remove();
+  const W=840,H=440;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const g=svg.append('g');
+  const base=H-50, maxH=H-120;
+  const bw=W/(n+1);
+
+  // 二项分布柱状图
+  let maxP=0;
+  for(let k=0;k<=n;k++){ maxP=Math.max(maxP, binomPMF(k,n,0.5)); }
+  for(let k=0;k<=n;k++){
+    const p=binomPMF(k,n,0.5);
+    const h=(p/maxP)*maxH*0.9;
+    const x=k*bw+bw/2, y=base-h;
+    g.append('rect').attr('x',x-bw*0.35).attr('y',y).attr('width',bw*0.7).attr('height',h).attr('rx',4).attr('fill','var(--primary)').attr('opacity',0.8);
+    g.append('text').attr('x',x).attr('y',base+20).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text(k);
+  }
+
+  // 正态近似曲线（n 较大时叠加）
+  if(n>=10){
+    const mu=n/2, sigma=Math.sqrt(n*0.25);
+    const path=[];
+    for(let k=0;k<=n;k+=0.5){
+      const pdf=1/(sigma*Math.sqrt(2*Math.PI))*Math.exp(-Math.pow(k-mu,2)/(2*sigma*sigma));
+      path.push([k*bw+bw/2, base-(pdf/(1/(sigma*Math.sqrt(2*Math.PI))))*maxH*0.9]);
+    }
+    g.append('path').attr('d',path.map((p,i)=>`${i?'L':'M'}${p[0]},${p[1]}`).join('')).attr('fill','none').attr('stroke','var(--danger)').attr('stroke-width',3);
+    g.append('text').attr('x',W-160).attr('y',40).attr('fill','var(--danger)').attr('font-size',13).attr('font-weight','700').text('正态近似');
+  }
+
+  g.append('text').attr('x',20).attr('y',30).attr('fill','var(--highlight)').attr('font-size',14).attr('font-weight','700').text('抛 '+n+' 次硬币，正面次数的分布');
+  g.append('text').attr('x',20).attr('y',54).attr('fill','var(--text-muted)').attr('font-size',13).text(n>=10?'已接近正态分布（钟形）':'n 较小，还不是钟形');
+  document.getElementById('subtitle').textContent='n='+n+'，'+(n>=10?'分布已接近正态 ✓':'继续增大 n 会趋近正态');
+  document.getElementById('val-n').textContent=n;
+}
+function renderAll(){renderViz()}
+function renderDerive(){const el=document.getElementById('derive-katex');const lines=window.COURSEWARE_DATA.derivation;el.innerHTML=lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');if(window.renderMathInElement)window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});else if(window.katex){el.innerHTML='';lines.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true})})}}
+function renderContent(){const d=window.COURSEWARE_DATA;document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text}</p>`;document.getElementById('exam-text').innerHTML=d.exam_text+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;document.getElementById('pitfall-list').innerHTML=d.pitfall_list.map(x=>`<li>${x}</li>`).join('');document.getElementById('quiz-list').innerHTML=d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');renderDerive()}
+function bindQuiz(){document.querySelectorAll('.quiz-item .opt').forEach(opt=>{opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong')})})}
+function initTheme(){try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}document.getElementById('theme-float-btn').textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙'}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}document.getElementById('theme-float-btn').textContent=n==='light'?'☀️':'🌙'})
+function init(){renderContent();bindQuiz();renderAll();document.getElementById('slider-n').addEventListener('input',e=>{n=+e.target.value;renderAll()});document.getElementById('btn-play').addEventListener('click',()=>{let p=1;const t=setInterval(()=>{p=Math.min(100,p+2);document.getElementById('slider-n').value=p;n=p;renderAll()},100)});document.getElementById('btn-reset').addEventListener('click',()=>{n=5;document.getElementById('slider-n').value=5;renderAll()})}
+window.addEventListener('load',()=>{initTheme();if(window.gsap)gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});init()});
+</script>
+</body>
+</html>
