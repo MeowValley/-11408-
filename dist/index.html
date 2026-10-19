@@ -1,0 +1,2692 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>考研11408 动画课件导航</title>
+<style>
+:root {
+  --bg: #0f1420; --bg-panel: #161d2e; --bg-elevated: #1d263b;
+  --border: #2a3550; --text: #e6ebf5; --text-muted: #8b96ad;
+  --primary: #4f8cff; --highlight: #ffb020; --success: #2dd4a7;
+  --radius: 12px;
+  --font: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+}
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --highlight:#f59e0b; --success:#10b981;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* 顶栏主题切换 */
+.top-nav { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.top-nav .theme-btn { font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:4px 12px; cursor:pointer; }
+.top-nav .quiz-link { font-size:14px; color:var(--primary-strong); text-decoration:none; padding:8px 16px; border:1px solid var(--primary); border-radius:8px; font-weight:600; }
+.top-nav .quiz-link:hover { background:var(--primary); color:#fff; }
+
+/* 巨大的刷题入口按钮 */
+.big-quiz-btn {
+  display:block; text-align:center; padding:18px 24px; margin-bottom:16px;
+  background:linear-gradient(135deg, var(--primary), var(--success));
+  color:#fff; text-decoration:none; font-size:20px; font-weight:800;
+  border-radius:var(--radius); letter-spacing:2px; transition:all .2s ease;
+  box-shadow:0 6px 20px rgba(79,140,255,0.35);
+}
+.big-quiz-btn:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(79,140,255,0.5); filter:brightness(1.05); }
+
+/* 顶部进度条 */
+.header { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 24px; }
+.header h1 { font-size: 22px; margin-bottom: 8px; }
+.header .sub { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+.progress-row { display: flex; align-items: center; gap: 12px; }
+.progress-bar { flex: 1; height: 10px; background: var(--bg-elevated); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 999px; transition: width .3s; }
+.progress-num { font-size: 14px; font-weight: 700; color: var(--success); white-space: nowrap; }
+.legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+.legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* 科目折叠 */
+.subject { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+.subject-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; user-select: none; }
+.subject-head:hover { background: var(--bg-elevated); }
+.subject-head .left { display: flex; align-items: center; gap: 12px; }
+.subject-dot { width: 12px; height: 12px; border-radius: 4px; }
+.subject-name { font-size: 17px; font-weight: 700; }
+.subject-count { font-size: 13px; color: var(--text-muted); }
+.subject-toggle { font-size: 14px; color: var(--text-muted); transition: transform .2s; }
+.subject.open .subject-toggle { transform: rotate(90deg); }
+.subject-body { display: none; padding: 0 20px 16px; }
+.subject.open .subject-body { display: block; }
+
+/* 章节 */
+.chapter { margin-top: 14px; }
+.chapter-title { font-size: 14px; font-weight: 600; color: var(--highlight); margin-bottom: 8px; padding-left: 4px; border-left: 3px solid var(--highlight); }
+.topic-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; transition: background .15s; }
+.topic-row:hover { background: var(--bg-elevated); }
+.topic-id { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-muted); min-width: 64px; }
+.topic-name { flex: 1; font-size: 14px; }
+.topic-name a { color: var(--primary); text-decoration: none; }
+.topic-name a:hover { text-decoration: underline; }
+.topic-name .pending { color: var(--text-muted); }
+.freq-badge { font-size: 11px; padding: 1px 8px; border-radius: 999px; font-weight: 700; white-space: nowrap; }
+.freq-high { background: rgba(255,92,122,0.15); color: #ff5c7a; border: 1px solid #ff5c7a; }
+.freq-mid  { background: rgba(255,176,32,0.15); color: #ffb020; border: 1px solid #ffb020; }
+.freq-low  { background: rgba(79,140,255,0.15); color: #6ea8ff; border: 1px solid #4f8cff; }
+.freq-cold { background: rgba(139,150,173,0.12); color: #8b96ad; border: 1px solid #8b96ad; }
+.footer { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 24px; }
+
+/* 搜索与筛选 */
+.search-bar { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.search-input {
+  flex: 1; min-width: 240px; padding: 10px 14px;
+  background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: 14px; font-family: var(--font); outline: none;
+  transition: border-color .15s;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,140,255,0.15); }
+.search-input::placeholder { color: var(--text-muted); }
+.filter-check { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text); cursor: pointer; user-select: none; }
+.filter-check input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+.no-result { text-align: center; color: var(--text-muted); padding: 32px; font-size: 14px; }
+.topic-row.hidden { display: none; }
+
+/* 响应式 */
+@media (max-width:768px) {
+  .wrap { padding: 16px 12px 60px; }
+  .subject-head { padding: 12px 14px; }
+  .topic-id { min-width: 50px; font-size: 10px; }
+  .topic-name { font-size: 13px; }
+}
+@media (max-width:375px) {
+  .header h1 { font-size: 18px; }
+  .subject-name { font-size: 15px; }
+  .subject-count { display: none; }
+  .search-input { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-nav">
+    <h1 style="font-size:20px;">考研 11408 动画课件导航</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a class="quiz-link" href="quiz.html">📝 在线刷题</a>
+      <button class="theme-btn" id="theme-btn" title="切换主题">🌙</button>
+    </div>
+  </div>
+  <div class="header">
+    <a class="big-quiz-btn" href="quiz.html">📝 进入刷题模式</a>
+    <div class="sub">数学一 · 408 · 英语一 · 政治 —— 全知识点动画课件索引</div>
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" style="width:100.0%"></div></div>
+      <div class="progress-num">436 / 436</div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:#ff5c7a"></span>高频</span>
+      <span><span class="dot" style="background:#ffb020"></span>中频</span>
+      <span><span class="dot" style="background:#4f8cff"></span>低频</span>
+      <span><span class="dot" style="background:#8b96ad"></span>冷门</span>
+      <span><span class="dot" style="background:transparent;border:1px solid #8b96ad"></span>灰色=未生成</span>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" id="search-box" type="text" placeholder="🔍 搜索知识点（按 ID 或名称，如：TCP / 二重积分 / DS-07）">
+      <label class="filter-check"><input type="checkbox" id="filter-pending"> 只看未生成</label>
+    </div>
+  </div>
+
+  <div class="subject open">
+    <div class="subject-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="subject-dot" style="background:#2dd4a7"></span>
+        <span class="subject-name">408</span>
+      </div>
+      <span class="subject-count">186 个知识点 · 24 章</span>
+      <span class="subject-toggle">▶</span>
+    </div>
+    <div class="subject-body">
+      <div class="chapter">
+        <div class="chapter-title">一、基本概念</div>
+        <div class="topic-row" data-id="DS-01" data-name="数据结构的基本概念" data-done="1">
+          <span class="topic-id">DS-01</span>
+          <span class="topic-name"><a href="../src/DS-01.html" target="_blank">数据结构的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-02" data-name="算法的基本概念" data-done="1">
+          <span class="topic-id">DS-02</span>
+          <span class="topic-name"><a href="../src/DS-02.html" target="_blank">算法的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-03" data-name="时间复杂度和空间复杂度分析" data-done="1">
+          <span class="topic-id">DS-03</span>
+          <span class="topic-name"><a href="../src/DS-03.html" target="_blank">时间复杂度和空间复杂度分析</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、线性表</div>
+        <div class="topic-row" data-id="DS-04" data-name="线性表的基本概念" data-done="1">
+          <span class="topic-id">DS-04</span>
+          <span class="topic-name"><a href="../src/DS-04.html" target="_blank">线性表的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-05" data-name="线性表的实现" data-done="1">
+          <span class="topic-id">DS-05</span>
+          <span class="topic-name"><a href="../src/DS-05.html" target="_blank">线性表的实现</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-06" data-name="顺序存储（顺序表）" data-done="1">
+          <span class="topic-id">DS-06</span>
+          <span class="topic-name"><a href="../src/DS-06.html" target="_blank">顺序存储（顺序表）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-07" data-name="链式存储（链表）" data-done="1">
+          <span class="topic-id">DS-07</span>
+          <span class="topic-name"><a href="../src/DS-07.html" target="_blank">链式存储（链表）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-08" data-name="线性表的应用" data-done="1">
+          <span class="topic-id">DS-08</span>
+          <span class="topic-name"><a href="../src/DS-08.html" target="_blank">线性表的应用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、栈、队列和数组</div>
+        <div class="topic-row" data-id="DS-09" data-name="栈和队列的基本概念" data-done="1">
+          <span class="topic-id">DS-09</span>
+          <span class="topic-name"><a href="../src/DS-09.html" target="_blank">栈和队列的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-10" data-name="栈和队列的顺序存储结构" data-done="1">
+          <span class="topic-id">DS-10</span>
+          <span class="topic-name"><a href="../src/DS-10.html" target="_blank">栈和队列的顺序存储结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-11" data-name="栈和队列的链式存储结构" data-done="1">
+          <span class="topic-id">DS-11</span>
+          <span class="topic-name"><a href="../src/DS-11.html" target="_blank">栈和队列的链式存储结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-12" data-name="多维数组的存储" data-done="1">
+          <span class="topic-id">DS-12</span>
+          <span class="topic-name"><a href="../src/DS-12.html" target="_blank">多维数组的存储</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-13" data-name="特殊矩阵的压缩存储" data-done="1">
+          <span class="topic-id">DS-13</span>
+          <span class="topic-name"><a href="../src/DS-13.html" target="_blank">特殊矩阵的压缩存储</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-14" data-name="栈、队列和数组的应用" data-done="1">
+          <span class="topic-id">DS-14</span>
+          <span class="topic-name"><a href="../src/DS-14.html" target="_blank">栈、队列和数组的应用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-15" data-name="串（串的模式匹配、KMP 算法）" data-done="1">
+          <span class="topic-id">DS-15</span>
+          <span class="topic-name"><a href="../src/DS-15.html" target="_blank">串（串的模式匹配、KMP 算法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、树与二叉树</div>
+        <div class="topic-row" data-id="DS-16" data-name="树的基本概念" data-done="1">
+          <span class="topic-id">DS-16</span>
+          <span class="topic-name"><a href="../src/DS-16.html" target="_blank">树的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-17" data-name="二叉树" data-done="1">
+          <span class="topic-id">DS-17</span>
+          <span class="topic-name"><a href="../src/DS-17.html" target="_blank">二叉树</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-18" data-name="二叉树的定义及其主要特征" data-done="1">
+          <span class="topic-id">DS-18</span>
+          <span class="topic-name"><a href="../src/DS-18.html" target="_blank">二叉树的定义及其主要特征</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-19" data-name="二叉树的顺序存储结构和链式存储结构" data-done="1">
+          <span class="topic-id">DS-19</span>
+          <span class="topic-name"><a href="../src/DS-19.html" target="_blank">二叉树的顺序存储结构和链式存储结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-20" data-name="二叉树的遍历" data-done="1">
+          <span class="topic-id">DS-20</span>
+          <span class="topic-name"><a href="../src/DS-20.html" target="_blank">二叉树的遍历</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-21" data-name="线索二叉树" data-done="1">
+          <span class="topic-id">DS-21</span>
+          <span class="topic-name"><a href="../src/DS-21.html" target="_blank">线索二叉树</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-22" data-name="哈夫曼树与哈夫曼编码" data-done="1">
+          <span class="topic-id">DS-22</span>
+          <span class="topic-name"><a href="../src/DS-22.html" target="_blank">哈夫曼树与哈夫曼编码</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-23" data-name="树、森林" data-done="1">
+          <span class="topic-id">DS-23</span>
+          <span class="topic-name"><a href="../src/DS-23.html" target="_blank">树、森林</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-24" data-name="树的存储结构" data-done="1">
+          <span class="topic-id">DS-24</span>
+          <span class="topic-name"><a href="../src/DS-24.html" target="_blank">树的存储结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-25" data-name="树与二叉树的转换" data-done="1">
+          <span class="topic-id">DS-25</span>
+          <span class="topic-name"><a href="../src/DS-25.html" target="_blank">树与二叉树的转换</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-26" data-name="森林与二叉树的转换" data-done="1">
+          <span class="topic-id">DS-26</span>
+          <span class="topic-name"><a href="../src/DS-26.html" target="_blank">森林与二叉树的转换</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-27" data-name="树和森林的遍历" data-done="1">
+          <span class="topic-id">DS-27</span>
+          <span class="topic-name"><a href="../src/DS-27.html" target="_blank">树和森林的遍历</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-28" data-name="树与二叉树的应用" data-done="1">
+          <span class="topic-id">DS-28</span>
+          <span class="topic-name"><a href="../src/DS-28.html" target="_blank">树与二叉树的应用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-29" data-name="二叉排序树（BST）" data-done="1">
+          <span class="topic-id">DS-29</span>
+          <span class="topic-name"><a href="../src/DS-29.html" target="_blank">二叉排序树（BST）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-30" data-name="平衡二叉树（AVL）" data-done="1">
+          <span class="topic-id">DS-30</span>
+          <span class="topic-name"><a href="../src/DS-30.html" target="_blank">平衡二叉树（AVL）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-31" data-name="红黑树" data-done="1">
+          <span class="topic-id">DS-31</span>
+          <span class="topic-name"><a href="../src/DS-31.html" target="_blank">红黑树</a></span>
+          <span class="freq-badge freq-cold">冷</span>
+        </div>
+        <div class="topic-row" data-id="DS-32" data-name="并查集" data-done="1">
+          <span class="topic-id">DS-32</span>
+          <span class="topic-name"><a href="../src/DS-32.html" target="_blank">并查集</a></span>
+          <span class="freq-badge freq-cold">冷</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、图</div>
+        <div class="topic-row" data-id="DS-33" data-name="图的基本概念" data-done="1">
+          <span class="topic-id">DS-33</span>
+          <span class="topic-name"><a href="../src/DS-33.html" target="_blank">图的基本概念</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="DS-34" data-name="图的存储结构（邻接矩阵、邻接表）" data-done="1">
+          <span class="topic-id">DS-34</span>
+          <span class="topic-name"><a href="../src/DS-34.html" target="_blank">图的存储结构（邻接矩阵、邻接表）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-35" data-name="图的遍历（DFS、BFS）" data-done="1">
+          <span class="topic-id">DS-35</span>
+          <span class="topic-name"><a href="../src/DS-35.html" target="_blank">图的遍历（DFS、BFS）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-36" data-name="图的应用" data-done="1">
+          <span class="topic-id">DS-36</span>
+          <span class="topic-name"><a href="../src/DS-36.html" target="_blank">图的应用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-37" data-name="最小生成树（Prim、Kruskal）" data-done="1">
+          <span class="topic-id">DS-37</span>
+          <span class="topic-name"><a href="../src/DS-37.html" target="_blank">最小生成树（Prim、Kruskal）</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="DS-38" data-name="最短路径（Dijkstra、Floyd）" data-done="1">
+          <span class="topic-id">DS-38</span>
+          <span class="topic-name"><a href="../src/DS-38.html" target="_blank">最短路径（Dijkstra、Floyd）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-39" data-name="拓扑排序" data-done="1">
+          <span class="topic-id">DS-39</span>
+          <span class="topic-name"><a href="../src/DS-39.html" target="_blank">拓扑排序</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-40" data-name="关键路径（AOE 网）" data-done="1">
+          <span class="topic-id">DS-40</span>
+          <span class="topic-name"><a href="../src/DS-40.html" target="_blank">关键路径（AOE 网）</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、查找</div>
+        <div class="topic-row" data-id="DS-41" data-name="顺序查找" data-done="1">
+          <span class="topic-id">DS-41</span>
+          <span class="topic-name"><a href="../src/DS-41.html" target="_blank">顺序查找</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-42" data-name="折半查找（二分查找）" data-done="1">
+          <span class="topic-id">DS-42</span>
+          <span class="topic-name"><a href="../src/DS-42.html" target="_blank">折半查找（二分查找）</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="DS-43" data-name="分块查找" data-done="1">
+          <span class="topic-id">DS-43</span>
+          <span class="topic-name"><a href="../src/DS-43.html" target="_blank">分块查找</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-44" data-name="二叉排序树查找" data-done="1">
+          <span class="topic-id">DS-44</span>
+          <span class="topic-name"><a href="../src/DS-44.html" target="_blank">二叉排序树查找</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-45" data-name="平衡二叉树查找" data-done="1">
+          <span class="topic-id">DS-45</span>
+          <span class="topic-name"><a href="../src/DS-45.html" target="_blank">平衡二叉树查找</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-46" data-name="B 树与 B+ 树" data-done="1">
+          <span class="topic-id">DS-46</span>
+          <span class="topic-name"><a href="../src/DS-46.html" target="_blank">B 树与 B+ 树</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-47" data-name="散列表（哈希表）及其冲突处理" data-done="1">
+          <span class="topic-id">DS-47</span>
+          <span class="topic-name"><a href="../src/DS-47.html" target="_blank">散列表（哈希表）及其冲突处理</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-48" data-name="KMP 算法" data-done="1">
+          <span class="topic-id">DS-48</span>
+          <span class="topic-name"><a href="../src/DS-48.html" target="_blank">KMP 算法</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、排序</div>
+        <div class="topic-row" data-id="DS-49" data-name="插入排序（直接插入、折半插入、希尔排序）" data-done="1">
+          <span class="topic-id">DS-49</span>
+          <span class="topic-name"><a href="../src/DS-49.html" target="_blank">插入排序（直接插入、折半插入、希尔排序）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-50" data-name="交换排序（冒泡排序、快速排序）" data-done="1">
+          <span class="topic-id">DS-50</span>
+          <span class="topic-name"><a href="../src/DS-50.html" target="_blank">交换排序（冒泡排序、快速排序）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-51" data-name="选择排序（简单选择排序、堆排序）" data-done="1">
+          <span class="topic-id">DS-51</span>
+          <span class="topic-name"><a href="../src/DS-51.html" target="_blank">选择排序（简单选择排序、堆排序）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-52" data-name="归并排序" data-done="1">
+          <span class="topic-id">DS-52</span>
+          <span class="topic-name"><a href="../src/DS-52.html" target="_blank">归并排序</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-53" data-name="基数排序" data-done="1">
+          <span class="topic-id">DS-53</span>
+          <span class="topic-name"><a href="../src/DS-53.html" target="_blank">基数排序</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-54" data-name="各种内部排序算法的比较" data-done="1">
+          <span class="topic-id">DS-54</span>
+          <span class="topic-name"><a href="../src/DS-54.html" target="_blank">各种内部排序算法的比较</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="DS-55" data-name="外部排序" data-done="1">
+          <span class="topic-id">DS-55</span>
+          <span class="topic-name"><a href="../src/DS-55.html" target="_blank">外部排序</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、计算机系统概述</div>
+        <div class="topic-row" data-id="CO-56" data-name="计算机发展历程" data-done="1">
+          <span class="topic-id">CO-56</span>
+          <span class="topic-name"><a href="../src/CO-56.html" target="_blank">计算机发展历程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-57" data-name="计算机系统层次结构" data-done="1">
+          <span class="topic-id">CO-57</span>
+          <span class="topic-name"><a href="../src/CO-57.html" target="_blank">计算机系统层次结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-58" data-name="计算机的基本组成" data-done="1">
+          <span class="topic-id">CO-58</span>
+          <span class="topic-name"><a href="../src/CO-58.html" target="_blank">计算机的基本组成</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-59" data-name="计算机的性能指标" data-done="1">
+          <span class="topic-id">CO-59</span>
+          <span class="topic-name"><a href="../src/CO-59.html" target="_blank">计算机的性能指标</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-88" data-name="操作系统的基本概念" data-done="1">
+          <span class="topic-id">OS-88</span>
+          <span class="topic-name"><a href="../src/OS-88.html" target="_blank">操作系统的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-89" data-name="操作系统的发展历程" data-done="1">
+          <span class="topic-id">OS-89</span>
+          <span class="topic-name"><a href="../src/OS-89.html" target="_blank">操作系统的发展历程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-90" data-name="操作系统的运行环境" data-done="1">
+          <span class="topic-id">OS-90</span>
+          <span class="topic-name"><a href="../src/OS-90.html" target="_blank">操作系统的运行环境</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-91" data-name="操作系统的体系结构" data-done="1">
+          <span class="topic-id">OS-91</span>
+          <span class="topic-name"><a href="../src/OS-91.html" target="_blank">操作系统的体系结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-92" data-name="虚拟机" data-done="1">
+          <span class="topic-id">OS-92</span>
+          <span class="topic-name"><a href="../src/OS-92.html" target="_blank">虚拟机</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、数据的表示和运算</div>
+        <div class="topic-row" data-id="CO-60" data-name="数制与编码" data-done="1">
+          <span class="topic-id">CO-60</span>
+          <span class="topic-name"><a href="../src/CO-60.html" target="_blank">数制与编码</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-61" data-name="定点数的表示和运算" data-done="1">
+          <span class="topic-id">CO-61</span>
+          <span class="topic-name"><a href="../src/CO-61.html" target="_blank">定点数的表示和运算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-62" data-name="浮点数的表示和运算" data-done="1">
+          <span class="topic-id">CO-62</span>
+          <span class="topic-name"><a href="../src/CO-62.html" target="_blank">浮点数的表示和运算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-63" data-name="算术逻辑单元（ALU）" data-done="1">
+          <span class="topic-id">CO-63</span>
+          <span class="topic-name"><a href="../src/CO-63.html" target="_blank">算术逻辑单元（ALU）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、存储系统</div>
+        <div class="topic-row" data-id="CO-64" data-name="存储器的分类与层次结构" data-done="1">
+          <span class="topic-id">CO-64</span>
+          <span class="topic-name"><a href="../src/CO-64.html" target="_blank">存储器的分类与层次结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-65" data-name="主存储器（SRAM、DRAM、ROM）" data-done="1">
+          <span class="topic-id">CO-65</span>
+          <span class="topic-name"><a href="../src/CO-65.html" target="_blank">主存储器（SRAM、DRAM、ROM）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-66" data-name="高速缓冲存储器（Cache）" data-done="1">
+          <span class="topic-id">CO-66</span>
+          <span class="topic-name"><a href="../src/CO-66.html" target="_blank">高速缓冲存储器（Cache）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-67" data-name="虚拟存储器" data-done="1">
+          <span class="topic-id">CO-67</span>
+          <span class="topic-name"><a href="../src/CO-67.html" target="_blank">虚拟存储器</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-68" data-name="存储器的校验" data-done="1">
+          <span class="topic-id">CO-68</span>
+          <span class="topic-name"><a href="../src/CO-68.html" target="_blank">存储器的校验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、指令系统</div>
+        <div class="topic-row" data-id="CO-69" data-name="指令格式" data-done="1">
+          <span class="topic-id">CO-69</span>
+          <span class="topic-name"><a href="../src/CO-69.html" target="_blank">指令格式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-70" data-name="指令的寻址方式" data-done="1">
+          <span class="topic-id">CO-70</span>
+          <span class="topic-name"><a href="../src/CO-70.html" target="_blank">指令的寻址方式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-71" data-name="CISC 与 RISC" data-done="1">
+          <span class="topic-id">CO-71</span>
+          <span class="topic-name"><a href="../src/CO-71.html" target="_blank">CISC 与 RISC</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-72" data-name="机器级代码的表示" data-done="1">
+          <span class="topic-id">CO-72</span>
+          <span class="topic-name"><a href="../src/CO-72.html" target="_blank">机器级代码的表示</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、中央处理器（CPU）</div>
+        <div class="topic-row" data-id="CO-73" data-name="CPU 的功能和基本结构" data-done="1">
+          <span class="topic-id">CO-73</span>
+          <span class="topic-name"><a href="../src/CO-73.html" target="_blank">CPU 的功能和基本结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-74" data-name="指令执行过程（指令周期）" data-done="1">
+          <span class="topic-id">CO-74</span>
+          <span class="topic-name"><a href="../src/CO-74.html" target="_blank">指令执行过程（指令周期）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-75" data-name="数据通路" data-done="1">
+          <span class="topic-id">CO-75</span>
+          <span class="topic-name"><a href="../src/CO-75.html" target="_blank">数据通路</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-76" data-name="控制器的功能和工作原理" data-done="1">
+          <span class="topic-id">CO-76</span>
+          <span class="topic-name"><a href="../src/CO-76.html" target="_blank">控制器的功能和工作原理</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-77" data-name="指令流水线" data-done="1">
+          <span class="topic-id">CO-77</span>
+          <span class="topic-name"><a href="../src/CO-77.html" target="_blank">指令流水线</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-78" data-name="中断系统" data-done="1">
+          <span class="topic-id">CO-78</span>
+          <span class="topic-name"><a href="../src/CO-78.html" target="_blank">中断系统</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、总线</div>
+        <div class="topic-row" data-id="CO-79" data-name="总线概述" data-done="1">
+          <span class="topic-id">CO-79</span>
+          <span class="topic-name"><a href="../src/CO-79.html" target="_blank">总线概述</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-80" data-name="总线的分类与结构" data-done="1">
+          <span class="topic-id">CO-80</span>
+          <span class="topic-name"><a href="../src/CO-80.html" target="_blank">总线的分类与结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-81" data-name="总线仲裁与控制" data-done="1">
+          <span class="topic-id">CO-81</span>
+          <span class="topic-name"><a href="../src/CO-81.html" target="_blank">总线仲裁与控制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-82" data-name="总线性能指标" data-done="1">
+          <span class="topic-id">CO-82</span>
+          <span class="topic-name"><a href="../src/CO-82.html" target="_blank">总线性能指标</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、输入/输出系统</div>
+        <div class="topic-row" data-id="CO-83" data-name="I/O 系统的基本概念" data-done="1">
+          <span class="topic-id">CO-83</span>
+          <span class="topic-name"><a href="../src/CO-83.html" target="_blank">I/O 系统的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-84" data-name="外部设备" data-done="1">
+          <span class="topic-id">CO-84</span>
+          <span class="topic-name"><a href="../src/CO-84.html" target="_blank">外部设备</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-85" data-name="I/O 接口" data-done="1">
+          <span class="topic-id">CO-85</span>
+          <span class="topic-name"><a href="../src/CO-85.html" target="_blank">I/O 接口</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-86" data-name="I/O 控制方式（程序查询、程序中断、DMA、通道）" data-done="1">
+          <span class="topic-id">CO-86</span>
+          <span class="topic-name"><a href="../src/CO-86.html" target="_blank">I/O 控制方式（程序查询、程序中断、DMA、通道）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CO-87" data-name="中断系统" data-done="1">
+          <span class="topic-id">CO-87</span>
+          <span class="topic-name"><a href="../src/CO-87.html" target="_blank">中断系统</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、进程与线程</div>
+        <div class="topic-row" data-id="OS-93" data-name="进程与线程" data-done="1">
+          <span class="topic-id">OS-93</span>
+          <span class="topic-name"><a href="../src/OS-93.html" target="_blank">进程与线程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-94" data-name="进程的概念、组成、特征" data-done="1">
+          <span class="topic-id">OS-94</span>
+          <span class="topic-name"><a href="../src/OS-94.html" target="_blank">进程的概念、组成、特征</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-95" data-name="进程的状态与转换" data-done="1">
+          <span class="topic-id">OS-95</span>
+          <span class="topic-name"><a href="../src/OS-95.html" target="_blank">进程的状态与转换</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-96" data-name="进程控制" data-done="1">
+          <span class="topic-id">OS-96</span>
+          <span class="topic-name"><a href="../src/OS-96.html" target="_blank">进程控制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-97" data-name="进程通信" data-done="1">
+          <span class="topic-id">OS-97</span>
+          <span class="topic-name"><a href="../src/OS-97.html" target="_blank">进程通信</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-98" data-name="线程的概念与多线程模型" data-done="1">
+          <span class="topic-id">OS-98</span>
+          <span class="topic-name"><a href="../src/OS-98.html" target="_blank">线程的概念与多线程模型</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-99" data-name="CPU 调度" data-done="1">
+          <span class="topic-id">OS-99</span>
+          <span class="topic-name"><a href="../src/OS-99.html" target="_blank">CPU 调度</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-100" data-name="调度的基本概念" data-done="1">
+          <span class="topic-id">OS-100</span>
+          <span class="topic-name"><a href="../src/OS-100.html" target="_blank">调度的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-101" data-name="调度算法（FCFS、SJF、RR、优先级、多级反馈队列）" data-done="1">
+          <span class="topic-id">OS-101</span>
+          <span class="topic-name"><a href="../src/OS-101.html" target="_blank">调度算法（FCFS、SJF、RR、优先级、多级反馈队列）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-102" data-name="同步与互斥" data-done="1">
+          <span class="topic-id">OS-102</span>
+          <span class="topic-name"><a href="../src/OS-102.html" target="_blank">同步与互斥</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-103" data-name="进程同步与互斥的基本概念" data-done="1">
+          <span class="topic-id">OS-103</span>
+          <span class="topic-name"><a href="../src/OS-103.html" target="_blank">进程同步与互斥的基本概念</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-104" data-name="信号量机制（PV 操作）" data-done="1">
+          <span class="topic-id">OS-104</span>
+          <span class="topic-name"><a href="../src/OS-104.html" target="_blank">信号量机制（PV 操作）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-105" data-name="经典同步问题（生产者-消费者、读者-写者、哲学家进餐）" data-done="1">
+          <span class="topic-id">OS-105</span>
+          <span class="topic-name"><a href="../src/OS-105.html" target="_blank">经典同步问题（生产者-消费者、读者-写者、哲学家进餐）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-106" data-name="死锁" data-done="1">
+          <span class="topic-id">OS-106</span>
+          <span class="topic-name"><a href="../src/OS-106.html" target="_blank">死锁</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-107" data-name="死锁的概念与必要条件" data-done="1">
+          <span class="topic-id">OS-107</span>
+          <span class="topic-name"><a href="../src/OS-107.html" target="_blank">死锁的概念与必要条件</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-108" data-name="死锁预防" data-done="1">
+          <span class="topic-id">OS-108</span>
+          <span class="topic-name"><a href="../src/OS-108.html" target="_blank">死锁预防</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-109" data-name="死锁避免（银行家算法）" data-done="1">
+          <span class="topic-id">OS-109</span>
+          <span class="topic-name"><a href="../src/OS-109.html" target="_blank">死锁避免（银行家算法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-110" data-name="死锁检测与解除" data-done="1">
+          <span class="topic-id">OS-110</span>
+          <span class="topic-name"><a href="../src/OS-110.html" target="_blank">死锁检测与解除</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、内存管理</div>
+        <div class="topic-row" data-id="OS-111" data-name="内存管理概念" data-done="1">
+          <span class="topic-id">OS-111</span>
+          <span class="topic-name"><a href="../src/OS-111.html" target="_blank">内存管理概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-112" data-name="内存管理的功能" data-done="1">
+          <span class="topic-id">OS-112</span>
+          <span class="topic-name"><a href="../src/OS-112.html" target="_blank">内存管理的功能</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-113" data-name="程序装入与链接" data-done="1">
+          <span class="topic-id">OS-113</span>
+          <span class="topic-name"><a href="../src/OS-113.html" target="_blank">程序装入与链接</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-114" data-name="连续分配管理方式" data-done="1">
+          <span class="topic-id">OS-114</span>
+          <span class="topic-name"><a href="../src/OS-114.html" target="_blank">连续分配管理方式</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-115" data-name="非连续分配管理方式（分页、分段、段页式）" data-done="1">
+          <span class="topic-id">OS-115</span>
+          <span class="topic-name"><a href="../src/OS-115.html" target="_blank">非连续分配管理方式（分页、分段、段页式）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-116" data-name="虚拟内存管理" data-done="1">
+          <span class="topic-id">OS-116</span>
+          <span class="topic-name"><a href="../src/OS-116.html" target="_blank">虚拟内存管理</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="OS-117" data-name="虚拟内存的基本概念" data-done="1">
+          <span class="topic-id">OS-117</span>
+          <span class="topic-name"><a href="../src/OS-117.html" target="_blank">虚拟内存的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-118" data-name="请求分页管理方式" data-done="1">
+          <span class="topic-id">OS-118</span>
+          <span class="topic-name"><a href="../src/OS-118.html" target="_blank">请求分页管理方式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-119" data-name="页面置换算法（OPT、FIFO、LRU、CLOCK）" data-done="1">
+          <span class="topic-id">OS-119</span>
+          <span class="topic-name"><a href="../src/OS-119.html" target="_blank">页面置换算法（OPT、FIFO、LRU、CLOCK）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-120" data-name="抖动与工作集" data-done="1">
+          <span class="topic-id">OS-120</span>
+          <span class="topic-name"><a href="../src/OS-120.html" target="_blank">抖动与工作集</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、文件管理</div>
+        <div class="topic-row" data-id="OS-121" data-name="文件系统基础" data-done="1">
+          <span class="topic-id">OS-121</span>
+          <span class="topic-name"><a href="../src/OS-121.html" target="_blank">文件系统基础</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-122" data-name="文件的概念与属性" data-done="1">
+          <span class="topic-id">OS-122</span>
+          <span class="topic-name"><a href="../src/OS-122.html" target="_blank">文件的概念与属性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-123" data-name="文件的逻辑结构" data-done="1">
+          <span class="topic-id">OS-123</span>
+          <span class="topic-name"><a href="../src/OS-123.html" target="_blank">文件的逻辑结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-124" data-name="文件的物理结构" data-done="1">
+          <span class="topic-id">OS-124</span>
+          <span class="topic-name"><a href="../src/OS-124.html" target="_blank">文件的物理结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-125" data-name="目录" data-done="1">
+          <span class="topic-id">OS-125</span>
+          <span class="topic-name"><a href="../src/OS-125.html" target="_blank">目录</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-126" data-name="目录的基本概念" data-done="1">
+          <span class="topic-id">OS-126</span>
+          <span class="topic-name"><a href="../src/OS-126.html" target="_blank">目录的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-127" data-name="目录结构" data-done="1">
+          <span class="topic-id">OS-127</span>
+          <span class="topic-name"><a href="../src/OS-127.html" target="_blank">目录结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-128" data-name="目录操作" data-done="1">
+          <span class="topic-id">OS-128</span>
+          <span class="topic-name"><a href="../src/OS-128.html" target="_blank">目录操作</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-129" data-name="文件系统" data-done="1">
+          <span class="topic-id">OS-129</span>
+          <span class="topic-name"><a href="../src/OS-129.html" target="_blank">文件系统</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-130" data-name="文件系统的全局结构" data-done="1">
+          <span class="topic-id">OS-130</span>
+          <span class="topic-name"><a href="../src/OS-130.html" target="_blank">文件系统的全局结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-131" data-name="文件存储空间的管理" data-done="1">
+          <span class="topic-id">OS-131</span>
+          <span class="topic-name"><a href="../src/OS-131.html" target="_blank">文件存储空间的管理</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-132" data-name="文件共享与保护" data-done="1">
+          <span class="topic-id">OS-132</span>
+          <span class="topic-name"><a href="../src/OS-132.html" target="_blank">文件共享与保护</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、输入/输出管理</div>
+        <div class="topic-row" data-id="OS-133" data-name="I/O 管理概述" data-done="1">
+          <span class="topic-id">OS-133</span>
+          <span class="topic-name"><a href="../src/OS-133.html" target="_blank">I/O 管理概述</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-134" data-name="I/O 控制方式" data-done="1">
+          <span class="topic-id">OS-134</span>
+          <span class="topic-name"><a href="../src/OS-134.html" target="_blank">I/O 控制方式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-135" data-name="设备独立性软件" data-done="1">
+          <span class="topic-id">OS-135</span>
+          <span class="topic-name"><a href="../src/OS-135.html" target="_blank">设备独立性软件</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-136" data-name="缓冲管理" data-done="1">
+          <span class="topic-id">OS-136</span>
+          <span class="topic-name"><a href="../src/OS-136.html" target="_blank">缓冲管理</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="OS-137" data-name="磁盘和固态硬盘（磁盘调度算法）" data-done="1">
+          <span class="topic-id">OS-137</span>
+          <span class="topic-name"><a href="../src/OS-137.html" target="_blank">磁盘和固态硬盘（磁盘调度算法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、计算机网络体系结构</div>
+        <div class="topic-row" data-id="CN-138" data-name="计算机网络概述" data-done="1">
+          <span class="topic-id">CN-138</span>
+          <span class="topic-name"><a href="../src/CN-138.html" target="_blank">计算机网络概述</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-139" data-name="计算机网络的概念、组成与功能" data-done="1">
+          <span class="topic-id">CN-139</span>
+          <span class="topic-name"><a href="../src/CN-139.html" target="_blank">计算机网络的概念、组成与功能</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-140" data-name="计算机网络的分类" data-done="1">
+          <span class="topic-id">CN-140</span>
+          <span class="topic-name"><a href="../src/CN-140.html" target="_blank">计算机网络的分类</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-141" data-name="计算机网络的性能指标" data-done="1">
+          <span class="topic-id">CN-141</span>
+          <span class="topic-name"><a href="../src/CN-141.html" target="_blank">计算机网络的性能指标</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-142" data-name="计算机网络体系结构与参考模型" data-done="1">
+          <span class="topic-id">CN-142</span>
+          <span class="topic-name"><a href="../src/CN-142.html" target="_blank">计算机网络体系结构与参考模型</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-143" data-name="分层结构、协议、接口、服务" data-done="1">
+          <span class="topic-id">CN-143</span>
+          <span class="topic-name"><a href="../src/CN-143.html" target="_blank">分层结构、协议、接口、服务</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-144" data-name="OSI 参考模型" data-done="1">
+          <span class="topic-id">CN-144</span>
+          <span class="topic-name"><a href="../src/CN-144.html" target="_blank">OSI 参考模型</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-145" data-name="TCP/IP 模型" data-done="1">
+          <span class="topic-id">CN-145</span>
+          <span class="topic-name"><a href="../src/CN-145.html" target="_blank">TCP/IP 模型</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、物理层</div>
+        <div class="topic-row" data-id="CN-146" data-name="通信基础" data-done="1">
+          <span class="topic-id">CN-146</span>
+          <span class="topic-name"><a href="../src/CN-146.html" target="_blank">通信基础</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-147" data-name="基本概念（数据、信号、信道）" data-done="1">
+          <span class="topic-id">CN-147</span>
+          <span class="topic-name"><a href="../src/CN-147.html" target="_blank">基本概念（数据、信号、信道）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="CN-148" data-name="信道的极限容量（奈奎斯特定理、香农定理）" data-done="1">
+          <span class="topic-id">CN-148</span>
+          <span class="topic-name"><a href="../src/CN-148.html" target="_blank">信道的极限容量（奈奎斯特定理、香农定理）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-149" data-name="编码与调制" data-done="1">
+          <span class="topic-id">CN-149</span>
+          <span class="topic-name"><a href="../src/CN-149.html" target="_blank">编码与调制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-150" data-name="传输介质" data-done="1">
+          <span class="topic-id">CN-150</span>
+          <span class="topic-name"><a href="../src/CN-150.html" target="_blank">传输介质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-151" data-name="物理层设备（中继器、集线器）" data-done="1">
+          <span class="topic-id">CN-151</span>
+          <span class="topic-name"><a href="../src/CN-151.html" target="_blank">物理层设备（中继器、集线器）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、数据链路层</div>
+        <div class="topic-row" data-id="CN-152" data-name="数据链路层的功能" data-done="1">
+          <span class="topic-id">CN-152</span>
+          <span class="topic-name"><a href="../src/CN-152.html" target="_blank">数据链路层的功能</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-153" data-name="组帧" data-done="1">
+          <span class="topic-id">CN-153</span>
+          <span class="topic-name"><a href="../src/CN-153.html" target="_blank">组帧</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-154" data-name="差错控制（检错编码、纠错编码）" data-done="1">
+          <span class="topic-id">CN-154</span>
+          <span class="topic-name"><a href="../src/CN-154.html" target="_blank">差错控制（检错编码、纠错编码）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-155" data-name="流量控制与可靠传输机制" data-done="1">
+          <span class="topic-id">CN-155</span>
+          <span class="topic-name"><a href="../src/CN-155.html" target="_blank">流量控制与可靠传输机制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-156" data-name="停止-等待协议" data-done="1">
+          <span class="topic-id">CN-156</span>
+          <span class="topic-name"><a href="../src/CN-156.html" target="_blank">停止-等待协议</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-157" data-name="后退 N 帧协议（GBN）" data-done="1">
+          <span class="topic-id">CN-157</span>
+          <span class="topic-name"><a href="../src/CN-157.html" target="_blank">后退 N 帧协议（GBN）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-158" data-name="选择重传协议（SR）" data-done="1">
+          <span class="topic-id">CN-158</span>
+          <span class="topic-name"><a href="../src/CN-158.html" target="_blank">选择重传协议（SR）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-159" data-name="介质访问控制" data-done="1">
+          <span class="topic-id">CN-159</span>
+          <span class="topic-name"><a href="../src/CN-159.html" target="_blank">介质访问控制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-160" data-name="信道划分（FDM、TDM、WDM、CDMA）" data-done="1">
+          <span class="topic-id">CN-160</span>
+          <span class="topic-name"><a href="../src/CN-160.html" target="_blank">信道划分（FDM、TDM、WDM、CDMA）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-161" data-name="随机访问（ALOHA、CSMA、CSMA/CD、CSMA/CA）" data-done="1">
+          <span class="topic-id">CN-161</span>
+          <span class="topic-name"><a href="../src/CN-161.html" target="_blank">随机访问（ALOHA、CSMA、CSMA/CD、CSMA/CA）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-162" data-name="轮询访问（令牌传递）" data-done="1">
+          <span class="topic-id">CN-162</span>
+          <span class="topic-name"><a href="../src/CN-162.html" target="_blank">轮询访问（令牌传递）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-163" data-name="局域网（以太网、IEEE 802.3）" data-done="1">
+          <span class="topic-id">CN-163</span>
+          <span class="topic-name"><a href="../src/CN-163.html" target="_blank">局域网（以太网、IEEE 802.3）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-164" data-name="广域网" data-done="1">
+          <span class="topic-id">CN-164</span>
+          <span class="topic-name"><a href="../src/CN-164.html" target="_blank">广域网</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-165" data-name="数据链路层设备（网桥、交换机）" data-done="1">
+          <span class="topic-id">CN-165</span>
+          <span class="topic-name"><a href="../src/CN-165.html" target="_blank">数据链路层设备（网桥、交换机）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、网络层</div>
+        <div class="topic-row" data-id="CN-166" data-name="网络层的功能" data-done="1">
+          <span class="topic-id">CN-166</span>
+          <span class="topic-name"><a href="../src/CN-166.html" target="_blank">网络层的功能</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-167" data-name="路由算法（静态路由、动态路由、距离向量、链路状态）" data-done="1">
+          <span class="topic-id">CN-167</span>
+          <span class="topic-name"><a href="../src/CN-167.html" target="_blank">路由算法（静态路由、动态路由、距离向量、链路状态）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-168" data-name="IPv4（地址、子网划分、CIDR、ARP、DHCP、ICMP）" data-done="1">
+          <span class="topic-id">CN-168</span>
+          <span class="topic-name"><a href="../src/CN-168.html" target="_blank">IPv4（地址、子网划分、CIDR、ARP、DHCP、ICMP）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-169" data-name="IPv6" data-done="1">
+          <span class="topic-id">CN-169</span>
+          <span class="topic-name"><a href="../src/CN-169.html" target="_blank">IPv6</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-170" data-name="路由协议（RIP、OSPF、BGP）" data-done="1">
+          <span class="topic-id">CN-170</span>
+          <span class="topic-name"><a href="../src/CN-170.html" target="_blank">路由协议（RIP、OSPF、BGP）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-171" data-name="IP 组播" data-done="1">
+          <span class="topic-id">CN-171</span>
+          <span class="topic-name"><a href="../src/CN-171.html" target="_blank">IP 组播</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-172" data-name="移动 IP" data-done="1">
+          <span class="topic-id">CN-172</span>
+          <span class="topic-name"><a href="../src/CN-172.html" target="_blank">移动 IP</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-173" data-name="网络层设备（路由器）" data-done="1">
+          <span class="topic-id">CN-173</span>
+          <span class="topic-name"><a href="../src/CN-173.html" target="_blank">网络层设备（路由器）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、传输层</div>
+        <div class="topic-row" data-id="CN-174" data-name="传输层提供的服务" data-done="1">
+          <span class="topic-id">CN-174</span>
+          <span class="topic-name"><a href="../src/CN-174.html" target="_blank">传输层提供的服务</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-175" data-name="UDP 协议" data-done="1">
+          <span class="topic-id">CN-175</span>
+          <span class="topic-name"><a href="../src/CN-175.html" target="_blank">UDP 协议</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-176" data-name="TCP 协议" data-done="1">
+          <span class="topic-id">CN-176</span>
+          <span class="topic-name"><a href="../src/CN-176.html" target="_blank">TCP 协议</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-177" data-name="TCP 的特点" data-done="1">
+          <span class="topic-id">CN-177</span>
+          <span class="topic-name"><a href="../src/CN-177.html" target="_blank">TCP 的特点</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-178" data-name="TCP 连接管理（三次握手、四次挥手）" data-done="1">
+          <span class="topic-id">CN-178</span>
+          <span class="topic-name"><a href="../src/CN-178.html" target="_blank">TCP 连接管理（三次握手、四次挥手）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-179" data-name="TCP 可靠传输" data-done="1">
+          <span class="topic-id">CN-179</span>
+          <span class="topic-name"><a href="../src/CN-179.html" target="_blank">TCP 可靠传输</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-180" data-name="TCP 流量控制" data-done="1">
+          <span class="topic-id">CN-180</span>
+          <span class="topic-name"><a href="../src/CN-180.html" target="_blank">TCP 流量控制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-181" data-name="TCP 拥塞控制" data-done="1">
+          <span class="topic-id">CN-181</span>
+          <span class="topic-name"><a href="../src/CN-181.html" target="_blank">TCP 拥塞控制</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、应用层</div>
+        <div class="topic-row" data-id="CN-182" data-name="网络应用模型（C/S、P2P）" data-done="1">
+          <span class="topic-id">CN-182</span>
+          <span class="topic-name"><a href="../src/CN-182.html" target="_blank">网络应用模型（C/S、P2P）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-183" data-name="DNS 域名系统" data-done="1">
+          <span class="topic-id">CN-183</span>
+          <span class="topic-name"><a href="../src/CN-183.html" target="_blank">DNS 域名系统</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-184" data-name="FTP 文件传输协议" data-done="1">
+          <span class="topic-id">CN-184</span>
+          <span class="topic-name"><a href="../src/CN-184.html" target="_blank">FTP 文件传输协议</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-185" data-name="电子邮件（SMTP、POP3、IMAP）" data-done="1">
+          <span class="topic-id">CN-185</span>
+          <span class="topic-name"><a href="../src/CN-185.html" target="_blank">电子邮件（SMTP、POP3、IMAP）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="CN-186" data-name="万维网（WWW、HTTP、HTTPS）" data-done="1">
+          <span class="topic-id">CN-186</span>
+          <span class="topic-name"><a href="../src/CN-186.html" target="_blank">万维网（WWW、HTTP、HTTPS）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subject open">
+    <div class="subject-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="subject-dot" style="background:#4f8cff"></span>
+        <span class="subject-name">数学一</span>
+      </div>
+      <span class="subject-count">133 个知识点 · 23 章</span>
+      <span class="subject-toggle">▶</span>
+    </div>
+    <div class="subject-body">
+      <div class="chapter">
+        <div class="chapter-title">一、函数、极限、连续</div>
+        <div class="topic-row" data-id="MA-01" data-name="函数的概念、性质（有界性、单调性、奇偶性、周期性）" data-done="1">
+          <span class="topic-id">MA-01</span>
+          <span class="topic-name"><a href="../src/MA-01.html" target="_blank">函数的概念、性质（有界性、单调性、奇偶性、周期性）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-02" data-name="复合函数、反函数、分段函数、隐函数" data-done="1">
+          <span class="topic-id">MA-02</span>
+          <span class="topic-name"><a href="../src/MA-02.html" target="_blank">复合函数、反函数、分段函数、隐函数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-03" data-name="极限的定义（数列极限、函数极限）" data-done="1">
+          <span class="topic-id">MA-03</span>
+          <span class="topic-name"><a href="../src/MA-03.html" target="_blank">极限的定义（数列极限、函数极限）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-04" data-name="极限的计算方法（四则运算、两个重要极限、等价无穷小替换、洛必达法则）" data-done="1">
+          <span class="topic-id">MA-04</span>
+          <span class="topic-name"><a href="../src/MA-04.html" target="_blank">极限的计算方法（四则运算、两个重要极限、等价无穷小替换、洛必达法则）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-05" data-name="无穷小量与无穷大量的比较（高阶、低阶、同阶、等价）" data-done="1">
+          <span class="topic-id">MA-05</span>
+          <span class="topic-name"><a href="../src/MA-05.html" target="_blank">无穷小量与无穷大量的比较（高阶、低阶、同阶、等价）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-06" data-name="函数的连续性（连续的定义、间断点的类型）" data-done="1">
+          <span class="topic-id">MA-06</span>
+          <span class="topic-name"><a href="../src/MA-06.html" target="_blank">函数的连续性（连续的定义、间断点的类型）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-07" data-name="闭区间上连续函数的性质（有界性、最值定理、介值定理、零点定理）" data-done="1">
+          <span class="topic-id">MA-07</span>
+          <span class="topic-name"><a href="../src/MA-07.html" target="_blank">闭区间上连续函数的性质（有界性、最值定理、介值定理、零点定理）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、一元函数微分学</div>
+        <div class="topic-row" data-id="MA-08" data-name="导数与微分的概念及其几何意义" data-done="1">
+          <span class="topic-id">MA-08</span>
+          <span class="topic-name"><a href="../src/MA-08.html" target="_blank">导数与微分的概念及其几何意义</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-09" data-name="可导与连续的关系" data-done="1">
+          <span class="topic-id">MA-09</span>
+          <span class="topic-name"><a href="../src/MA-09.html" target="_blank">可导与连续的关系</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-10" data-name="求导法则（四则运算、复合函数、隐函数、参数方程、反函数）" data-done="1">
+          <span class="topic-id">MA-10</span>
+          <span class="topic-name"><a href="../src/MA-10.html" target="_blank">求导法则（四则运算、复合函数、隐函数、参数方程、反函数）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-11" data-name="高阶导数" data-done="1">
+          <span class="topic-id">MA-11</span>
+          <span class="topic-name"><a href="../src/MA-11.html" target="_blank">高阶导数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-12" data-name="微分中值定理（罗尔定理、拉格朗日中值定理、柯西中值定理、泰勒中值定理）" data-done="1">
+          <span class="topic-id">MA-12</span>
+          <span class="topic-name"><a href="../src/MA-12.html" target="_blank">微分中值定理（罗尔定理、拉格朗日中值定理、柯西中值定理、泰勒中值定理）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-13" data-name="洛必达法则" data-done="1">
+          <span class="topic-id">MA-13</span>
+          <span class="topic-name"><a href="../src/MA-13.html" target="_blank">洛必达法则</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-14" data-name="函数单调性、极值与最值" data-done="1">
+          <span class="topic-id">MA-14</span>
+          <span class="topic-name"><a href="../src/MA-14.html" target="_blank">函数单调性、极值与最值</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-15" data-name="函数凹凸性与拐点" data-done="1">
+          <span class="topic-id">MA-15</span>
+          <span class="topic-name"><a href="../src/MA-15.html" target="_blank">函数凹凸性与拐点</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-16" data-name="曲率与曲率半径（数一）" data-done="1">
+          <span class="topic-id">MA-16</span>
+          <span class="topic-name"><a href="../src/MA-16.html" target="_blank">曲率与曲率半径（数一）</a></span>
+          <span class="freq-badge freq-cold">冷</span>
+        </div>
+        <div class="topic-row" data-id="MA-17" data-name="函数图形的描绘" data-done="1">
+          <span class="topic-id">MA-17</span>
+          <span class="topic-name"><a href="../src/MA-17.html" target="_blank">函数图形的描绘</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-18" data-name="弧微分" data-done="1">
+          <span class="topic-id">MA-18</span>
+          <span class="topic-name"><a href="../src/MA-18.html" target="_blank">弧微分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、一元函数积分学</div>
+        <div class="topic-row" data-id="MA-19" data-name="不定积分的概念与性质" data-done="1">
+          <span class="topic-id">MA-19</span>
+          <span class="topic-name"><a href="../src/MA-19.html" target="_blank">不定积分的概念与性质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-20" data-name="换元积分法（第一类、第二类）" data-done="1">
+          <span class="topic-id">MA-20</span>
+          <span class="topic-name"><a href="../src/MA-20.html" target="_blank">换元积分法（第一类、第二类）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-21" data-name="分部积分法" data-done="1">
+          <span class="topic-id">MA-21</span>
+          <span class="topic-name"><a href="../src/MA-21.html" target="_blank">分部积分法</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-22" data-name="有理函数、三角函数有理式、简单无理函数的积分" data-done="1">
+          <span class="topic-id">MA-22</span>
+          <span class="topic-name"><a href="../src/MA-22.html" target="_blank">有理函数、三角函数有理式、简单无理函数的积分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-23" data-name="定积分的概念与性质" data-done="1">
+          <span class="topic-id">MA-23</span>
+          <span class="topic-name"><a href="../src/MA-23.html" target="_blank">定积分的概念与性质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-24" data-name="微积分基本定理（牛顿-莱布尼茨公式）" data-done="1">
+          <span class="topic-id">MA-24</span>
+          <span class="topic-name"><a href="../src/MA-24.html" target="_blank">微积分基本定理（牛顿-莱布尼茨公式）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-25" data-name="变限积分函数及其求导" data-done="1">
+          <span class="topic-id">MA-25</span>
+          <span class="topic-name"><a href="../src/MA-25.html" target="_blank">变限积分函数及其求导</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-26" data-name="定积分的计算（换元法、分部积分法）" data-done="1">
+          <span class="topic-id">MA-26</span>
+          <span class="topic-name"><a href="../src/MA-26.html" target="_blank">定积分的计算（换元法、分部积分法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-27" data-name="反常积分（无穷区间、无界函数）及其敛散性判别" data-done="1">
+          <span class="topic-id">MA-27</span>
+          <span class="topic-name"><a href="../src/MA-27.html" target="_blank">反常积分（无穷区间、无界函数）及其敛散性判别</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-28" data-name="定积分的应用（平面图形面积、旋转体体积、弧长、物理应用）" data-done="1">
+          <span class="topic-id">MA-28</span>
+          <span class="topic-name"><a href="../src/MA-28.html" target="_blank">定积分的应用（平面图形面积、旋转体体积、弧长、物理应用）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、向量代数与空间解析几何（数一独有）</div>
+        <div class="topic-row" data-id="MA-29" data-name="向量的概念、线性运算、数量积、向量积、混合积" data-done="1">
+          <span class="topic-id">MA-29</span>
+          <span class="topic-name"><a href="../src/MA-29.html" target="_blank">向量的概念、线性运算、数量积、向量积、混合积</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-30" data-name="平面方程（点法式、一般式）" data-done="1">
+          <span class="topic-id">MA-30</span>
+          <span class="topic-name"><a href="../src/MA-30.html" target="_blank">平面方程（点法式、一般式）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-31" data-name="直线方程（点向式、参数式、一般式）" data-done="1">
+          <span class="topic-id">MA-31</span>
+          <span class="topic-name"><a href="../src/MA-31.html" target="_blank">直线方程（点向式、参数式、一般式）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-32" data-name="直线与平面的关系（夹角、位置关系）" data-done="1">
+          <span class="topic-id">MA-32</span>
+          <span class="topic-name"><a href="../src/MA-32.html" target="_blank">直线与平面的关系（夹角、位置关系）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-33" data-name="曲面方程（旋转曲面、柱面、二次曲面）" data-done="1">
+          <span class="topic-id">MA-33</span>
+          <span class="topic-name"><a href="../src/MA-33.html" target="_blank">曲面方程（旋转曲面、柱面、二次曲面）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-34" data-name="空间曲线及其方程" data-done="1">
+          <span class="topic-id">MA-34</span>
+          <span class="topic-name"><a href="../src/MA-34.html" target="_blank">空间曲线及其方程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-35" data-name="点到平面、点到直线的距离" data-done="1">
+          <span class="topic-id">MA-35</span>
+          <span class="topic-name"><a href="../src/MA-35.html" target="_blank">点到平面、点到直线的距离</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、多元函数微分学</div>
+        <div class="topic-row" data-id="MA-36" data-name="多元函数的概念、极限与连续" data-done="1">
+          <span class="topic-id">MA-36</span>
+          <span class="topic-name"><a href="../src/MA-36.html" target="_blank">多元函数的概念、极限与连续</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-37" data-name="偏导数的概念与计算" data-done="1">
+          <span class="topic-id">MA-37</span>
+          <span class="topic-name"><a href="../src/MA-37.html" target="_blank">偏导数的概念与计算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-38" data-name="全微分的概念与计算" data-done="1">
+          <span class="topic-id">MA-38</span>
+          <span class="topic-name"><a href="../src/MA-38.html" target="_blank">全微分的概念与计算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-39" data-name="多元复合函数求导（链式法则）" data-done="1">
+          <span class="topic-id">MA-39</span>
+          <span class="topic-name"><a href="../src/MA-39.html" target="_blank">多元复合函数求导（链式法则）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-40" data-name="隐函数求导" data-done="1">
+          <span class="topic-id">MA-40</span>
+          <span class="topic-name"><a href="../src/MA-40.html" target="_blank">隐函数求导</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-41" data-name="多元函数极值与最值" data-done="1">
+          <span class="topic-id">MA-41</span>
+          <span class="topic-name"><a href="../src/MA-41.html" target="_blank">多元函数极值与最值</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-42" data-name="条件极值与拉格朗日乘数法" data-done="1">
+          <span class="topic-id">MA-42</span>
+          <span class="topic-name"><a href="../src/MA-42.html" target="_blank">条件极值与拉格朗日乘数法</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-43" data-name="方向导数与梯度" data-done="1">
+          <span class="topic-id">MA-43</span>
+          <span class="topic-name"><a href="../src/MA-43.html" target="_blank">方向导数与梯度</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-44" data-name="多元函数微分学的几何应用（切平面、法线、空间曲线切线与法平面）" data-done="1">
+          <span class="topic-id">MA-44</span>
+          <span class="topic-name"><a href="../src/MA-44.html" target="_blank">多元函数微分学的几何应用（切平面、法线、空间曲线切线与法平面）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、多元函数积分学（数一独有，重点难点）</div>
+        <div class="topic-row" data-id="MA-45" data-name="二重积分的概念、性质与计算（直角坐标、极坐标）" data-done="1">
+          <span class="topic-id">MA-45</span>
+          <span class="topic-name"><a href="../src/MA-45.html" target="_blank">二重积分的概念、性质与计算（直角坐标、极坐标）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-46" data-name="三重积分的概念、性质与计算（直角坐标、柱面坐标、球面坐标）" data-done="1">
+          <span class="topic-id">MA-46</span>
+          <span class="topic-name"><a href="../src/MA-46.html" target="_blank">三重积分的概念、性质与计算（直角坐标、柱面坐标、球面坐标）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-47" data-name="第一类曲线积分（对弧长的曲线积分）" data-done="1">
+          <span class="topic-id">MA-47</span>
+          <span class="topic-name"><a href="../src/MA-47.html" target="_blank">第一类曲线积分（对弧长的曲线积分）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-48" data-name="第二类曲线积分（对坐标的曲线积分）" data-done="1">
+          <span class="topic-id">MA-48</span>
+          <span class="topic-name"><a href="../src/MA-48.html" target="_blank">第二类曲线积分（对坐标的曲线积分）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-49" data-name="格林公式及其应用（积分与路径无关的条件）" data-done="1">
+          <span class="topic-id">MA-49</span>
+          <span class="topic-name"><a href="../src/MA-49.html" target="_blank">格林公式及其应用（积分与路径无关的条件）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-50" data-name="第一类曲面积分（对面积的曲面积分）" data-done="1">
+          <span class="topic-id">MA-50</span>
+          <span class="topic-name"><a href="../src/MA-50.html" target="_blank">第一类曲面积分（对面积的曲面积分）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-51" data-name="第二类曲面积分（对坐标的曲面积分）" data-done="1">
+          <span class="topic-id">MA-51</span>
+          <span class="topic-name"><a href="../src/MA-51.html" target="_blank">第二类曲面积分（对坐标的曲面积分）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-52" data-name="高斯公式（散度）" data-done="1">
+          <span class="topic-id">MA-52</span>
+          <span class="topic-name"><a href="../src/MA-52.html" target="_blank">高斯公式（散度）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-53" data-name="斯托克斯公式（旋度）" data-done="1">
+          <span class="topic-id">MA-53</span>
+          <span class="topic-name"><a href="../src/MA-53.html" target="_blank">斯托克斯公式（旋度）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-54" data-name="场论初步（梯度、散度、旋度）" data-done="1">
+          <span class="topic-id">MA-54</span>
+          <span class="topic-name"><a href="../src/MA-54.html" target="_blank">场论初步（梯度、散度、旋度）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、无穷级数</div>
+        <div class="topic-row" data-id="MA-55" data-name="常数项级数的概念与性质" data-done="1">
+          <span class="topic-id">MA-55</span>
+          <span class="topic-name"><a href="../src/MA-55.html" target="_blank">常数项级数的概念与性质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-56" data-name="正项级数审敛法（比较、比值、根值、积分判别法）" data-done="1">
+          <span class="topic-id">MA-56</span>
+          <span class="topic-name"><a href="../src/MA-56.html" target="_blank">正项级数审敛法（比较、比值、根值、积分判别法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-57" data-name="交错级数与莱布尼茨判别法" data-done="1">
+          <span class="topic-id">MA-57</span>
+          <span class="topic-name"><a href="../src/MA-57.html" target="_blank">交错级数与莱布尼茨判别法</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-58" data-name="绝对收敛与条件收敛" data-done="1">
+          <span class="topic-id">MA-58</span>
+          <span class="topic-name"><a href="../src/MA-58.html" target="_blank">绝对收敛与条件收敛</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-59" data-name="幂级数的收敛半径、收敛区间、收敛域" data-done="1">
+          <span class="topic-id">MA-59</span>
+          <span class="topic-name"><a href="../src/MA-59.html" target="_blank">幂级数的收敛半径、收敛区间、收敛域</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-60" data-name="幂级数的和函数" data-done="1">
+          <span class="topic-id">MA-60</span>
+          <span class="topic-name"><a href="../src/MA-60.html" target="_blank">幂级数的和函数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-61" data-name="函数的幂级数展开（泰勒级数、麦克劳林级数）" data-done="1">
+          <span class="topic-id">MA-61</span>
+          <span class="topic-name"><a href="../src/MA-61.html" target="_blank">函数的幂级数展开（泰勒级数、麦克劳林级数）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-62" data-name="傅里叶级数（数一独有）" data-done="1">
+          <span class="topic-id">MA-62</span>
+          <span class="topic-name"><a href="../src/MA-62.html" target="_blank">傅里叶级数（数一独有）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">八、常微分方程</div>
+        <div class="topic-row" data-id="MA-63" data-name="微分方程的基本概念" data-done="1">
+          <span class="topic-id">MA-63</span>
+          <span class="topic-name"><a href="../src/MA-63.html" target="_blank">微分方程的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-64" data-name="一阶微分方程（可分离变量、齐次、一阶线性、伯努利）" data-done="1">
+          <span class="topic-id">MA-64</span>
+          <span class="topic-name"><a href="../src/MA-64.html" target="_blank">一阶微分方程（可分离变量、齐次、一阶线性、伯努利）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-65" data-name="可降阶的高阶微分方程" data-done="1">
+          <span class="topic-id">MA-65</span>
+          <span class="topic-name"><a href="../src/MA-65.html" target="_blank">可降阶的高阶微分方程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-66" data-name="高阶线性微分方程解的结构" data-done="1">
+          <span class="topic-id">MA-66</span>
+          <span class="topic-name"><a href="../src/MA-66.html" target="_blank">高阶线性微分方程解的结构</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-67" data-name="二阶常系数齐次线性微分方程" data-done="1">
+          <span class="topic-id">MA-67</span>
+          <span class="topic-name"><a href="../src/MA-67.html" target="_blank">二阶常系数齐次线性微分方程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-68" data-name="二阶常系数非齐次线性微分方程" data-done="1">
+          <span class="topic-id">MA-68</span>
+          <span class="topic-name"><a href="../src/MA-68.html" target="_blank">二阶常系数非齐次线性微分方程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-69" data-name="欧拉方程（数一）" data-done="1">
+          <span class="topic-id">MA-69</span>
+          <span class="topic-name"><a href="../src/MA-69.html" target="_blank">欧拉方程（数一）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-70" data-name="微分方程的应用" data-done="1">
+          <span class="topic-id">MA-70</span>
+          <span class="topic-name"><a href="../src/MA-70.html" target="_blank">微分方程的应用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、行列式</div>
+        <div class="topic-row" data-id="MA-71" data-name="行列式的概念与性质" data-done="1">
+          <span class="topic-id">MA-71</span>
+          <span class="topic-name"><a href="../src/MA-71.html" target="_blank">行列式的概念与性质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-72" data-name="行列式按行（列）展开" data-done="1">
+          <span class="topic-id">MA-72</span>
+          <span class="topic-name"><a href="../src/MA-72.html" target="_blank">行列式按行（列）展开</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-73" data-name="克拉默法则" data-done="1">
+          <span class="topic-id">MA-73</span>
+          <span class="topic-name"><a href="../src/MA-73.html" target="_blank">克拉默法则</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、矩阵</div>
+        <div class="topic-row" data-id="MA-74" data-name="矩阵的概念与运算（加法、数乘、乘法、转置）" data-done="1">
+          <span class="topic-id">MA-74</span>
+          <span class="topic-name"><a href="../src/MA-74.html" target="_blank">矩阵的概念与运算（加法、数乘、乘法、转置）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-75" data-name="逆矩阵（定义、性质、求法）" data-done="1">
+          <span class="topic-id">MA-75</span>
+          <span class="topic-name"><a href="../src/MA-75.html" target="_blank">逆矩阵（定义、性质、求法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-76" data-name="伴随矩阵" data-done="1">
+          <span class="topic-id">MA-76</span>
+          <span class="topic-name"><a href="../src/MA-76.html" target="_blank">伴随矩阵</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-77" data-name="初等变换与初等矩阵" data-done="1">
+          <span class="topic-id">MA-77</span>
+          <span class="topic-name"><a href="../src/MA-77.html" target="_blank">初等变换与初等矩阵</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-78" data-name="矩阵的秩" data-done="1">
+          <span class="topic-id">MA-78</span>
+          <span class="topic-name"><a href="../src/MA-78.html" target="_blank">矩阵的秩</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、向量</div>
+        <div class="topic-row" data-id="MA-79" data-name="向量组的线性表示与线性组合" data-done="1">
+          <span class="topic-id">MA-79</span>
+          <span class="topic-name"><a href="../src/MA-79.html" target="_blank">向量组的线性表示与线性组合</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-80" data-name="向量组的线性相关与线性无关" data-done="1">
+          <span class="topic-id">MA-80</span>
+          <span class="topic-name"><a href="../src/MA-80.html" target="_blank">向量组的线性相关与线性无关</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-81" data-name="向量组的秩与极大线性无关组" data-done="1">
+          <span class="topic-id">MA-81</span>
+          <span class="topic-name"><a href="../src/MA-81.html" target="_blank">向量组的秩与极大线性无关组</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-82" data-name="向量空间（数一独有）" data-done="1">
+          <span class="topic-id">MA-82</span>
+          <span class="topic-name"><a href="../src/MA-82.html" target="_blank">向量空间（数一独有）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-83" data-name="线性方程组的解的结构（基础解系）" data-done="1">
+          <span class="topic-id">MA-83</span>
+          <span class="topic-name"><a href="../src/MA-83.html" target="_blank">线性方程组的解的结构（基础解系）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、线性方程组</div>
+        <div class="topic-row" data-id="MA-84" data-name="齐次线性方程组有非零解的条件" data-done="1">
+          <span class="topic-id">MA-84</span>
+          <span class="topic-name"><a href="../src/MA-84.html" target="_blank">齐次线性方程组有非零解的条件</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-85" data-name="非齐次线性方程组有解的条件" data-done="1">
+          <span class="topic-id">MA-85</span>
+          <span class="topic-name"><a href="../src/MA-85.html" target="_blank">非齐次线性方程组有解的条件</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-86" data-name="线性方程组的通解" data-done="1">
+          <span class="topic-id">MA-86</span>
+          <span class="topic-name"><a href="../src/MA-86.html" target="_blank">线性方程组的通解</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、矩阵的特征值与特征向量</div>
+        <div class="topic-row" data-id="MA-87" data-name="特征值与特征向量的概念与计算" data-done="1">
+          <span class="topic-id">MA-87</span>
+          <span class="topic-name"><a href="../src/MA-87.html" target="_blank">特征值与特征向量的概念与计算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-88" data-name="相似矩阵" data-done="1">
+          <span class="topic-id">MA-88</span>
+          <span class="topic-name"><a href="../src/MA-88.html" target="_blank">相似矩阵</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-89" data-name="实对称矩阵的对角化" data-done="1">
+          <span class="topic-id">MA-89</span>
+          <span class="topic-name"><a href="../src/MA-89.html" target="_blank">实对称矩阵的对角化</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、二次型</div>
+        <div class="topic-row" data-id="MA-90" data-name="二次型及其矩阵表示" data-done="1">
+          <span class="topic-id">MA-90</span>
+          <span class="topic-name"><a href="../src/MA-90.html" target="_blank">二次型及其矩阵表示</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-91" data-name="化二次型为标准形（配方法、正交变换法）" data-done="1">
+          <span class="topic-id">MA-91</span>
+          <span class="topic-name"><a href="../src/MA-91.html" target="_blank">化二次型为标准形（配方法、正交变换法）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-92" data-name="正定二次型与正定矩阵" data-done="1">
+          <span class="topic-id">MA-92</span>
+          <span class="topic-name"><a href="../src/MA-92.html" target="_blank">正定二次型与正定矩阵</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、随机事件与概率</div>
+        <div class="topic-row" data-id="MA-93" data-name="随机事件与样本空间" data-done="1">
+          <span class="topic-id">MA-93</span>
+          <span class="topic-name"><a href="../src/MA-93.html" target="_blank">随机事件与样本空间</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-94" data-name="事件的关系与运算" data-done="1">
+          <span class="topic-id">MA-94</span>
+          <span class="topic-name"><a href="../src/MA-94.html" target="_blank">事件的关系与运算</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-95" data-name="概率的定义与性质" data-done="1">
+          <span class="topic-id">MA-95</span>
+          <span class="topic-name"><a href="../src/MA-95.html" target="_blank">概率的定义与性质</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-96" data-name="古典概型、几何概型" data-done="1">
+          <span class="topic-id">MA-96</span>
+          <span class="topic-name"><a href="../src/MA-96.html" target="_blank">古典概型、几何概型</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-97" data-name="条件概率" data-done="1">
+          <span class="topic-id">MA-97</span>
+          <span class="topic-name"><a href="../src/MA-97.html" target="_blank">条件概率</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="MA-98" data-name="全概率公式与贝叶斯公式" data-done="1">
+          <span class="topic-id">MA-98</span>
+          <span class="topic-name"><a href="../src/MA-98.html" target="_blank">全概率公式与贝叶斯公式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-99" data-name="事件的独立性" data-done="1">
+          <span class="topic-id">MA-99</span>
+          <span class="topic-name"><a href="../src/MA-99.html" target="_blank">事件的独立性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、随机变量及其分布</div>
+        <div class="topic-row" data-id="MA-100" data-name="随机变量与分布函数" data-done="1">
+          <span class="topic-id">MA-100</span>
+          <span class="topic-name"><a href="../src/MA-100.html" target="_blank">随机变量与分布函数</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="MA-101" data-name="离散型随机变量及其分布律" data-done="1">
+          <span class="topic-id">MA-101</span>
+          <span class="topic-name"><a href="../src/MA-101.html" target="_blank">离散型随机变量及其分布律</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-102" data-name="连续型随机变量及其概率密度" data-done="1">
+          <span class="topic-id">MA-102</span>
+          <span class="topic-name"><a href="../src/MA-102.html" target="_blank">连续型随机变量及其概率密度</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-103" data-name="常见分布（0-1分布、二项分布、泊松分布、均匀分布、指数分布、正态分布）" data-done="1">
+          <span class="topic-id">MA-103</span>
+          <span class="topic-name"><a href="../src/MA-103.html" target="_blank">常见分布（0-1分布、二项分布、泊松分布、均匀分布、指数分布、正态分布）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-104" data-name="随机变量函数的分布" data-done="1">
+          <span class="topic-id">MA-104</span>
+          <span class="topic-name"><a href="../src/MA-104.html" target="_blank">随机变量函数的分布</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、多维随机变量及其分布</div>
+        <div class="topic-row" data-id="MA-105" data-name="二维随机变量、联合分布函数" data-done="1">
+          <span class="topic-id">MA-105</span>
+          <span class="topic-name"><a href="../src/MA-105.html" target="_blank">二维随机变量、联合分布函数</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="MA-106" data-name="边缘分布" data-done="1">
+          <span class="topic-id">MA-106</span>
+          <span class="topic-name"><a href="../src/MA-106.html" target="_blank">边缘分布</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-107" data-name="条件分布" data-done="1">
+          <span class="topic-id">MA-107</span>
+          <span class="topic-name"><a href="../src/MA-107.html" target="_blank">条件分布</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-108" data-name="随机变量的独立性" data-done="1">
+          <span class="topic-id">MA-108</span>
+          <span class="topic-name"><a href="../src/MA-108.html" target="_blank">随机变量的独立性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-109" data-name="两个随机变量函数的分布" data-done="1">
+          <span class="topic-id">MA-109</span>
+          <span class="topic-name"><a href="../src/MA-109.html" target="_blank">两个随机变量函数的分布</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、随机变量的数字特征</div>
+        <div class="topic-row" data-id="MA-110" data-name="数学期望" data-done="1">
+          <span class="topic-id">MA-110</span>
+          <span class="topic-name"><a href="../src/MA-110.html" target="_blank">数学期望</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-111" data-name="方差" data-done="1">
+          <span class="topic-id">MA-111</span>
+          <span class="topic-name"><a href="../src/MA-111.html" target="_blank">方差</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-112" data-name="协方差与相关系数" data-done="1">
+          <span class="topic-id">MA-112</span>
+          <span class="topic-name"><a href="../src/MA-112.html" target="_blank">协方差与相关系数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-113" data-name="矩、协方差矩阵" data-done="1">
+          <span class="topic-id">MA-113</span>
+          <span class="topic-name"><a href="../src/MA-113.html" target="_blank">矩、协方差矩阵</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、大数定律与中心极限定理</div>
+        <div class="topic-row" data-id="MA-114" data-name="切比雪夫不等式" data-done="1">
+          <span class="topic-id">MA-114</span>
+          <span class="topic-name"><a href="../src/MA-114.html" target="_blank">切比雪夫不等式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-115" data-name="大数定律" data-done="1">
+          <span class="topic-id">MA-115</span>
+          <span class="topic-name"><a href="../src/MA-115.html" target="_blank">大数定律</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-116" data-name="中心极限定理" data-done="1">
+          <span class="topic-id">MA-116</span>
+          <span class="topic-name"><a href="../src/MA-116.html" target="_blank">中心极限定理</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、数理统计的基本概念</div>
+        <div class="topic-row" data-id="MA-117" data-name="总体、样本、统计量" data-done="1">
+          <span class="topic-id">MA-117</span>
+          <span class="topic-name"><a href="../src/MA-117.html" target="_blank">总体、样本、统计量</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-118" data-name="抽样分布（χ²分布、t分布、F分布）" data-done="1">
+          <span class="topic-id">MA-118</span>
+          <span class="topic-name"><a href="../src/MA-118.html" target="_blank">抽样分布（χ²分布、t分布、F分布）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-119" data-name="正态总体的抽样分布" data-done="1">
+          <span class="topic-id">MA-119</span>
+          <span class="topic-name"><a href="../src/MA-119.html" target="_blank">正态总体的抽样分布</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、参数估计</div>
+        <div class="topic-row" data-id="MA-120" data-name="点估计（矩估计、极大似然估计）" data-done="1">
+          <span class="topic-id">MA-120</span>
+          <span class="topic-name"><a href="../src/MA-120.html" target="_blank">点估计（矩估计、极大似然估计）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-121" data-name="估计量的评选标准（无偏性、有效性、相合性）" data-done="1">
+          <span class="topic-id">MA-121</span>
+          <span class="topic-name"><a href="../src/MA-121.html" target="_blank">估计量的评选标准（无偏性、有效性、相合性）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-122" data-name="区间估计（正态总体均值与方差的区间估计）" data-done="1">
+          <span class="topic-id">MA-122</span>
+          <span class="topic-name"><a href="../src/MA-122.html" target="_blank">区间估计（正态总体均值与方差的区间估计）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">八、假设检验（数一独有）</div>
+        <div class="topic-row" data-id="MA-123" data-name="假设检验的基本概念" data-done="1">
+          <span class="topic-id">MA-123</span>
+          <span class="topic-name"><a href="../src/MA-123.html" target="_blank">假设检验的基本概念</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-124" data-name="正态总体均值的假设检验" data-done="1">
+          <span class="topic-id">MA-124</span>
+          <span class="topic-name"><a href="../src/MA-124.html" target="_blank">正态总体均值的假设检验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-125" data-name="正态总体方差的假设检验" data-done="1">
+          <span class="topic-id">MA-125</span>
+          <span class="topic-name"><a href="../src/MA-125.html" target="_blank">正态总体方差的假设检验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">数一 vs 数二 / 数三 独有考点（标记）</div>
+        <div class="topic-row" data-id="MA-126" data-name="空间解析几何与向量代数" data-done="1">
+          <span class="topic-id">MA-126</span>
+          <span class="topic-name"><a href="../src/MA-126.html" target="_blank">空间解析几何与向量代数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-127" data-name="三重积分" data-done="1">
+          <span class="topic-id">MA-127</span>
+          <span class="topic-name"><a href="../src/MA-127.html" target="_blank">三重积分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-128" data-name="两类曲线积分、两类曲面积分" data-done="1">
+          <span class="topic-id">MA-128</span>
+          <span class="topic-name"><a href="../src/MA-128.html" target="_blank">两类曲线积分、两类曲面积分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-129" data-name="格林公式、高斯公式、斯托克斯公式、场论" data-done="1">
+          <span class="topic-id">MA-129</span>
+          <span class="topic-name"><a href="../src/MA-129.html" target="_blank">格林公式、高斯公式、斯托克斯公式、场论</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-130" data-name="傅里叶级数" data-done="1">
+          <span class="topic-id">MA-130</span>
+          <span class="topic-name"><a href="../src/MA-130.html" target="_blank">傅里叶级数</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-131" data-name="向量空间" data-done="1">
+          <span class="topic-id">MA-131</span>
+          <span class="topic-name"><a href="../src/MA-131.html" target="_blank">向量空间</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-132" data-name="假设检验" data-done="1">
+          <span class="topic-id">MA-132</span>
+          <span class="topic-name"><a href="../src/MA-132.html" target="_blank">假设检验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="MA-133" data-name="区间估计（数二不考概率，数三不考区间估计）" data-done="1">
+          <span class="topic-id">MA-133</span>
+          <span class="topic-name"><a href="../src/MA-133.html" target="_blank">区间估计（数二不考概率，数三不考区间估计）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subject open">
+    <div class="subject-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="subject-dot" style="background:#ff9f43"></span>
+        <span class="subject-name">英语一</span>
+      </div>
+      <span class="subject-count">29 个知识点 · 7 章</span>
+      <span class="subject-toggle">▶</span>
+    </div>
+    <div class="subject-body">
+      <div class="chapter">
+        <div class="chapter-title">（一）完形填空（英语知识运用）—— 10 分</div>
+        <div class="topic-row" data-id="EN-01" data-name="20 题，每题 0.5 分" data-done="1">
+          <span class="topic-id">EN-01</span>
+          <span class="topic-name"><a href="../src/EN-01.html" target="_blank">20 题，每题 0.5 分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-02" data-name="一篇 240-280 词短文，留 20 个空白，四选一" data-done="1">
+          <span class="topic-id">EN-02</span>
+          <span class="topic-name"><a href="../src/EN-02.html" target="_blank">一篇 240-280 词短文，留 20 个空白，四选一</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-03" data-name="考查重点：词汇辨析（形近词、近义词）、固定搭配、语法结构、上下文逻辑关系（转折、因果、递进）" data-done="1">
+          <span class="topic-id">EN-03</span>
+          <span class="topic-name"><a href="../src/EN-03.html" target="_blank">考查重点：词汇辨析（形近词、近义词）、固定搭配、语法结构、上下文逻辑关系（转折、因果、递进）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">（二）阅读理解 Part A（传统阅读）—— 40 分</div>
+        <div class="topic-row" data-id="EN-04" data-name="4 篇文章，每篇 5 题，每题 2 分" data-done="1">
+          <span class="topic-id">EN-04</span>
+          <span class="topic-name"><a href="../src/EN-04.html" target="_blank">4 篇文章，每篇 5 题，每题 2 分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-05" data-name="每篇约 400-500 词，总约 1600 词" data-done="1">
+          <span class="topic-id">EN-05</span>
+          <span class="topic-name"><a href="../src/EN-05.html" target="_blank">每篇约 400-500 词，总约 1600 词</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-06" data-name="文章选材：学术期刊、专业评论（《经济学人》《卫报》《纽约时报》等英美主流刊物）" data-done="1">
+          <span class="topic-id">EN-06</span>
+          <span class="topic-name"><a href="../src/EN-06.html" target="_blank">文章选材：学术期刊、专业评论（《经济学人》《卫报》《纽约时报》等英美主流刊物）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-07" data-name="考查重点：" data-done="1">
+          <span class="topic-id">EN-07</span>
+          <span class="topic-name"><a href="../src/EN-07.html" target="_blank">考查重点：</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-08" data-name="细节题（约 40%）" data-done="1">
+          <span class="topic-id">EN-08</span>
+          <span class="topic-name"><a href="../src/EN-08.html" target="_blank">细节题（约 40%）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="EN-09" data-name="推理题（约 20%）" data-done="1">
+          <span class="topic-id">EN-09</span>
+          <span class="topic-name"><a href="../src/EN-09.html" target="_blank">推理题（约 20%）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="EN-10" data-name="态度题（约 15%）" data-done="1">
+          <span class="topic-id">EN-10</span>
+          <span class="topic-name"><a href="../src/EN-10.html" target="_blank">态度题（约 15%）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-11" data-name="主旨题（约 15%）" data-done="1">
+          <span class="topic-id">EN-11</span>
+          <span class="topic-name"><a href="../src/EN-11.html" target="_blank">主旨题（约 15%）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="EN-12" data-name="词义猜测题（约 10%）" data-done="1">
+          <span class="topic-id">EN-12</span>
+          <span class="topic-name"><a href="../src/EN-12.html" target="_blank">词义猜测题（约 10%）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">（三）阅读理解 Part B（新题型）—— 10 分</div>
+        <div class="topic-row" data-id="EN-13" data-name="5 题，每题 2 分" data-done="1">
+          <span class="topic-id">EN-13</span>
+          <span class="topic-name"><a href="../src/EN-13.html" target="_blank">5 题，每题 2 分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-14" data-name="文章 500-600 词" data-done="1">
+          <span class="topic-id">EN-14</span>
+          <span class="topic-name"><a href="../src/EN-14.html" target="_blank">文章 500-600 词</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-15" data-name="三种备选题型（每次选其一）：" data-done="1">
+          <span class="topic-id">EN-15</span>
+          <span class="topic-name"><a href="../src/EN-15.html" target="_blank">三种备选题型（每次选其一）：</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-16" data-name="考查重点：语篇衔接、逻辑梳理（指代、转折词、段落主旨呼应）" data-done="1">
+          <span class="topic-id">EN-16</span>
+          <span class="topic-name"><a href="../src/EN-16.html" target="_blank">考查重点：语篇衔接、逻辑梳理（指代、转折词、段落主旨呼应）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">（四）阅读理解 Part C（翻译）—— 10 分</div>
+        <div class="topic-row" data-id="EN-17" data-name="从一篇约 400 词学术短文中选取 5 个长难句，每句 2 分" data-done="1">
+          <span class="topic-id">EN-17</span>
+          <span class="topic-name"><a href="../src/EN-17.html" target="_blank">从一篇约 400 词学术短文中选取 5 个长难句，每句 2 分</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-18" data-name="英译汉" data-done="1">
+          <span class="topic-id">EN-18</span>
+          <span class="topic-name"><a href="../src/EN-18.html" target="_blank">英译汉</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-19" data-name="考查重点：长难句拆解、语法分析（定语从句、状语从句、名词性从句、倒装、省略）、精准翻译" data-done="1">
+          <span class="topic-id">EN-19</span>
+          <span class="topic-name"><a href="../src/EN-19.html" target="_blank">考查重点：长难句拆解、语法分析（定语从句、状语从句、名词性从句、倒装、省略）、精准翻译</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">（五）写作 —— 30 分</div>
+        <div class="topic-row" data-id="EN-20" data-name="小作文 Part A：应用文写作，约 100 词，10 分（书信、通知、备忘录等）" data-done="1">
+          <span class="topic-id">EN-20</span>
+          <span class="topic-name"><a href="../src/EN-20.html" target="_blank">小作文 Part A：应用文写作，约 100 词，10 分（书信、通知、备忘录等）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-21" data-name="大作文 Part B：图画作文，160-200 词，20 分" data-done="1">
+          <span class="topic-id">EN-21</span>
+          <span class="topic-name"><a href="../src/EN-21.html" target="_blank">大作文 Part B：图画作文，160-200 词，20 分</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、词汇要求（5500 词汇表）</div>
+        <div class="topic-row" data-id="EN-22" data-name="大纲词汇 5529 个（2026 年调整）" data-done="1">
+          <span class="topic-id">EN-22</span>
+          <span class="topic-name"><a href="../src/EN-22.html" target="_blank">大纲词汇 5529 个（2026 年调整）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-23" data-name="词汇考查从&quot;单纯记忆&quot;转向&quot;语境理解&quot;" data-done="1">
+          <span class="topic-id">EN-23</span>
+          <span class="topic-name"><a href="../src/EN-23.html" target="_blank">词汇考查从&quot;单纯记忆&quot;转向&quot;语境理解&quot;</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-24" data-name="核心高频词汇、真题语境搭配、多义词用法" data-done="1">
+          <span class="topic-id">EN-24</span>
+          <span class="topic-name"><a href="../src/EN-24.html" target="_blank">核心高频词汇、真题语境搭配、多义词用法</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、语法条目（大纲要求）</div>
+        <div class="topic-row" data-id="EN-25" data-name="名词、代词、形容词、副词、动词（时态、语态、情态动词）" data-done="1">
+          <span class="topic-id">EN-25</span>
+          <span class="topic-name"><a href="../src/EN-25.html" target="_blank">名词、代词、形容词、副词、动词（时态、语态、情态动词）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-26" data-name="非谓语动词（不定式、动名词、分词）" data-done="1">
+          <span class="topic-id">EN-26</span>
+          <span class="topic-name"><a href="../src/EN-26.html" target="_blank">非谓语动词（不定式、动名词、分词）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-27" data-name="各类从句（定语从句、状语从句、名词性从句）" data-done="1">
+          <span class="topic-id">EN-27</span>
+          <span class="topic-name"><a href="../src/EN-27.html" target="_blank">各类从句（定语从句、状语从句、名词性从句）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-28" data-name="倒装、省略、强调、虚拟语气" data-done="1">
+          <span class="topic-id">EN-28</span>
+          <span class="topic-name"><a href="../src/EN-28.html" target="_blank">倒装、省略、强调、虚拟语气</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="EN-29" data-name="句子成分与句子结构分析（长难句拆解）" data-done="1">
+          <span class="topic-id">EN-29</span>
+          <span class="topic-name"><a href="../src/EN-29.html" target="_blank">句子成分与句子结构分析（长难句拆解）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subject open">
+    <div class="subject-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="left">
+        <span class="subject-dot" style="background:#c792ea"></span>
+        <span class="subject-name">政治</span>
+      </div>
+      <span class="subject-count">88 个知识点 · 29 章</span>
+      <span class="subject-toggle">▶</span>
+    </div>
+    <div class="subject-body">
+      <div class="chapter">
+        <div class="chapter-title">一、马克思主义是关于无产阶级和人类解放的科学</div>
+        <div class="topic-row" data-id="POL-01" data-name="马克思主义的创立与发展" data-done="1">
+          <span class="topic-id">POL-01</span>
+          <span class="topic-name"><a href="../src/POL-01.html" target="_blank">马克思主义的创立与发展</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-02" data-name="马克思主义的鲜明特征" data-done="1">
+          <span class="topic-id">POL-02</span>
+          <span class="topic-name"><a href="../src/POL-02.html" target="_blank">马克思主义的鲜明特征</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-03" data-name="马克思主义中国化时代化的历史进程（新增）" data-done="1">
+          <span class="topic-id">POL-03</span>
+          <span class="topic-name"><a href="../src/POL-03.html" target="_blank">马克思主义中国化时代化的历史进程（新增）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、世界的物质性及发展规律（唯物论与辩证法）</div>
+        <div class="topic-row" data-id="POL-04" data-name="世界的物质统一性" data-done="1">
+          <span class="topic-id">POL-04</span>
+          <span class="topic-name"><a href="../src/POL-04.html" target="_blank">世界的物质统一性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-05" data-name="物质与意识的辩证关系" data-done="1">
+          <span class="topic-id">POL-05</span>
+          <span class="topic-name"><a href="../src/POL-05.html" target="_blank">物质与意识的辩证关系</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-06" data-name="唯物辩证法的基本规律（对立统一规律、量变质变规律、否定之否定规律）" data-done="1">
+          <span class="topic-id">POL-06</span>
+          <span class="topic-name"><a href="../src/POL-06.html" target="_blank">唯物辩证法的基本规律（对立统一规律、量变质变规律、否定之否定规律）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-07" data-name="联系与发展的基本环节" data-done="1">
+          <span class="topic-id">POL-07</span>
+          <span class="topic-name"><a href="../src/POL-07.html" target="_blank">联系与发展的基本环节</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-08" data-name="矛盾规律（普遍性与特殊性、主要矛盾与矛盾主要方面）" data-done="1">
+          <span class="topic-id">POL-08</span>
+          <span class="topic-name"><a href="../src/POL-08.html" target="_blank">矛盾规律（普遍性与特殊性、主要矛盾与矛盾主要方面）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、实践与认识及其发展规律（认识论）</div>
+        <div class="topic-row" data-id="POL-09" data-name="实践与认识的辩证关系" data-done="1">
+          <span class="topic-id">POL-09</span>
+          <span class="topic-name"><a href="../src/POL-09.html" target="_blank">实践与认识的辩证关系</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-10" data-name="认识的本质与过程" data-done="1">
+          <span class="topic-id">POL-10</span>
+          <span class="topic-name"><a href="../src/POL-10.html" target="_blank">认识的本质与过程</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-11" data-name="真理的绝对性与相对性" data-done="1">
+          <span class="topic-id">POL-11</span>
+          <span class="topic-name"><a href="../src/POL-11.html" target="_blank">真理的绝对性与相对性</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="POL-12" data-name="真理与价值的辩证关系" data-done="1">
+          <span class="topic-id">POL-12</span>
+          <span class="topic-name"><a href="../src/POL-12.html" target="_blank">真理与价值的辩证关系</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-13" data-name="认识世界和改造世界" data-done="1">
+          <span class="topic-id">POL-13</span>
+          <span class="topic-name"><a href="../src/POL-13.html" target="_blank">认识世界和改造世界</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、人类社会及其发展规律（唯物史观）</div>
+        <div class="topic-row" data-id="POL-14" data-name="社会存在与社会意识" data-done="1">
+          <span class="topic-id">POL-14</span>
+          <span class="topic-name"><a href="../src/POL-14.html" target="_blank">社会存在与社会意识</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-15" data-name="生产力与生产关系、经济基础与上层建筑" data-done="1">
+          <span class="topic-id">POL-15</span>
+          <span class="topic-name"><a href="../src/POL-15.html" target="_blank">生产力与生产关系、经济基础与上层建筑</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-16" data-name="社会基本矛盾及其运动规律" data-done="1">
+          <span class="topic-id">POL-16</span>
+          <span class="topic-name"><a href="../src/POL-16.html" target="_blank">社会基本矛盾及其运动规律</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-17" data-name="人类普遍交往与世界历史的形成发展（新增）" data-done="1">
+          <span class="topic-id">POL-17</span>
+          <span class="topic-name"><a href="../src/POL-17.html" target="_blank">人类普遍交往与世界历史的形成发展（新增）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-18" data-name="社会形态更替的一般规律及特殊形式" data-done="1">
+          <span class="topic-id">POL-18</span>
+          <span class="topic-name"><a href="../src/POL-18.html" target="_blank">社会形态更替的一般规律及特殊形式</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-19" data-name="人民群众在历史发展中的作用" data-done="1">
+          <span class="topic-id">POL-19</span>
+          <span class="topic-name"><a href="../src/POL-19.html" target="_blank">人民群众在历史发展中的作用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-20" data-name="群众、阶级、政党、领袖的关系（新增）" data-done="1">
+          <span class="topic-id">POL-20</span>
+          <span class="topic-name"><a href="../src/POL-20.html" target="_blank">群众、阶级、政党、领袖的关系（新增）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、资本主义的本质及规律（政治经济学）</div>
+        <div class="topic-row" data-id="POL-21" data-name="商品二因素与劳动二重性" data-done="1">
+          <span class="topic-id">POL-21</span>
+          <span class="topic-name"><a href="../src/POL-21.html" target="_blank">商品二因素与劳动二重性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-22" data-name="价值规律及其作用" data-done="1">
+          <span class="topic-id">POL-22</span>
+          <span class="topic-name"><a href="../src/POL-22.html" target="_blank">价值规律及其作用</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-23" data-name="剩余价值理论" data-done="1">
+          <span class="topic-id">POL-23</span>
+          <span class="topic-name"><a href="../src/POL-23.html" target="_blank">剩余价值理论</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-24" data-name="资本有机构成" data-done="1">
+          <span class="topic-id">POL-24</span>
+          <span class="topic-name"><a href="../src/POL-24.html" target="_blank">资本有机构成</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-25" data-name="资本主义基本矛盾与经济危机" data-done="1">
+          <span class="topic-id">POL-25</span>
+          <span class="topic-name"><a href="../src/POL-25.html" target="_blank">资本主义基本矛盾与经济危机</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、资本主义的发展及趋势</div>
+        <div class="topic-row" data-id="POL-26" data-name="垄断资本主义" data-done="1">
+          <span class="topic-id">POL-26</span>
+          <span class="topic-name"><a href="../src/POL-26.html" target="_blank">垄断资本主义</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-27" data-name="当代资本主义新变化" data-done="1">
+          <span class="topic-id">POL-27</span>
+          <span class="topic-name"><a href="../src/POL-27.html" target="_blank">当代资本主义新变化</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、社会主义社会的发展及其规律</div>
+        <div class="topic-row" data-id="POL-28" data-name="社会主义从空想到科学、从理论到实践" data-done="1">
+          <span class="topic-id">POL-28</span>
+          <span class="topic-name"><a href="../src/POL-28.html" target="_blank">社会主义从空想到科学、从理论到实践</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-29" data-name="社会主义在实践中发展和完善" data-done="1">
+          <span class="topic-id">POL-29</span>
+          <span class="topic-name"><a href="../src/POL-29.html" target="_blank">社会主义在实践中发展和完善</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">八、共产主义崇高理想及其最终实现</div>
+        <div class="topic-row" data-id="POL-30" data-name="共产主义社会的基本特征" data-done="1">
+          <span class="topic-id">POL-30</span>
+          <span class="topic-name"><a href="../src/POL-30.html" target="_blank">共产主义社会的基本特征</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-31" data-name="实现共产主义的必然性" data-done="1">
+          <span class="topic-id">POL-31</span>
+          <span class="topic-name"><a href="../src/POL-31.html" target="_blank">实现共产主义的必然性</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、毛泽东思想及其历史地位</div>
+        <div class="topic-row" data-id="POL-32" data-name="毛泽东思想的形成和发展" data-done="1">
+          <span class="topic-id">POL-32</span>
+          <span class="topic-name"><a href="../src/POL-32.html" target="_blank">毛泽东思想的形成和发展</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-33" data-name="毛泽东思想的主要内容和活的灵魂" data-done="1">
+          <span class="topic-id">POL-33</span>
+          <span class="topic-name"><a href="../src/POL-33.html" target="_blank">毛泽东思想的主要内容和活的灵魂</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、新民主主义革命理论</div>
+        <div class="topic-row" data-id="POL-34" data-name="新民主主义革命的总路线和基本纲领" data-done="1">
+          <span class="topic-id">POL-34</span>
+          <span class="topic-name"><a href="../src/POL-34.html" target="_blank">新民主主义革命的总路线和基本纲领</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-35" data-name="新民主主义革命的道路和基本经验" data-done="1">
+          <span class="topic-id">POL-35</span>
+          <span class="topic-name"><a href="../src/POL-35.html" target="_blank">新民主主义革命的道路和基本经验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、社会主义改造理论</div>
+        <div class="topic-row" data-id="POL-36" data-name="从新民主主义到社会主义的转变" data-done="1">
+          <span class="topic-id">POL-36</span>
+          <span class="topic-name"><a href="../src/POL-36.html" target="_blank">从新民主主义到社会主义的转变</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-37" data-name="社会主义改造道路和历史经验" data-done="1">
+          <span class="topic-id">POL-37</span>
+          <span class="topic-name"><a href="../src/POL-37.html" target="_blank">社会主义改造道路和历史经验</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、社会主义建设道路初步探索的理论成果</div>
+        <div class="topic-row" data-id="POL-38" data-name="初步探索的重要理论成果" data-done="1">
+          <span class="topic-id">POL-38</span>
+          <span class="topic-name"><a href="../src/POL-38.html" target="_blank">初步探索的重要理论成果</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-39" data-name="初步探索的意义和经验教训" data-done="1">
+          <span class="topic-id">POL-39</span>
+          <span class="topic-name"><a href="../src/POL-39.html" target="_blank">初步探索的意义和经验教训</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、中国特色社会主义理论体系</div>
+        <div class="topic-row" data-id="POL-40" data-name="邓小平理论" data-done="1">
+          <span class="topic-id">POL-40</span>
+          <span class="topic-name"><a href="../src/POL-40.html" target="_blank">邓小平理论</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-41" data-name="&quot;三个代表&quot;重要思想" data-done="1">
+          <span class="topic-id">POL-41</span>
+          <span class="topic-name"><a href="../src/POL-41.html" target="_blank">&quot;三个代表&quot;重要思想</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-42" data-name="科学发展观" data-done="1">
+          <span class="topic-id">POL-42</span>
+          <span class="topic-name"><a href="../src/POL-42.html" target="_blank">科学发展观</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、习近平新时代中国特色社会主义思想（新思想）</div>
+        <div class="topic-row" data-id="POL-43" data-name="中国特色社会主义进入新时代" data-done="1">
+          <span class="topic-id">POL-43</span>
+          <span class="topic-name"><a href="../src/POL-43.html" target="_blank">中国特色社会主义进入新时代</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-44" data-name="中国式现代化（本质特征、五个特征）" data-done="1">
+          <span class="topic-id">POL-44</span>
+          <span class="topic-name"><a href="../src/POL-44.html" target="_blank">中国式现代化（本质特征、五个特征）</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="POL-45" data-name="新质生产力（科技创新引领，高质量发展与现代化产业体系）" data-done="1">
+          <span class="topic-id">POL-45</span>
+          <span class="topic-name"><a href="../src/POL-45.html" target="_blank">新质生产力（科技创新引领，高质量发展与现代化产业体系）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-46" data-name="共同富裕" data-done="1">
+          <span class="topic-id">POL-46</span>
+          <span class="topic-name"><a href="../src/POL-46.html" target="_blank">共同富裕</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+        <div class="topic-row" data-id="POL-47" data-name="&quot;十个明确&quot;&quot;十四个坚持&quot;" data-done="1">
+          <span class="topic-id">POL-47</span>
+          <span class="topic-name"><a href="../src/POL-47.html" target="_blank">&quot;十个明确&quot;&quot;十四个坚持&quot;</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-48" data-name="五位一体总体布局、四个全面战略布局" data-done="1">
+          <span class="topic-id">POL-48</span>
+          <span class="topic-name"><a href="../src/POL-48.html" target="_blank">五位一体总体布局、四个全面战略布局</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-49" data-name="高质量发展与新发展格局" data-done="1">
+          <span class="topic-id">POL-49</span>
+          <span class="topic-name"><a href="../src/POL-49.html" target="_blank">高质量发展与新发展格局</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-50" data-name="高水平对外开放" data-done="1">
+          <span class="topic-id">POL-50</span>
+          <span class="topic-name"><a href="../src/POL-50.html" target="_blank">高水平对外开放</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-51" data-name="十五五规划" data-done="1">
+          <span class="topic-id">POL-51</span>
+          <span class="topic-name"><a href="../src/POL-51.html" target="_blank">十五五规划</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">七、坚持和发展中国特色社会主义的总任务</div>
+        <div class="topic-row" data-id="POL-52" data-name="实现中华民族伟大复兴的中国梦" data-done="1">
+          <span class="topic-id">POL-52</span>
+          <span class="topic-name"><a href="../src/POL-52.html" target="_blank">实现中华民族伟大复兴的中国梦</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-53" data-name="全面建设社会主义现代化国家" data-done="1">
+          <span class="topic-id">POL-53</span>
+          <span class="topic-name"><a href="../src/POL-53.html" target="_blank">全面建设社会主义现代化国家</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">八、实现中华民族伟大复兴的重要保障（第十二章，变动最大）</div>
+        <div class="topic-row" data-id="POL-54" data-name="坚持总体国家安全观" data-done="1">
+          <span class="topic-id">POL-54</span>
+          <span class="topic-name"><a href="../src/POL-54.html" target="_blank">坚持总体国家安全观</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-55" data-name="强军思想（习大大强军思想，与其他思想一样前加&quot;坚持&quot;）" data-done="1">
+          <span class="topic-id">POL-55</span>
+          <span class="topic-name"><a href="../src/POL-55.html" target="_blank">强军思想（习大大强军思想，与其他思想一样前加&quot;坚持&quot;）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-56" data-name="加快国防和军队现代化（强调&quot;加快&quot;）" data-done="1">
+          <span class="topic-id">POL-56</span>
+          <span class="topic-name"><a href="../src/POL-56.html" target="_blank">加快国防和军队现代化（强调&quot;加快&quot;）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-57" data-name="坚持&quot;一国两制&quot;，推进祖国完全统一（强调&quot;完全统一&quot;）" data-done="1">
+          <span class="topic-id">POL-57</span>
+          <span class="topic-name"><a href="../src/POL-57.html" target="_blank">坚持&quot;一国两制&quot;，推进祖国完全统一（强调&quot;完全统一&quot;）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、反对外国侵略的斗争</div>
+        <div class="topic-row" data-id="POL-58" data-name="资本-帝国主义对中国的侵略" data-done="1">
+          <span class="topic-id">POL-58</span>
+          <span class="topic-name"><a href="../src/POL-58.html" target="_blank">资本-帝国主义对中国的侵略</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-59" data-name="抵御外国武装侵略、争取民族独立的斗争" data-done="1">
+          <span class="topic-id">POL-59</span>
+          <span class="topic-name"><a href="../src/POL-59.html" target="_blank">抵御外国武装侵略、争取民族独立的斗争</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">二、对国家出路的早期探索</div>
+        <div class="topic-row" data-id="POL-60" data-name="洋务运动的历史作用及失败（2026 简化表述，原&quot;及其失败&quot;）" data-done="1">
+          <span class="topic-id">POL-60</span>
+          <span class="topic-name"><a href="../src/POL-60.html" target="_blank">洋务运动的历史作用及失败（2026 简化表述，原&quot;及其失败&quot;）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-61" data-name="戊戌维新运动" data-done="1">
+          <span class="topic-id">POL-61</span>
+          <span class="topic-name"><a href="../src/POL-61.html" target="_blank">戊戌维新运动</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-62" data-name="辛亥革命" data-done="1">
+          <span class="topic-id">POL-62</span>
+          <span class="topic-name"><a href="../src/POL-62.html" target="_blank">辛亥革命</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、开天辟地的大事变</div>
+        <div class="topic-row" data-id="POL-63" data-name="新文化运动和五四运动" data-done="1">
+          <span class="topic-id">POL-63</span>
+          <span class="topic-name"><a href="../src/POL-63.html" target="_blank">新文化运动和五四运动</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-64" data-name="马克思主义的传播与中国共产党的成立" data-done="1">
+          <span class="topic-id">POL-64</span>
+          <span class="topic-name"><a href="../src/POL-64.html" target="_blank">马克思主义的传播与中国共产党的成立</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-65" data-name="中国革命的新局面" data-done="1">
+          <span class="topic-id">POL-65</span>
+          <span class="topic-name"><a href="../src/POL-65.html" target="_blank">中国革命的新局面</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-66" data-name="大革命的失败及其教训（新增）" data-done="1">
+          <span class="topic-id">POL-66</span>
+          <span class="topic-name"><a href="../src/POL-66.html" target="_blank">大革命的失败及其教训（新增）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、中国革命新道路</div>
+        <div class="topic-row" data-id="POL-67" data-name="农村包围城市、武装夺取政权的道路" data-done="1">
+          <span class="topic-id">POL-67</span>
+          <span class="topic-name"><a href="../src/POL-67.html" target="_blank">农村包围城市、武装夺取政权的道路</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、中华民族的抗日战争</div>
+        <div class="topic-row" data-id="POL-68" data-name="抗日民族统一战线的形成" data-done="1">
+          <span class="topic-id">POL-68</span>
+          <span class="topic-name"><a href="../src/POL-68.html" target="_blank">抗日民族统一战线的形成</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-69" data-name="中国共产党在抗日战争中的中流砥柱作用（史料补充）" data-done="1">
+          <span class="topic-id">POL-69</span>
+          <span class="topic-name"><a href="../src/POL-69.html" target="_blank">中国共产党在抗日战争中的中流砥柱作用（史料补充）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-70" data-name="抗日战争的胜利及其意义" data-done="1">
+          <span class="topic-id">POL-70</span>
+          <span class="topic-name"><a href="../src/POL-70.html" target="_blank">抗日战争的胜利及其意义</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、为新中国而奋斗</div>
+        <div class="topic-row" data-id="POL-71" data-name="解放战争" data-done="1">
+          <span class="topic-id">POL-71</span>
+          <span class="topic-name"><a href="../src/POL-71.html" target="_blank">解放战争</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-72" data-name="建立人民民主专政的新中国" data-done="1">
+          <span class="topic-id">POL-72</span>
+          <span class="topic-name"><a href="../src/POL-72.html" target="_blank">建立人民民主专政的新中国</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-73" data-name="中国革命重心从农村转向城市（中共中央进驻北平香山，新增）" data-done="1">
+          <span class="topic-id">POL-73</span>
+          <span class="topic-name"><a href="../src/POL-73.html" target="_blank">中国革命重心从农村转向城市（中共中央进驻北平香山，新增）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">一、领悟人生真谛、把握人生方向</div>
+        <div class="topic-row" data-id="POL-74" data-name="人生观、价值观" data-done="1">
+          <span class="topic-id">POL-74</span>
+          <span class="topic-name"><a href="../src/POL-74.html" target="_blank">人生观、价值观</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-75" data-name="理想信念" data-done="1">
+          <span class="topic-id">POL-75</span>
+          <span class="topic-name"><a href="../src/POL-75.html" target="_blank">理想信念</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">三、继承优良传统、弘扬中国精神</div>
+        <div class="topic-row" data-id="POL-76" data-name="民族精神与时代精神" data-done="1">
+          <span class="topic-id">POL-76</span>
+          <span class="topic-name"><a href="../src/POL-76.html" target="_blank">民族精神与时代精神</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-77" data-name="坚定中国特色社会主义文化自信（案例更新）" data-done="1">
+          <span class="topic-id">POL-77</span>
+          <span class="topic-name"><a href="../src/POL-77.html" target="_blank">坚定中国特色社会主义文化自信（案例更新）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">四、明确价值要求、践行价值准则</div>
+        <div class="topic-row" data-id="POL-78" data-name="社会主义核心价值观" data-done="1">
+          <span class="topic-id">POL-78</span>
+          <span class="topic-name"><a href="../src/POL-78.html" target="_blank">社会主义核心价值观</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">五、遵守道德规范、锤炼道德品格</div>
+        <div class="topic-row" data-id="POL-79" data-name="社会公德、职业道德、家庭美德、个人品德" data-done="1">
+          <span class="topic-id">POL-79</span>
+          <span class="topic-name"><a href="../src/POL-79.html" target="_blank">社会公德、职业道德、家庭美德、个人品德</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">六、学习法治思想、提升法治素养</div>
+        <div class="topic-row" data-id="POL-80" data-name="法治建设（时代内涵更新）" data-done="1">
+          <span class="topic-id">POL-80</span>
+          <span class="topic-name"><a href="../src/POL-80.html" target="_blank">法治建设（时代内涵更新）</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-81" data-name="宪法与法律体系" data-done="1">
+          <span class="topic-id">POL-81</span>
+          <span class="topic-name"><a href="../src/POL-81.html" target="_blank">宪法与法律体系</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">形势与政策（2026 考查时间：2025 年 1 月 - 12 月）</div>
+        <div class="topic-row" data-id="POL-82" data-name="国内时政热点（二十届三中全会、新质生产力、高质量发展等）" data-done="1">
+          <span class="topic-id">POL-82</span>
+          <span class="topic-name"><a href="../src/POL-82.html" target="_blank">国内时政热点（二十届三中全会、新质生产力、高质量发展等）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="POL-83" data-name="国际时政热点（大国关系、全球治理等）" data-done="1">
+          <span class="topic-id">POL-83</span>
+          <span class="topic-name"><a href="../src/POL-83.html" target="_blank">国际时政热点（大国关系、全球治理等）</a></span>
+          <span class="freq-badge freq-high">高</span>
+        </div>
+        <div class="topic-row" data-id="POL-84" data-name="党的最新重要会议精神" data-done="1">
+          <span class="topic-id">POL-84</span>
+          <span class="topic-name"><a href="../src/POL-84.html" target="_blank">党的最新重要会议精神</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+      </div>
+      <div class="chapter">
+        <div class="chapter-title">当代世界经济与政治</div>
+        <div class="topic-row" data-id="POL-85" data-name="世界多极化、经济全球化" data-done="1">
+          <span class="topic-id">POL-85</span>
+          <span class="topic-name"><a href="../src/POL-85.html" target="_blank">世界多极化、经济全球化</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-86" data-name="全球治理体系变革" data-done="1">
+          <span class="topic-id">POL-86</span>
+          <span class="topic-name"><a href="../src/POL-86.html" target="_blank">全球治理体系变革</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-87" data-name="构建人类命运共同体" data-done="1">
+          <span class="topic-id">POL-87</span>
+          <span class="topic-name"><a href="../src/POL-87.html" target="_blank">构建人类命运共同体</a></span>
+          <span class="freq-badge freq-mid">中</span>
+        </div>
+        <div class="topic-row" data-id="POL-88" data-name="中国外交政策" data-done="1">
+          <span class="topic-id">POL-88</span>
+          <span class="topic-name"><a href="../src/POL-88.html" target="_blank">中国外交政策</a></span>
+          <span class="freq-badge freq-low">低</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">生成于 2026/10/19 15:13:28 · 数据源 ledger/topics.json</div>
+</div>
+
+<script>
+/* ============ 搜索 + 筛选（纯原生 JS） ============ */
+(function () {
+  const searchBox = document.getElementById('search-box');
+  const filterPending = document.getElementById('filter-pending');
+
+  function applyFilter() {
+    const kw = searchBox.value.trim().toLowerCase();
+    const onlyPending = filterPending.checked;
+    const rows = document.querySelectorAll('.topic-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const id = (row.dataset.id || '').toLowerCase();
+      const name = (row.dataset.name || '').toLowerCase();
+      const done = row.dataset.done === '1';
+
+      // 关键词匹配：按 id 或 name
+      const kwHit = !kw || id.includes(kw) || name.includes(kw);
+      // 未生成筛选
+      const pendingHit = !onlyPending || !done;
+
+      const show = kwHit && pendingHit;
+      row.classList.toggle('hidden', !show);
+      if (show) visibleCount++;
+    });
+
+    // 折叠无匹配章节、无匹配科目
+    document.querySelectorAll('.chapter').forEach(ch => {
+      const hasVisible = ch.querySelectorAll('.topic-row:not(.hidden)').length > 0;
+      ch.style.display = hasVisible ? '' : 'none';
+    });
+    document.querySelectorAll('.subject').forEach(sub => {
+      const hasVisible = sub.querySelectorAll('.topic-row:not(.hidden)').length > 0;
+      // 有匹配则强制展开，无匹配则折叠
+      if (hasVisible) sub.classList.add('open');
+      else sub.classList.remove('open');
+    });
+  }
+
+  searchBox.addEventListener('input', applyFilter);
+  filterPending.addEventListener('change', applyFilter);
+})();
+
+/* ============ 主题切换（localStorage 持久化） ============ */
+(function () {
+  const btn = document.getElementById('theme-btn');
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  function update() {
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    btn.textContent = isDark ? '🌙' : '☀️';
+  }
+  update();
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    update();
+  });
+})();
+</script>
+</body>
+</html>

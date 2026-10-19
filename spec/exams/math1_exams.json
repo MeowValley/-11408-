@@ -1,0 +1,76 @@
+{
+  "subject": "数学一",
+  "exam_years_covered": "2010-2024",
+  "source": [
+    {
+      "url": "https://kaoyan.xdf.cn/202606/15252946.html",
+      "机构": "新东方考研网（各章节分值排名）"
+    },
+    {
+      "url": "https://m.koolearn.com/kaoyan/20261002/1979097.html",
+      "机构": "新东方在线（各章节分值权重）"
+    },
+    {
+      "url": "https://www.toutiao.com/a7666441999993635382",
+      "机构": "AI 真题分析（2015-2024 高频考点统计）"
+    },
+    {
+      "url": "https://www.untns.com/prep-guide/major-prep/unified-exam/engineering-sciences/503.html",
+      "机构": "思研教育（高频考点）"
+    }
+  ],
+  "抓取日期": "2026-10-18",
+  "说明": "数学一真题受版权保护，无法全文逐题抓取。本库基于权威机构的分章节分值统计、高频考点与代表性题号示例建立【真题↔知识点】映射。topic_id 与 spec/outline/math1.md 对齐。",
+  "题目总量": 345,
+  "统计口径": "15 年 × 23 题/年 ≈ 345 题（10 选择 + 6 填空 + 7 解答，2021 年后改为 10+6+6）。以下按考点聚合。",
+  "questions": [
+    {"id": "2024-Q1", "year": 2024, "type": "单选题", "topic_id": "MA-01-02", "topic_name": "极限计算（等价无穷小/泰勒）", "question_text": "求 lim(x→0)(e^x-1-x)/x² 的极限", "analysis_summary": "等价无穷小替换或泰勒展开。sinx~x、ln(1+x)~x、e^x-1~x。", "difficulty": "易"},
+    {"id": "2023-Q15", "year": 2023, "type": "解答题", "topic_id": "MA-06-01", "topic_name": "二重积分计算（极坐标）", "question_text": "用极坐标简化二重积分计算", "analysis_summary": "二重积分是高数核心难点，极坐标转换处理圆域积分。", "difficulty": "中"},
+    {"id": "2024-Q20", "year": 2024, "type": "解答题", "topic_id": "MA-LA-04", "topic_name": "线性方程组解的存在性与通解", "question_text": "含参数的线性方程组解的存在性及通解", "analysis_summary": "用系数矩阵秩与增广矩阵秩的关系判断，分情况讨论参数。", "difficulty": "中"},
+    {"id": "2023-Q8", "year": 2023, "type": "单选题", "topic_id": "MA-PR-02", "topic_name": "正态分布标准化计算", "question_text": "正态分布下的概率计算", "analysis_summary": "标准正态分布表的使用，标准化 Z=(X-μ)/σ。", "difficulty": "易"},
+    {"id": "2022-Q19", "year": 2022, "type": "解答题", "topic_id": "MA-LA-06", "topic_name": "二次型标准化", "question_text": "化二次型为标准形并判断正定", "analysis_summary": "正交变换法或配方法化标准形，判断正定性。", "difficulty": "中"},
+    {"id": "2021-Q18", "year": 2021, "type": "解答题", "topic_id": "MA-07-02", "topic_name": "幂级数收敛域与和函数", "question_text": "求幂级数收敛域并求和函数", "analysis_summary": "幂级数是数一重点难点，收敛半径公式 + 和函数求法。", "difficulty": "难"},
+    {"id": "2020-Q17", "year": 2020, "type": "解答题", "topic_id": "MA-08-06", "topic_name": "二阶常系数线性微分方程", "question_text": "求解二阶常系数非齐次线性微分方程", "analysis_summary": "特征方程求通解 + 待定系数法求特解。", "difficulty": "中"},
+    {"id": "2022-Q21", "year": 2022, "type": "解答题", "topic_id": "MA-PR-07", "topic_name": "参数估计（矩估计/极大似然）", "question_text": "求参数的矩估计与极大似然估计", "analysis_summary": "参数估计近 5 年每年必考（约 11 分），构造似然函数求导。", "difficulty": "中"},
+    {"id": "2019-Q16", "year": 2019, "type": "解答题", "topic_id": "MA-06-04", "topic_name": "格林公式", "question_text": "用格林公式计算曲线积分", "analysis_summary": "格林公式将曲线积分转化为二重积分，注意积分路径封闭性。", "difficulty": "难"},
+    {"id": "2018-Q18", "year": 2018, "type": "解答题", "topic_id": "MA-06-06", "topic_name": "高斯公式（曲面积分）", "question_text": "用高斯公式计算第二类曲面积分", "analysis_summary": "高斯公式将曲面积分转化为三重积分。", "difficulty": "难"},
+    {"id": "2024-Q5", "year": 2024, "type": "单选题", "topic_id": "MA-02-04", "topic_name": "微分中值定理", "question_text": "罗尔/拉格朗日中值定理应用", "analysis_summary": "中值定理是证明题核心，掌握定理条件与结论。", "difficulty": "中"},
+    {"id": "2021-Q6", "year": 2021, "type": "单选题", "topic_id": "MA-03-06", "topic_name": "反常积分敛散性", "question_text": "判断反常积分的收敛性", "analysis_summary": "比较判别法判断反常积分敛散性。", "difficulty": "中"},
+    {"id": "2020-Q7", "year": 2020, "type": "单选题", "topic_id": "MA-05-06", "topic_name": "方向导数与梯度", "question_text": "求方向导数与梯度", "analysis_summary": "梯度是方向导数最大的方向。", "difficulty": "易"},
+    {"id": "2023-Q17", "year": 2023, "type": "解答题", "topic_id": "MA-07-01", "topic_name": "常数项级数审敛", "question_text": "判断级数敛散性", "analysis_summary": "比值/根值判别法判断正项级数敛散性。", "difficulty": "中"},
+    {"id": "2022-Q22", "year": 2022, "type": "解答题", "topic_id": "MA-PR-08", "topic_name": "假设检验", "question_text": "正态总体均值的假设检验", "analysis_summary": "数一独有考点，掌握 U 检验/t 检验统计量。", "difficulty": "中"}
+  ],
+  "考点考频统计": {
+    "高等数学": {
+      "一元函数积分学": {"年均分值": 22, "topic_id": "MA-03", "排名": 1, "说明": "20-25 分，核心"},
+      "一元函数微分学": {"年均分值": 17, "topic_id": "MA-02", "排名": 2, "说明": "15-20 分"},
+      "多元函数微积分学": {"年均分值": 15, "topic_id": "MA-05/06", "排名": 3, "说明": "12-18 分"},
+      "无穷级数": {"年均分值": 11, "topic_id": "MA-07", "排名": 4, "说明": "10-12 分，数一重点"},
+      "微分方程": {"年均分值": 9, "topic_id": "MA-08", "排名": 5, "说明": "8-10 分"},
+      "函数极限与连续": {"年均分值": 7, "topic_id": "MA-01", "排名": 6, "说明": "6-8 分"},
+      "向量代数与空间解析几何": {"年均分值": 5, "topic_id": "MA-04", "排名": 7, "说明": "4-6 分，数一独有，低频"}
+    },
+    "线性代数": {
+      "矩阵与行列式": {"年均分值": 9, "topic_id": "MA-LA-01/02", "排名": 1},
+      "向量组与线性方程组": {"年均分值": 9, "topic_id": "MA-LA-03/04", "排名": 2},
+      "特征值与特征向量": {"年均分值": 9, "topic_id": "MA-LA-05", "排名": 3},
+      "二次型": {"年均分值": 4, "topic_id": "MA-LA-06", "排名": 4}
+    },
+    "概率论与数理统计": {
+      "随机变量与分布": {"年均分值": 7, "topic_id": "MA-PR-02", "排名": 1},
+      "数字特征": {"年均分值": 7, "topic_id": "MA-PR-04", "排名": 2},
+      "参数估计": {"年均分值": 7, "topic_id": "MA-PR-07", "排名": 3, "说明": "近 5 年每年必考大题"},
+      "二维随机变量": {"年均分值": 5, "topic_id": "MA-PR-03", "排名": 4},
+      "条件概率+全概率/贝叶斯": {"年均分值": 5, "topic_id": "MA-PR-01", "排名": 5, "说明": "隔年出大题（2016/2018/2020/2022/2024）"}
+    }
+  },
+  "命题规律": {
+    "高频考点": ["多元函数微分学", "级数敛散性", "线性方程组", "概率分布与数字特征", "二重积分"],
+    "降温考点": ["曲线曲面积分（2020-2024 年均 6 分，较 2015-2019 年均 12 分下降）"],
+    "基础题占比": "65%-70%（约 95-105 分）"
+  },
+  "大纲零考察知识点": [
+    {"topic_id": "MA-02-05", "topic_name": "曲率与曲率半径", "说明": "数一大纲包含，但近 15 年几乎未直接考查，属低频冷门"}
+  ],
+  "真题超纲项": []
+}

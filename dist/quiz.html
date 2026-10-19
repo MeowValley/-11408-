@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>考研 11408 在线刷题</title>
+<style>
+:root {
+  --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550;
+  --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff;
+  --highlight:#ffb020; --success:#2dd4a7; --danger:#ff5c7a; --swap:#ff9f43;
+  --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35);
+  --font:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+}
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --danger:#ef4444; --swap:#f97316;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.app { max-width:900px; margin:0 auto; padding:16px; }
+
+/* 顶栏 */
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; flex-wrap:wrap; }
+.topbar h1 { font-size:18px; font-weight:700; }
+.topbar .right { display:flex; align-items:center; gap:8px; }
+.theme-btn { font-size:20px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; padding:4px 10px; cursor:pointer; transition:all .15s; }
+.theme-btn:hover { border-color:var(--primary); transform:translateY(-1px); }
+.back-btn { font-size:13px; color:var(--primary-strong); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:8px; }
+.back-btn:hover { border-color:var(--primary); }
+
+/* 模式切换 */
+.mode-tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.mode-tab { flex:1; min-width:100px; text-align:center; padding:10px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all .15s; }
+.mode-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* 筛选栏 */
+.filter-bar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+.filter-bar select, .filter-bar button { padding:8px 12px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; cursor:pointer; }
+.filter-bar select:focus { outline:none; border-color:var(--primary); }
+.filter-bar button.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* 题目卡片 */
+.q-card { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+.q-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.q-tag { font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700; }
+.tag-subject { background:rgba(79,140,255,0.15); color:var(--primary-strong); border:1px solid var(--primary); }
+.tag-type { background:rgba(45,212,167,0.15); color:var(--success); border:1px solid var(--success); }
+.q-text { font-size:15px; margin-bottom:16px; font-weight:500; }
+.opt { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:14px; transition:all .15s; color:var(--text); }
+.opt:hover { border-color:var(--primary); }
+.opt.correct { border-color:var(--success); background:rgba(45,212,167,0.12); color:var(--success); }
+.opt.wrong { border-color:var(--danger); background:rgba(255,92,122,0.12); color:var(--danger); }
+.opt.disabled { pointer-events:none; opacity:0.85; }
+
+/* 解析 */
+.explain { margin-top:12px; padding:14px; background:var(--bg-elevated); border-left:3px solid var(--primary); border-radius:6px; font-size:14px; display:none; }
+.explain.show { display:block; }
+.explain .explain-title { font-weight:700; color:var(--primary-strong); margin-bottom:6px; }
+.anim-link { display:inline-block; margin-top:10px; padding:8px 16px; background:var(--highlight); color:#1a2333; border-radius:8px; text-decoration:none; font-size:13px; font-weight:700; }
+.anim-link:hover { filter:brightness(1.1); }
+.report-btn { margin-top:8px; margin-left:8px; padding:6px 12px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text-muted); font-size:12px; cursor:pointer; }
+.report-btn:hover { border-color:var(--danger); color:var(--danger); }
+
+/* 考试模式 */
+.exam-bar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:8px; z-index:10; flex-wrap:wrap; }
+.timer { font-family:monospace; font-size:18px; font-weight:700; color:var(--highlight); }
+.timer.danger { color:var(--danger); }
+.progress-text { font-size:13px; color:var(--text-muted); }
+
+/* 纠错弹窗 */
+.modal-mask { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100; padding:16px; }
+.modal-mask.show { display:flex; }
+.modal { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; width:100%; max-width:420px; box-shadow:var(--shadow); }
+.modal h3 { margin-bottom:12px; font-size:16px; }
+.modal label { display:block; font-size:13px; color:var(--text-muted); margin-bottom:4px; margin-top:10px; }
+.modal input, .modal select, .modal textarea { width:100%; padding:8px 12px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:14px; }
+.modal textarea { min-height:80px; resize:vertical; }
+.modal .modal-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end; }
+.modal .modal-actions button { padding:8px 16px; border-radius:8px; border:1px solid var(--border); cursor:pointer; font-size:14px; }
+.modal .btn-submit { background:var(--primary); color:#fff; border-color:var(--primary); }
+.modal .btn-cancel { background:transparent; color:var(--text); }
+.result-banner { text-align:center; padding:20px; background:var(--bg-panel); border:1px solid var(--success); border-radius:var(--radius); margin-bottom:16px; }
+.result-banner .score { font-size:32px; font-weight:700; color:var(--success); }
+
+/* 响应式 */
+@media (max-width:768px) {
+  .app { padding:8px; }
+  .q-card { padding:14px; }
+  .mode-tab { font-size:13px; padding:8px; }
+}
+@media (max-width:375px) {
+  .topbar h1 { font-size:16px; }
+  .opt { font-size:13px; padding:10px; }
+}
+
+/* ===== 新增：倒计时 + 统计 + 收藏 ===== */
+.countdown { font-size:12px; color:var(--text-muted); background:var(--bg-elevated); padding:4px 10px; border-radius:999px; border:1px solid var(--border); }
+.countdown b { color:var(--highlight); font-size:13px; }
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
+.stat-card { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center; box-shadow:var(--shadow); }
+.stat-card .num { font-size:28px; font-weight:800; color:var(--primary-strong); }
+.stat-card .lbl { font-size:12px; color:var(--text-muted); margin-top:4px; }
+.stat-card.good .num { color:var(--success); }
+.stat-card.bad .num { color:var(--danger); }
+.subj-bar { display:flex; align-items:center; gap:10px; margin:10px 0; }
+.subj-bar .name { width:70px; font-size:13px; }
+.subj-bar .bar { flex:1; height:10px; background:var(--bg-elevated); border-radius:999px; overflow:hidden; }
+.subj-bar .fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--success)); border-radius:999px; transition:width .3s; }
+.subj-bar .pct { width:48px; font-size:12px; color:var(--text-muted); text-align:right; }
+.fav-btn { background:transparent; border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:13px; cursor:pointer; color:var(--text-muted); }
+.fav-btn.faved { color:var(--highlight); border-color:var(--highlight); }
+.streak-badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--swap); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>📚 考研 11408 在线刷题</h1>
+    <div class="right">
+      <span class="countdown" id="countdown">距考研 <b>--</b> 天</span>
+      <span class="streak-badge" id="streak-badge" title="连续打卡">🔥 <span id="streak-days">0</span> 天</span>
+      <span id="user-area" style="display:inline-flex;align-items:center;gap:6px;">
+        <button class="back-btn" id="btn-login" style="cursor:pointer;">👤 登录</button>
+      </span>
+      <a class="back-btn" href="/">← 导航</a>
+      <button class="theme-btn" id="theme-btn" title="切换主题">🌙</button>
+    </div>
+  </div>
+
+  <!-- 模式切换 -->
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="practice">📝 刷题模式</div>
+    <div class="mode-tab" data-mode="exam">⏱ 考试模式</div>
+    <div class="mode-tab" data-mode="wrong">❌ 错题本</div>
+    <div class="mode-tab" data-mode="fav">⭐ 收藏夹</div>
+    <div class="mode-tab" data-mode="stats">📊 数据统计</div>
+    <div class="mode-tab" data-mode="plan">🎯 学习计划</div>
+    <div class="mode-tab" data-mode="rank">🏆 排行榜</div>
+  </div>
+
+  <!-- 刷题筛选栏 -->
+  <div class="filter-bar" id="filter-bar">
+    <select id="filter-subject">
+      <option value="">全部科目</option>
+      <option value="408">408</option>
+      <option value="数学一">数学一</option>
+      <option value="政治">政治</option>
+      <option value="英语一">英语一</option>
+    </select>
+    <select id="filter-chapter"><option value="">全部章节</option></select>
+    <select id="filter-source">
+      <option value="">全部来源</option>
+      <option value="real">仅真题</option>
+      <option value="mock">仅模拟题</option>
+    </select>
+    <select id="filter-year" style="display:none;"><option value="">全部年份</option></select>
+    <button class="primary" id="btn-reset-filter">重置</button>
+  </div>
+
+  <!-- 考试模式状态栏 -->
+  <div class="exam-bar" id="exam-bar" style="display:none;">
+    <span class="timer" id="timer">60:00</span>
+    <span class="progress-text" id="exam-progress">已答 0 / 20</span>
+    <button class="primary" id="btn-submit-exam" style="margin-left:auto;">交卷</button>
+  </div>
+
+  <!-- 结果横幅 -->
+  <div class="result-banner" id="result-banner" style="display:none;"></div>
+
+  <!-- 题目容器 -->
+  <div id="quiz-container"></div>
+</div>
+
+<!-- 纠错弹窗 -->
+<div class="modal-mask" id="report-modal">
+  <div class="modal">
+    <h3>📮 报错 / 纠错</h3>
+    <label>题目 ID</label><input id="report-qid" readonly>
+    <label>错误类型</label>
+    <select id="report-type">
+      <option value="答案错误">答案错误</option>
+      <option value="解析错误">解析错误</option>
+      <option value="题目表述不清">题目表述不清</option>
+      <option value="动画链接失效">动画链接失效</option>
+      <option value="其他">其他</option>
+    </select>
+    <label>详细说明</label><textarea id="report-detail" placeholder="请描述问题..."></textarea>
+    <label>联系方式（选填）</label><input id="report-contact" placeholder="邮箱/微信，便于反馈">
+    <div class="modal-actions">
+      <button class="btn-cancel" id="report-cancel">取消</button>
+      <button class="btn-submit" id="report-submit">提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- 登录/注册弹窗 -->
+<div class="modal-mask" id="auth-modal">
+  <div class="modal">
+    <h3 id="auth-title">👤 登录</h3>
+    <div class="err" id="auth-err" style="color:var(--danger);font-size:13px;margin-bottom:8px;"></div>
+    <label>用户名</label><input id="auth-username" placeholder="2-20 位">
+    <label>密码</label><input id="auth-password" type="password" placeholder="至少 4 位">
+    <div class="modal-actions" style="justify-content:space-between;">
+      <button class="btn-cancel" id="auth-toggle" onclick="toggleAuthMode()" style="color:var(--primary-strong);">没有账号？去注册</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-cancel" id="auth-cancel">取消</button>
+        <button class="btn-submit" id="auth-submit">登录</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================== 题库加载与状态 ==================== */
+let QUESTIONS = [];
+let currentMode = 'practice';
+let filtered = [];
+let wrongIds = new Set(JSON.parse(localStorage.getItem('wrongIds') || '[]'));
+let favIds = new Set(JSON.parse(localStorage.getItem('favIds') || '[]'));
+// 答题历史：{ total, correct, bySubject: {科目: {total, correct}}, daily: {日期: 做题数} }
+let history = JSON.parse(localStorage.getItem('quizHistory') || '{"total":0,"correct":0,"bySubject":{},"daily":{}}');
+let examQuestions = [];
+let examAnswers = {};
+let examTimer = null;
+let examSeconds = 0;
+
+// 用户系统状态
+let userToken = localStorage.getItem('userToken') || '';
+let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+let authMode = 'login'; // 'login' | 'register'
+
+async function loadQuestions() {
+  try {
+    const resp = await fetch('/api/questions');
+    if (resp.ok) { QUESTIONS = await resp.json(); }
+  } catch (e) {
+    // 降级：直接 fetch 静态 json
+    try { const r = await fetch('/data/questions.json'); if (r.ok) QUESTIONS = await r.json(); } catch(e2) {}
+  }
+  if (!QUESTIONS.length) console.warn('题库加载失败');
+  // 清理本地错题/收藏里已经不存在于题库的旧 ID，避免统计数字虚高
+  try {
+    const ids = new Set(QUESTIONS.map(q => q.id));
+    const before = wrongIds.size;
+    [...wrongIds].forEach(id => { if (!ids.has(id)) wrongIds.delete(id); });
+    if (wrongIds.size !== before) localStorage.setItem('wrongIds', JSON.stringify([...wrongIds]));
+  } catch (e) {}
+  initChapters();
+  applyFilter();
+}
+
+function initChapters() {
+  const subject = document.getElementById('filter-subject').value;
+  const chapters = [...new Set(QUESTIONS.filter(q => !subject || q.subject === subject).map(q => q.chapter))];
+  const sel = document.getElementById('filter-chapter');
+  sel.innerHTML = '<option value="">全部章节</option>' + chapters.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+/* ==================== 主题切换 ==================== */
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  updateThemeBtn();
+}
+function updateThemeBtn() {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
+}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeBtn();
+});
+
+/* ==================== 模式切换 ==================== */
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentMode = tab.dataset.mode;
+    switchMode();
+  });
+});
+function switchMode() {
+  document.getElementById('filter-bar').style.display = currentMode === 'practice' ? 'flex' : 'none';
+  document.getElementById('exam-bar').style.display = currentMode === 'exam' ? 'flex' : 'none';
+  document.getElementById('result-banner').style.display = 'none';
+  document.getElementById('result-banner').innerHTML = '';
+  if (examTimer) { clearInterval(examTimer); examTimer = null; }
+  if (currentMode === 'practice') applyFilter();
+  else if (currentMode === 'exam') startExam();
+  else if (currentMode === 'wrong') showWrong();
+  else if (currentMode === 'fav') showFav();
+  else if (currentMode === 'stats') showStats();
+  else if (currentMode === 'plan') showPlan();
+  else if (currentMode === 'rank') showRank();
+}
+
+/* ==================== 刷题模式 ==================== */
+function applyFilter() {
+  const subject = document.getElementById('filter-subject').value;
+  const chapter = document.getElementById('filter-chapter').value;
+  const source = document.getElementById('filter-source').value;
+  const year = document.getElementById('filter-year').value;
+  filtered = QUESTIONS.filter(q =>
+    (!subject || q.subject === subject) &&
+    (!chapter || q.chapter === chapter) &&
+    (!source || (source === 'real' ? q.is_real_exam : !q.is_real_exam)) &&
+    (!year || String(q.year) === year)
+  );
+  renderPractice();
+}
+document.getElementById('filter-subject').addEventListener('change', () => { initChapters(); applyFilter(); });
+document.getElementById('filter-chapter').addEventListener('change', applyFilter);
+document.getElementById('filter-source').addEventListener('change', () => { updateYearFilter(); applyFilter(); });
+document.getElementById('filter-year').addEventListener('change', applyFilter);
+document.getElementById('btn-reset-filter').addEventListener('click', () => {
+  document.getElementById('filter-subject').value = '';
+  document.getElementById('filter-chapter').value = '';
+  document.getElementById('filter-source').value = '';
+  document.getElementById('filter-year').value = '';
+  initChapters(); updateYearFilter(); applyFilter();
+});
+
+// 年份筛选联动：选「仅真题」时显示年份下拉，并填充 2015-2024
+function updateYearFilter() {
+  const source = document.getElementById('filter-source').value;
+  const yearSel = document.getElementById('filter-year');
+  yearSel.style.display = source === 'real' ? 'inline-block' : 'none';
+  if (source === 'real') {
+    const years = [...new Set(QUESTIONS.filter(q => q.is_real_exam && q.year).map(q => q.year))].sort((a,b)=>b-a);
+    yearSel.innerHTML = '<option value="">全部年份</option>' + years.map(y => `<option value="${y}">${y} 年</option>`).join('');
+  }
+}
+
+function renderPractice() {
+  const container = document.getElementById('quiz-container');
+  if (!filtered.length) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">暂无题目</p>'; return; }
+  // 每日一题（按日期固定 seed 选一道题置顶）
+  const dailyCard = getDailyQuestionCard();
+  container.innerHTML = dailyCard + filtered.map(q => renderQuestion(q)).join('');
+  bindQuestionEvents();
+}
+
+/* 每日一题：按日期 seed 从题库固定选一题 */
+function getDailyQuestionCard() {
+  const today = new Date();
+  const dateKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+  const seed = dateKey.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const idx = seed % QUESTIONS.length;
+  const q = QUESTIONS[idx];
+  if (!q) return '';
+  const typeTag = q.type === '单选' ? '单选' : '多选';
+  const realTag = q.is_real_exam ? `<span class="q-tag" style="background:rgba(255,92,122,0.15);color:var(--danger);border:1px solid var(--danger);">真题</span>` : '';
+  return `<div class="q-card" data-qid="${q.id}" style="border:2px solid var(--highlight);">
+    <div class="q-head">
+      <span class="q-tag" style="background:rgba(255,176,32,0.15);color:var(--highlight);border:1px solid var(--highlight);">📅 每日一题</span>
+      <span class="q-tag tag-subject">${q.subject}</span>
+      <span class="q-tag tag-type">${typeTag}</span>
+      ${realTag}
+    </div>
+    <div class="q-text">${q.question}</div>
+    <div class="opts">
+      ${q.options.map((o, i) => `<button class="opt" data-opt="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+    </div>
+    <div class="explain" id="explain-${q.id}">
+      <div class="explain-title">💡 解析</div>
+      <div>${q.explanation}</div>
+      ${q.animation_id ? `<a class="anim-link" href="/${q.animation_id}.html" target="_blank">🎬 前往查看动画演示</a>` : ''}
+      <button class="report-btn" data-report="${q.id}">⚠️ 报错/纠错</button>
+    </div>
+  </div>`;
+}
+
+/* ==================== 题目渲染 ==================== */
+function renderQuestion(q, showAnswer = false) {
+  const typeTag = q.type === '单选' ? '单选' : '多选';
+  const realTag = q.is_real_exam ? `<span class="q-tag" style="background:rgba(255,92,122,0.15);color:var(--danger);border:1px solid var(--danger);">真题${q.year?'·'+q.year:''}</span>` : '';
+  return `
+  <div class="q-card" data-qid="${q.id}">
+    <div class="q-head">
+      <span class="q-tag tag-subject">${q.subject}</span>
+      <span class="q-tag tag-type">${typeTag}</span>
+      ${realTag}
+      <span style="font-size:12px;color:var(--text-muted);">${q.chapter} · ${q.id}</span>
+      <button class="fav-btn ${favIds.has(q.id)?'faved':''}" data-fav="${q.id}" style="margin-left:auto;">${favIds.has(q.id)?'⭐ 已收藏':'☆ 收藏'}</button>
+    </div>
+    <div class="q-text">${q.question}</div>
+    <div class="opts">
+      ${q.options.map((o, i) => `<button class="opt" data-opt="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+    </div>
+    <div class="explain" id="explain-${q.id}">
+      <div class="explain-title">💡 解析</div>
+      <div>${q.explanation}</div>
+      ${q.animation_id ? `<a class="anim-link" href="/${q.animation_id}.html" target="_blank">🎬 前往查看动画演示</a>` : ''}
+      <button class="report-btn" data-report="${q.id}">⚠️ 报错/纠错</button>
+    </div>
+  </div>`;
+}
+
+function bindQuestionEvents() {
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      const card = opt.closest('.q-card');
+      const qid = card.dataset.qid;
+      const q = QUESTIONS.find(x => x.id === qid);
+      const chosen = +opt.dataset.opt;
+      const opts = card.querySelectorAll('.opt');
+
+      // 判断对错
+      const isCorrect = Array.isArray(q.answer) ? q.answer.includes(chosen) : chosen === q.answer;
+      if (!isCorrect) wrongIds.add(qid);
+      else wrongIds.delete(qid);
+      localStorage.setItem('wrongIds', JSON.stringify([...wrongIds]));
+
+      // 记录答题历史（正确率统计 + 每日打卡）
+      recordAnswer(q, isCorrect);
+
+      // 标记
+      opts.forEach(o => o.classList.add('disabled'));
+      if (Array.isArray(q.answer)) {
+        q.answer.forEach(a => opts[a].classList.add('correct'));
+      } else {
+        opts[q.answer].classList.add('correct');
+      }
+      if (!isCorrect) opt.classList.add('wrong');
+
+      // 显示解析
+      document.getElementById(`explain-${qid}`).classList.add('show');
+    });
+  });
+  document.querySelectorAll('.report-btn').forEach(btn => {
+    btn.addEventListener('click', () => openReport(btn.dataset.report));
+  });
+  document.querySelectorAll('.fav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qid = btn.dataset.fav;
+      if (favIds.has(qid)) { favIds.delete(qid); btn.classList.remove('faved'); btn.textContent = '☆ 收藏'; }
+      else { favIds.add(qid); btn.classList.add('faved'); btn.textContent = '⭐ 已收藏'; }
+      localStorage.setItem('favIds', JSON.stringify([...favIds]));
+      if (userToken) syncToCloud();
+    });
+  });
+}
+
+/* ==================== 答题历史记录 ==================== */
+function recordAnswer(q, isCorrect) {
+  history.total++;
+  if (isCorrect) history.correct++;
+  const s = q.subject;
+  if (!history.bySubject[s]) history.bySubject[s] = { total: 0, correct: 0 };
+  history.bySubject[s].total++;
+  if (isCorrect) history.bySubject[s].correct++;
+  // 每日打卡
+  const today = new Date().toISOString().slice(0, 10);
+  history.daily[today] = (history.daily[today] || 0) + 1;
+  localStorage.setItem('quizHistory', JSON.stringify(history));
+  if (userToken) syncToCloud();
+  updateStreak();
+}
+
+/* ==================== 收藏夹 ==================== */
+function showFav() {
+  const favQuestions = QUESTIONS.filter(q => favIds.has(q.id));
+  const container = document.getElementById('quiz-container');
+  if (!favQuestions.length) {
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">⭐ 暂无收藏题目，做题时点「收藏」即可加入</p>';
+    return;
+  }
+  container.innerHTML = favQuestions.map(q => renderQuestion(q)).join('');
+  bindQuestionEvents();
+}
+
+/* ==================== 数据统计 ==================== */
+function showStats() {
+  const container = document.getElementById('quiz-container');
+  const rate = history.total ? Math.round(history.correct / history.total * 100) : 0;
+  const subjects = Object.keys(history.bySubject);
+  container.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${history.total}</div><div class="lbl">累计做题</div></div>
+      <div class="stat-card ${rate>=60?'good':'bad'}"><div class="num">${rate}%</div><div class="lbl">总正确率</div></div>
+      <div class="stat-card"><div class="num">${wrongIds.size}</div><div class="lbl">错题数</div></div>
+      <div class="stat-card"><div class="num">${favIds.size}</div><div class="lbl">收藏数</div></div>
+    </div>
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">📊 各科正确率</h3>
+      ${subjects.length ? subjects.map(s => {
+        const d = history.bySubject[s];
+        const r = d.total ? Math.round(d.correct / d.total * 100) : 0;
+        return `<div class="subj-bar"><span class="name">${s}</span><div class="bar"><div class="fill" style="width:${r}%"></div></div><span class="pct">${r}% (${d.correct}/${d.total})</span></div>`;
+      }).join('') : '<p style="color:var(--text-muted);">暂无答题数据，先去做几道题吧～</p>'}
+    </div>
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">🔥 连续打卡</h3>
+      <p style="font-size:28px;font-weight:800;color:var(--swap);">${calcStreak()} 天</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:6px;">近 7 天做题：${calc7Days()} 题</p>
+    </div>
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">🎯 各科掌握度（雷达图）</h3>
+      <svg id="radar" style="width:100%;max-width:360px;display:block;margin:0 auto;"></svg>
+    </div>
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">⏰ 错题复习提醒</h3>
+      <div id="review-reminder"></div>
+    </div>`;
+  drawRadar();
+  renderReviewReminder();
+}
+
+/* 掌握度雷达图（SVG 绘制） */
+function drawRadar() {
+  const svg = document.getElementById('radar');
+  if (!svg) return;
+  const subjects = ['408', '数学一', '政治', '英语一'];
+  const values = subjects.map(s => {
+    const d = history.bySubject[s];
+    return d && d.total ? Math.round(d.correct / d.total * 100) : 0;
+  });
+  const cx = 180, cy = 140, R = 90, n = 4;
+  const angle = i => -Math.PI/2 + i * 2*Math.PI/n;
+  const pt = (i, r) => [cx + r*Math.cos(angle(i)), cy + r*Math.sin(angle(i))];
+  svg.setAttribute('viewBox', '0 0 360 280');
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  let svgHTML = '';
+  // 网格（3 层）
+  for (let layer = 1; layer <= 3; layer++) {
+    const r = R * layer / 3;
+    const pts = subjects.map((_, i) => pt(i, r).join(',')).join(' ');
+    svgHTML += `<polygon points="${pts}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+  }
+  // 轴线
+  subjects.forEach((_, i) => {
+    const [x, y] = pt(i, R);
+    svgHTML += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+  });
+  // 数据多边形
+  const dataPts = values.map((v, i) => pt(i, R * v / 100).join(',')).join(' ');
+  svgHTML += `<polygon points="${dataPts}" fill="var(--primary)" fill-opacity="0.3" stroke="var(--primary)" stroke-width="2"/>`;
+  // 数据点
+  values.forEach((v, i) => {
+    const [x, y] = pt(i, R * v / 100);
+    svgHTML += `<circle cx="${x}" cy="${y}" r="4" fill="var(--highlight)"/>`;
+  });
+  // 标签
+  subjects.forEach((s, i) => {
+    const [x, y] = pt(i, R + 30);
+    svgHTML += `<text x="${x}" y="${y}" text-anchor="middle" fill="var(--text)" font-size="13">${s} ${values[i]}%</text>`;
+  });
+  svg.innerHTML = svgHTML;
+}
+
+/* 错题复习提醒（按遗忘曲线，做错后 1/3/7 天提醒） */
+function renderReviewReminder() {
+  const el = document.getElementById('review-reminder');
+  if (!el) return;
+  // 从 history 找最近做错的题（简化：错题数 + 建议）
+  const wrongCount = wrongIds.size;
+  if (!wrongCount) { el.innerHTML = '<p style="color:var(--success);">🎉 暂无错题，保持！</p>'; return; }
+  const today = new Date().toISOString().slice(0, 10);
+  const todayDone = history.daily[today] || 0;
+  el.innerHTML = `
+    <p style="margin-bottom:8px;">你有 <b style="color:var(--danger);">${wrongCount}</b> 道错题待复习。</p>
+    <p style="font-size:13px;color:var(--text-muted);">📖 建议：按遗忘曲线，错题应在 <b>1 天后、3 天后、7 天后</b> 各重练一次，才能长期记住。</p>
+    <button class="ctrl-btn primary" style="margin-top:10px;" onclick="document.querySelector('[data-mode=wrong]').click()">📝 去复习错题</button>`;
+}
+
+/* 学习计划 */
+function showPlan() {
+  const container = document.getElementById('quiz-container');
+  const today = new Date().toISOString().slice(0, 10);
+  const todayDone = history.daily[today] || 0;
+  const goal = parseInt(localStorage.getItem('dailyGoal') || '30');
+  const pct = Math.min(100, Math.round(todayDone / goal * 100));
+  container.innerHTML = `
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">🎯 今日学习计划</h3>
+      <p style="font-size:16px;margin-bottom:8px;">今日目标：<b style="color:var(--primary-strong);">${goal}</b> 道题（可修改）</p>
+      <input type="number" id="goal-input" value="${goal}" min="5" max="500" style="padding:8px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;color:var(--text);margin-bottom:12px;">
+      <button class="ctrl-btn primary" onclick="setGoal()">💾 保存目标</button>
+      <div style="margin-top:16px;">
+        <p style="margin-bottom:6px;">今日已完成：<b style="color:var(--success);">${todayDone}</b> / ${goal} 题（${pct}%）</p>
+        <div style="height:14px;background:var(--bg-elevated);border-radius:999px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:999px;transition:width .3s;"></div></div>
+        ${pct>=100?'<p style="color:var(--success);margin-top:8px;">🎉 今日目标已完成！</p>':''}
+      </div>
+    </div>
+    <div class="q-card">
+      <h3 style="margin-bottom:12px;">📅 近 7 天做题记录</h3>
+      ${renderWeekChart()}
+    </div>`;
+}
+function setGoal() {
+  const v = parseInt(document.getElementById('goal-input').value);
+  if (!v || v < 5) { alert('目标至少 5 题'); return; }
+  localStorage.setItem('dailyGoal', String(v));
+  showPlan();
+}
+function renderWeekChart() {
+  let html = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const cnt = history.daily[key] || 0;
+    const day = ['日','一','二','三','四','五','六'][d.getDay()];
+    const h = Math.min(100, cnt * 3);
+    html += `<div style="display:inline-flex;flex-direction:column;align-items:center;margin:0 6px;">
+      <span style="font-size:11px;color:var(--text-muted);">${cnt}</span>
+      <div style="width:24px;height:100px;background:var(--bg-elevated);border-radius:6px;display:flex;align-items:flex-end;"><div style="width:100%;height:${h}%;background:var(--primary);border-radius:6px;"></div></div>
+      <span style="font-size:11px;color:var(--text-muted);margin-top:4px;">周${day}</span>
+    </div>`;
+  }
+  return `<div style="text-align:center;">${html}</div>`;
+}
+
+/* 排行榜 */
+async function showRank() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">加载排行榜中...</p>';
+  try {
+    const r = await fetch('/api/leaderboard');
+    const board = await r.json();
+    if (!board.length) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">暂无数据，快去刷题上榜吧！</p>'; return; }
+    const medals = ['🥇', '🥈', '🥉'];
+    container.innerHTML = `<div class="q-card"><h3 style="margin-bottom:16px;">🏆 刷题排行榜（按做题量）</h3>
+      ${board.map((u, i) => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-bottom:1px solid var(--border);${i===0?'background:rgba(255,176,32,0.08);border-radius:8px;':''}">
+          <span style="font-size:22px;width:36px;text-align:center;">${medals[i] || (i+1)}</span>
+          <span style="flex:1;font-weight:${i===0?'700':'500'};">${u.username}</span>
+          <span style="color:var(--text-muted);font-size:13px;">${u.total} 题</span>
+          <span style="color:${u.rate>=60?'var(--success)':'var(--text-muted)'};font-size:13px;">正确率 ${u.rate}%</span>
+        </div>`).join('')}
+    </div>`;
+  } catch(e) { container.innerHTML = '<p style="color:var(--danger);text-align:center;padding:40px;">加载失败</p>'; }
+}
+
+function calcStreak() {
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = d.toISOString().slice(0, 10);
+    if (history.daily[key] && history.daily[key] > 0) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+function calc7Days() {
+  let sum = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    sum += history.daily[d.toISOString().slice(0, 10)] || 0;
+  }
+  return sum;
+}
+function updateStreak() {
+  document.getElementById('streak-days').textContent = calcStreak();
+}
+
+/* ==================== 考试模式 ==================== */
+function startExam() {
+  // 随机抽 20 题
+  examQuestions = [...QUESTIONS].sort(() => Math.random() - 0.5).slice(0, Math.min(20, QUESTIONS.length));
+  examAnswers = {};
+  examSeconds = 60 * 60;
+  renderExam();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimer();
+    if (examSeconds <= 0) submitExam();
+  }, 1000);
+}
+function updateTimer() {
+  const m = Math.floor(examSeconds / 60), s = examSeconds % 60;
+  const el = document.getElementById('timer');
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.classList.toggle('danger', examSeconds < 600);
+}
+function renderExam() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = examQuestions.map((q, idx) => `
+    <div class="q-card" data-qid="${q.id}" data-idx="${idx}">
+      <div class="q-head">
+        <span class="q-tag tag-subject">${q.subject}</span>
+        <span style="font-size:12px;color:var(--text-muted);">第 ${idx+1} 题</span>
+      </div>
+      <div class="q-text">${q.question}</div>
+      <div class="opts">
+        ${q.options.map((o,i)=>`<button class="opt" data-opt="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+      </div>
+    </div>`).join('');
+  // 考试模式只记录答案，不即时判对错
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const card = opt.closest('.q-card');
+      const qid = card.dataset.qid;
+      const chosen = +opt.dataset.opt;
+      examAnswers[qid] = chosen;
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('correct'));
+      opt.classList.add('correct');
+      updateExamProgress();
+    });
+  });
+  updateExamProgress();
+}
+function updateExamProgress() {
+  document.getElementById('exam-progress').textContent = `已答 ${Object.keys(examAnswers).length} / ${examQuestions.length}`;
+}
+document.getElementById('btn-submit-exam').addEventListener('click', submitExam);
+function submitExam() {
+  if (examTimer) { clearInterval(examTimer); examTimer = null; }
+  let score = 0;
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = examQuestions.map((q, idx) => {
+    const chosen = examAnswers[q.id];
+    const isCorrect = chosen !== undefined && (Array.isArray(q.answer) ? q.answer.includes(chosen) : chosen === q.answer);
+    if (isCorrect) score++;
+    if (!isCorrect && chosen !== undefined) wrongIds.add(q.id);
+    else if (isCorrect) wrongIds.delete(q.id);
+    return `
+    <div class="q-card">
+      <div class="q-head"><span class="q-tag tag-subject">${q.subject}</span><span style="font-size:12px;color:var(--text-muted);">第 ${idx+1} 题</span></div>
+      <div class="q-text">${q.question}</div>
+      <div class="opts">${q.options.map((o,i)=>{
+        let cls = '';
+        if (Array.isArray(q.answer) ? q.answer.includes(i) : i === q.answer) cls = 'correct';
+        else if (chosen === i) cls = 'wrong';
+        return `<button class="opt disabled ${cls}">${String.fromCharCode(65+i)}. ${o}</button>`;
+      }).join('')}</div>
+      <div class="explain show">
+        <div class="explain-title">💡 解析</div>
+        <div>${q.explanation}</div>
+        ${q.animation_id ? `<a class="anim-link" href="/${q.animation_id}.html" target="_blank">🎬 查看动画演示</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  localStorage.setItem('wrongIds', JSON.stringify([...wrongIds]));
+  document.getElementById('result-banner').style.display = 'block';
+  document.getElementById('result-banner').innerHTML = `<div class="score">${score} / ${examQuestions.length}</div><div style="color:var(--text-muted);">正确率 ${Math.round(score/examQuestions.length*100)}%</div>`;
+  document.getElementById('result-banner').scrollIntoView();
+}
+
+/* ==================== 错题本 ==================== */
+function showWrong() {
+  const wrongQuestions = QUESTIONS.filter(q => wrongIds.has(q.id));
+  const container = document.getElementById('quiz-container');
+  if (!wrongQuestions.length) {
+    container.innerHTML = '<p style="color:var(--success);text-align:center;padding:40px;">🎉 暂无错题，继续加油！</p>';
+    return;
+  }
+  container.innerHTML = `<div style="margin-bottom:12px;text-align:right;"><button class="primary" id="btn-clear-wrong" style="padding:8px 16px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;">清空错题本</button></div>`
+    + wrongQuestions.map(q => renderQuestion(q)).join('');
+  document.getElementById('btn-clear-wrong').addEventListener('click', () => {
+    wrongIds.clear();
+    localStorage.setItem('wrongIds', '[]');
+    if (userToken) syncToCloud();
+    showWrong();
+  });
+  bindQuestionEvents();
+}
+
+/* ==================== 纠错功能 ==================== */
+let currentReportQid = '';
+function openReport(qid) {
+  currentReportQid = qid;
+  document.getElementById('report-qid').value = qid;
+  document.getElementById('report-detail').value = '';
+  document.getElementById('report-contact').value = '';
+  document.getElementById('report-modal').classList.add('show');
+}
+document.getElementById('report-cancel').addEventListener('click', () => {
+  document.getElementById('report-modal').classList.remove('show');
+});
+document.getElementById('report-submit').addEventListener('click', async () => {
+  const payload = {
+    question_id: currentReportQid,
+    error_type: document.getElementById('report-type').value,
+    detail: document.getElementById('report-detail').value,
+    user_contact: document.getElementById('report-contact').value,
+  };
+  try {
+    const resp = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      alert('✅ 纠错已提交，感谢反馈！');
+      document.getElementById('report-modal').classList.remove('show');
+    } else {
+      alert('❌ 提交失败：' + data.error);
+    }
+  } catch (e) {
+    alert('❌ 网络错误，请稍后重试');
+  }
+});
+
+/* ==================== 用户系统 ==================== */
+function updateUserArea() {
+  const area = document.getElementById('user-area');
+  if (currentUser) {
+    area.innerHTML = `<span style="color:var(--success);font-size:13px;font-weight:600;">👤 ${currentUser.username}</span>
+      <button class="back-btn" id="btn-logout" style="cursor:pointer;">退出</button>`;
+    document.getElementById('btn-logout').addEventListener('click', logout);
+  } else {
+    area.innerHTML = `<button class="back-btn" id="btn-login" style="cursor:pointer;">👤 登录</button>`;
+    document.getElementById('btn-login').addEventListener('click', openAuth);
+  }
+}
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('auth-title').textContent = authMode === 'login' ? '👤 登录' : '📝 注册';
+  document.getElementById('auth-submit').textContent = authMode === 'login' ? '登录' : '注册';
+  document.getElementById('auth-toggle').textContent = authMode === 'login' ? '没有账号？去注册' : '已有账号？去登录';
+  document.getElementById('auth-err').textContent = '';
+}
+function openAuth() {
+  toggleAuthMode();
+  if (authMode !== 'login') toggleAuthMode(); // 确保是登录模式
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-err').textContent = '';
+  document.getElementById('auth-modal').classList.add('show');
+}
+async function submitAuth() {
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const err = document.getElementById('auth-err');
+  if (!username || !password) { err.textContent = '请填写用户名和密码'; return; }
+  const url = authMode === 'login' ? '/api/login' : '/api/register';
+  try {
+    const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username, password}) });
+    const d = await r.json();
+    if (d.ok) {
+      userToken = d.token;
+      currentUser = d.user;
+      localStorage.setItem('userToken', userToken);
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      document.getElementById('auth-modal').classList.remove('show');
+      updateUserArea();
+      await syncFromCloud();  // 登录后从云端拉取数据
+    } else {
+      err.textContent = d.error || '操作失败';
+    }
+  } catch(e) { err.textContent = '网络错误'; }
+}
+function logout() {
+  userToken = '';
+  currentUser = null;
+  localStorage.removeItem('userToken');
+  localStorage.removeItem('currentUser');
+  updateUserArea();
+  // 回退到本地数据
+  wrongIds = new Set(JSON.parse(localStorage.getItem('wrongIds') || '[]'));
+  favIds = new Set(JSON.parse(localStorage.getItem('favIds') || '[]'));
+  history = JSON.parse(localStorage.getItem('quizHistory') || '{"total":0,"correct":0,"bySubject":{},"daily":{}}');
+}
+
+/* 云端同步：把本地数据上传到用户账号 */
+async function syncToCloud() {
+  if (!userToken) return;
+  const payload = {
+    wrongIds: [...wrongIds],
+    favIds: [...favIds],
+    history: history,
+  };
+  try {
+    await fetch('/api/userdata', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+userToken}, body:JSON.stringify({key:'quizState', value:payload}) });
+  } catch(e) {}
+}
+/* 从云端拉取用户数据 */
+async function syncFromCloud() {
+  if (!userToken) return;
+  try {
+    const r = await fetch('/api/userdata', { headers:{Authorization:'Bearer '+userToken} });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data.quizState) {
+      wrongIds = new Set(data.quizState.wrongIds || []);
+      favIds = new Set(data.quizState.favIds || []);
+      history = data.quizState.history || { total:0, correct:0, bySubject:{}, daily:{} };
+      // 同时更新本地缓存
+      localStorage.setItem('wrongIds', JSON.stringify([...wrongIds]));
+      localStorage.setItem('favIds', JSON.stringify([...favIds]));
+      localStorage.setItem('quizHistory', JSON.stringify(history));
+    }
+  } catch(e) {}
+}
+
+// 记录答题后，若已登录则自动同步
+function afterDataChange() {
+  localStorage.setItem('wrongIds', JSON.stringify([...wrongIds]));
+  localStorage.setItem('favIds', JSON.stringify([...favIds]));
+  localStorage.setItem('quizHistory', JSON.stringify(history));
+  if (userToken) syncToCloud();
+}
+
+/* ==================== 考研倒计时 ====================
+   【要不要每年手动改？不用】
+   考研初试固定在「12 月倒数第二个周末（周六、周日）」。
+   下面这段代码会自动算出当年的那一天；如果已经考完，会自动切到下一年。
+   所以这个倒计时是「永远自动顺延」的，不需要每年修改。
+
+   【想手动指定某一天？】
+   把 EXAM_DATE_OVERRIDE 改成 '2026-12-19' 这样的字符串即可（写第一天）。
+   改成 null 就恢复自动推算。
+   ==================================================== */
+const EXAM_DATE_OVERRIDE = null;   // 例：'2026-12-19'；null = 自动
+
+/* ==================== 初始化 ==================== */
+initTheme();
+initCountdown();
+updateStreak();
+updateUserArea();
+// 绑定登录弹窗事件
+document.getElementById('auth-submit').addEventListener('click', submitAuth);
+document.getElementById('auth-cancel').addEventListener('click', () => document.getElementById('auth-modal').classList.remove('show'));
+document.getElementById('auth-password').addEventListener('keydown', e => { if(e.key==='Enter') submitAuth(); });
+loadQuestions();
+
+
+
+/* 求某年 12 月的「倒数第二个周六」 */
+function examDateOf(year) {
+  const d = new Date(year, 11, 31);          // 12 月 31 日
+  while (d.getDay() !== 6) d.setDate(d.getDate() - 1);  // 往前退到最后一个周六
+  d.setDate(d.getDate() - 7);                // 再退 7 天 = 倒数第二个周六
+  return d;
+}
+
+function initCountdown() {
+  const now = new Date();
+  let target;
+
+  if (EXAM_DATE_OVERRIDE) {
+    const d = new Date(EXAM_DATE_OVERRIDE + 'T00:00:00');
+    if (!isNaN(d.getTime())) target = d;
+  }
+  if (!target) {
+    target = examDateOf(now.getFullYear());
+    // 已经过了今年的考试（考试按两天算），就顺延到明年
+    const end = new Date(target); end.setDate(end.getDate() + 2);
+    if (now >= end) target = examDateOf(now.getFullYear() + 1);
+  }
+
+  const end = new Date(target); end.setDate(end.getDate() + 2);
+  const el = document.getElementById('countdown');
+
+  if (now >= target && now < end) {
+    el.innerHTML = '考研进行中，<b>加油！</b>';
+    return;
+  }
+
+  const days = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  const y = target.getFullYear(), m = target.getMonth() + 1, d = target.getDate();
+  el.innerHTML = `距考研 <b>${days}</b> 天`;
+  el.title = `考试日期：${y} 年 ${m} 月 ${d} 日起`;
+}
+</script>
+</body>
+</html>

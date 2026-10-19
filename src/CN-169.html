@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPv6</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>IPv6</h1><span class="badge">B级 · CN-169</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>IPv4 地址只有 32 位（约 43 亿），2011 年正式枯竭。<strong>IPv6 把地址扩大到 128 位</strong>（16 字节），总数 3.4×10³⁸——给地球上每粒沙子都分地址都够。除地址外，IPv6 还做了大量「减负」：</p>
+<p><strong>① 首部固定 40 字节</strong>（IPv4 变长），去掉首部校验和（交给链路层+传输层）；<strong>② 即插即用</strong>——自动配置地址，不需要 DHCP；<strong>③ 删除广播</strong>——广播功能用组播替代；<strong>④ 流标签</strong>字段支持 QoS；<strong>⑤ 内置 IPSec</strong> 安全支持。表示法：8 组 4 位十六进制，组内前导零可省，连续全零组可压缩为 <strong>::</strong>（只能出现一次）。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-169",
+  title: "IPv6",
+  derivation: [
+    "\\text{IPv6 地址}: \\; 128\\ \\text{bit} = 16\\ \\text{B} = 2^{128} \\approx 3.4 \\times 10^{38}",
+    "\\text{表示}: \\; 8\\ \\text{组} \\times 4\\ \\text{位十六进制（冒号分隔）}",
+    "\\text{压缩规则}: \\; \\text{组内前导零可省} + \\text{连续全零组压成}\\ \\texttt{::}",
+    "\\text{IPv6 首部}: \\; 40\\ \\text{B 固定} + \\text{扩展首部（可选）}",
+    "\\text{IPv4} \\to \\text{IPv6}: \\; \\text{双协议栈} + \\text{隧道技术}"
+  ],
+  exam_text: "<b>【2019 真题改编】</b>将 IPv6 地址 0:0:0:0:0:FFFF:8192:6E42 压缩表示，并说明它代表什么。",
+  exam_answer: "答案：按「连续全零组压成 ::」规则，地址压缩为 <b>::FFFF:8192:6E42</b>（前 5 个全零组合并成一个 ::）。这是 IPv4 映射地址：::FFFF:a.b.c.d 形式的 IPv6 地址表示 IPv4 地址 129.146.110.66（其中 8192(十六进制)=129.146、6E42=110.66），用于 IPv4/IPv6 过渡。注意 <b>:: 只能出现一次</b>——若地址有多段连续零，只能压缩最长的一段。",
+  pitfall_list: [
+    "「::」在一个地址里只能出现一次——如果原样写两个 ::，无法还原每组零的个数。",
+    "IPv6 没有广播地址（broadcast）——广播功能由组播（特别是「所有结点」组播）替代。",
+    "IPv6 首部去掉了校验和字段：检错交给链路层 CRC 和传输层校验和，中间路由器不校验。"
+  ],
+  quiz_list: [
+    { question: "IPv6 地址长度是？", options: ["32 位", "64 位", "128 位"], correct: 2 },
+    { question: "IPv6 中「::」可以出现几次？", options: ["1 次", "2 次", "任意次"], correct: 0 },
+    { question: "IPv6 相对 IPv4 的变化不包括？", options: ["即插即用自动配置", "保留广播地址", "首部固定 40 字节"], correct: 1 },
+  ]
+};
+
+/* ===== CN-169 专属动画：地址压缩 + IPv4/IPv6 对比 ===== */
+const STEPS = [
+  { focus:0, desc:'IPv4 枯竭 → IPv6：128 位地址，海量空间' },
+  { focus:1, desc:'地址表示：8 组 4 位十六进制 + 前导零省略 + 双冒号压缩' },
+  { focus:2, desc:'压缩规则演示：::FFFF:8192:6E42' },
+  { focus:3, desc:'IPv6 vs IPv4 首部对比：40B 固定 + 简化字段' },
+  { focus:4, desc:'过渡方案：双协议栈 / 隧道技术' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['为什么 IPv6','地址表示','压缩演示','首部对比','过渡方案'][f]);
+
+  if(f===0){
+    g.append('rect').attr('x',100).attr('y',90).attr('width',300).attr('height',100).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--danger)').attr('stroke-width',2.5);
+    g.append('text').attr('x',250).attr('y',128).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',18).attr('font-weight','700').text('IPv4 32 位');
+    g.append('text').attr('x',250).attr('y',160).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('约 43 亿个地址');
+    g.append('text').attr('x',450).attr('y',145).attr('fill','var(--text-muted)').attr('font-size',24).attr('font-weight','700').text('→');
+    g.append('rect').attr('x',500).attr('y',90).attr('width',300).attr('height',100).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',650).attr('y',128).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',18).attr('font-weight','700').text('IPv6 128 位');
+    g.append('text').attr('x',650).attr('y',160).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('约 3.4×10³⁸ 个');
+    g.append('text').attr('x',450).attr('y',250).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('');
+    g.append('text').attr('x',450).attr('y',252).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('不止地址更大：还顺手解决了 IPv4 的一堆毛病');
+    const gains=[
+      {t:'即插即用', s:'自动配置，免 DHCP', c:'var(--primary)'},
+      {t:'安全', s:'内置 IPSec 支持', c:'var(--success)'},
+      {t:'高效', s:'固定首部、免路由器校验', c:'var(--highlight)'},
+      {t:'QoS', s:'流标签字段', c:'var(--swap)'},
+    ];
+    gains.forEach((gn,i)=>{
+      const x=60+(i%2)*420, y=280+Math.floor(i/2)*56;
+      g.append('text').attr('x',x).attr('y',y+18).attr('fill',gn.c).attr('font-size',13).attr('font-weight','700').text(gn.t+'：');
+      g.append('text').attr('x',x+110).attr('y',y+18).attr('fill','var(--text)').attr('font-size',12).text(gn.s);
+    });
+  }
+
+  if(f===1){
+    g.append('text').attr('x',80).attr('y',80).attr('fill','var(--text)').attr('font-size',13.5).attr('font-weight','700').text('IPv6 地址 = 8 组冒号分隔的十六进制：');
+    const groups=['2001','0DB8','0000','0420','0000','0000','0000','007A'];
+    groups.forEach((gr,i)=>{
+      const x=60+i*100;
+      const zero = gr==='0000';
+      g.append('rect').attr('x',x).attr('y',100).attr('width',92).attr('height',48).attr('rx',6)
+        .attr('fill','var(--bg-panel)').attr('stroke', zero?'var(--text-muted)':'var(--primary)').attr('stroke-width',2);
+      g.append('text').attr('x',x+46).attr('y',130).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-family','monospace').text(gr);
+      if(i<7) g.append('text').attr('x',x+94).attr('y',130).attr('fill','var(--text-muted)').attr('font-size',14).attr('font-weight','700').text(':');
+    });
+    g.append('text').attr('x',450).attr('y',195).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',197).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('每组 4 个十六进制位（16 bit），共 8 组 = 128 bit');
+    const rules=[
+      {t:'规则一', s:'组内前导零可省略：0DB8 → DB8', c:'var(--primary)'},
+      {t:'规则二', s:'连续全零组可压成 ::（只能用一次）', c:'var(--success)'},
+    ];
+    rules.forEach((r,i)=>{
+      const y=225+i*62;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2);
+      g.append('text').attr('x',100).attr('y',y+31).attr('fill',r.c).attr('font-size',14).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',220).attr('y',y+31).attr('fill','var(--text)').attr('font-size',13).text(r.s);
+    });
+  }
+
+  if(f===2){
+    g.append('text').attr('x',80).attr('y',85).attr('fill','var(--text)').attr('font-size',13.5).attr('font-weight','700').text('压缩演示：');
+    const groups=['0','0','0','0','0','FFFF','8192','6E42'];
+    groups.forEach((gr,i)=>{
+      const x=60+i*100;
+      const zero = gr==='0';
+      g.append('rect').attr('x',x).attr('y',105).attr('width',92).attr('height',46).attr('rx',6)
+        .attr('fill','var(--bg-panel)').attr('stroke', zero?'var(--text-muted)':'var(--success)').attr('stroke-width', zero?1.5:2);
+      g.append('text').attr('x',x+46).attr('y',134).attr('text-anchor','middle').attr('fill', zero?'var(--text-muted)':'var(--text)').attr('font-size',13).attr('font-family','monospace').text(gr);
+      if(i<7) g.append('text').attr('x',x+94).attr('y',134).attr('fill','var(--text-muted)').attr('font-size',13).text(':');
+    });
+    /* 压缩后 */
+    g.append('path').attr('d','M 450 165 L 450 200').attr('stroke','var(--success)').attr('stroke-width',2.5).attr('marker-end','url(#arr169)');
+    g.append('text').attr('x',470).attr('y',190).attr('fill','var(--success)').attr('font-size',12).attr('font-weight','700').text('5 个连续全零组 → ::');
+    g.append('rect').attr('x',280).attr('y',210).attr('width',340).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',244).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',17).attr('font-weight','700').attr('font-family','monospace').text('::FFFF:8192:6E42');
+    g.append('text').attr('x',450).attr('y',310).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',312).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('这是 IPv4 映射地址（::FFFF:a.b.c.d），过渡期常见');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12.5).attr('font-weight','700').text('若地址有「两段」连续零，只能压缩更长的那一段');
+  }
+
+  if(f===3){
+    const rows=[
+      {a:'32 位', b:'128 位', k:'地址长度'},
+      {a:'变长（20~60B）', b:'固定 40B', k:'首部长度'},
+      {a:'有', b:'删除', k:'首部校验和'},
+      {a:'有', b:'删除', k:'广播地址'},
+      {a:'逐跳分段', b:'仅源端分段', k:'分片处理'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=60+i*58;
+      g.append('text').attr('x',80).attr('y',y+30).attr('fill','var(--text-muted)').attr('font-size',12.5).attr('font-weight','700').text(r.k);
+      g.append('rect').attr('x',200).attr('y',y).attr('width',280).attr('height',46).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--danger)').attr('stroke-width',2);
+      g.append('text').attr('x',340).attr('y',y+29).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(r.a);
+      g.append('rect').attr('x',500).attr('y',y).attr('width',280).attr('height',46).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2);
+      g.append('text').attr('x',640).attr('y',y+29).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(r.b);
+    });
+    g.append('text').attr('x',200).attr('y',52).attr('fill','var(--danger)').attr('font-size',13).attr('font-weight','700').text('IPv4');
+    g.append('text').attr('x',500).attr('y',52).attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('IPv6');
+    g.append('text').attr('x',450).attr('y',370).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('');
+    g.append('text').attr('x',450).attr('y',372).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('删除校验和+简化字段 = 路由器处理更快（IPv6 的设计哲学：路由器只做转发');
+  }
+
+  if(f===4){
+    g.append('rect').attr('x',70).attr('y',70).attr('width',370).attr('height',220).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('rect').attr('x',70).attr('y',70).attr('width',370).attr('height',220).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',255).attr('y',108).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700').text('双协议栈');
+    g.append('text').attr('x',255).attr('y',146).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text('主机同时运行 IPv4 + IPv6');
+    g.append('text').attr('x',255).attr('y',174).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text('按目的地址选协议');
+    g.append('text').attr('x',255).attr('y',206).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('简单直接，主流过渡方案');
+    g.append('rect').attr('x',470).attr('y',70).attr('width',370).attr('height',220).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',655).attr('y',108).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',16).attr('font-weight','700').text('隧道技术');
+    g.append('text').attr('x',655).attr('y',146).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text('IPv6 分组封装进 IPv4 分组');
+    g.append('text').attr('x',655).attr('y',174).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text('穿过 IPv4 网络再解封');
+    g.append('text').attr('x',655).attr('y',206).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('6to4 / ISATAP / Teredo');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',342).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('现实：IPv4/IPv6 将长期共存（NAT + 双栈 + 隧道混合部署）');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr169').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--success)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

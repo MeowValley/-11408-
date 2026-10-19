@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编码与调制</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>编码与调制</h1><span class="badge">B级 · CN-149</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>数据和信号各有「数字/模拟」两种形态，两两组合就有四种转换，这是本课的主线：</p>
+<p><strong>① 数字数据 → 数字信号（编码）</strong>：不归零码、曼彻斯特编码、差分曼彻斯特——用在基带传输（如以太网）；<strong>② 数字数据 → 模拟信号（调制）</strong>：ASK/FSK/PSK/QAM——用在频带传输（如 WiFi）；<strong>③ 模拟数据 → 数字信号（编码）</strong>：PCM 脉冲编码调制（采样→量化→编码），用在语音数字化（电话/语音通话）；<strong>④ 模拟数据 → 模拟信号（调制）</strong>：AM/FM/PM，传统广播。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-149",
+  title: "编码与调制",
+  derivation: [
+    "\\text{四种转换}: \\; \\text{数字数据}\\xrightarrow{\\text{编码}}\\text{数字信号} \\;|\\; \\text{数字数据}\\xrightarrow{\\text{调制}}\\text{模拟信号}",
+    "\\text{模拟数据}\\xrightarrow{\\text{PCM}}\\text{数字信号} \\;|\\; \\text{模拟数据}\\xrightarrow{\\text{AM/FM/PM}}\\text{模拟信号}",
+    "\\text{奈奎斯特定理}: \\; C = 2W \\log_2 V \\; (\\text{理想低通信道})",
+    "\\text{香农公式}: \\; C = W \\log_2\\!\\left(1 + \\frac{S}{N}\\right) \\; (\\text{带宽}W\\ \\text{受噪声影响})"
+  ],
+  exam_text: "<b>【2020 真题改编】</b>曼彻斯特编码相比不归零码（NRZ）的主要优点是什么？",
+  exam_answer: "答案：曼彻斯特编码在每个比特周期中间都有一次跳变，这个跳变可以当<b>时钟信号</b>用（「自含时钟」「自同步」），收发双方无需单独传同步时钟；且跳变方向携带数据（正跳变=0、负跳变=1，或反之）。代价是<b>编码效率只有 50%</b>（一个比特要两个码元宽），所需带宽是 NRZ 的两倍。NRZ 则存在直流分量和同步困难问题。",
+  pitfall_list: [
+    "「编码」是数字→数字，「调制」是数字→模拟——数字数据变模拟信号必须叫调制，不叫编码。",
+    "曼彻斯特编码效率 50%（每比特两码元），差分曼彻斯特同样自含时钟但抗干扰更好。",
+    "奈奎斯特定理给出理想无噪声信道的极限码元速率，香农公式给出有噪声信道的极限信息速率——两个公式适用条件不同。"
+  ],
+  quiz_list: [
+    { question: "数字数据调制成模拟信号，采用的方式是？", options: ["ASK/FSK/PSK", "NRZ/RZ", "PCM"], correct: 0 },
+    { question: "曼彻斯特编码的优点是？", options: ["带宽利用率 100%", "自含时钟，可自同步", "无直流分量且带宽减半"], correct: 1 },
+    { question: "模拟语音数字化的典型步骤是？", options: ["ASK 调制", "PCM 采样量化编码", "曼彻斯特编码"], correct: 1 },
+  ]
+};
+
+/* ===== CN-149 专属动画：四种编码/调制波形 ===== */
+const STEPS = [
+  { focus:0, desc:'四种转换总览：编码（数字→数字）/ 调制（数字→模拟）/ PCM / AM-FM-PM' },
+  { focus:1, desc:'数字→数字：不归零码 NRZ vs 曼彻斯特编码（跳变=时钟）' },
+  { focus:2, desc:'数字→模拟：ASK（幅变）/ FSK（频变）/ PSK（相变）' },
+  { focus:3, desc:'模拟→数字：PCM 三步——采样、量化、编码' },
+  { focus:4, desc:'两大极限公式：奈奎斯特（无噪声）vs 香农（有噪声）' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+const BITS = [1,0,1,1,0,0,1,0];
+
+function squareWave(x0, yBase, bw, hi, lo, bits, color, midJump){
+  let d = 'M '+(x0)+' '+yBase;
+  bits.forEach((b,i)=>{
+    const x = x0 + i*bw;
+    d += ' L '+x+' '+(b?hi:lo)+' L '+(x+bw)+' '+(b?hi:lo);
+  });
+  return d;
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['四种转换','数字→数字编码','数字→模拟调制','模拟→数字 PCM','极限公式'][f]);
+
+  if(f===0){
+    const rows=[
+      {a:'数字数据', b:'数字信号', m:'编码：RZ/NRZ/曼彻斯特', c:'var(--primary)', x:60},
+      {a:'数字数据', b:'模拟信号', m:'调制：ASK/FSK/PSK/QAM', c:'var(--success)', x:480},
+      {a:'模拟数据', b:'数字信号', m:'PCM：采样→量化→编码', c:'var(--highlight)', x:60},
+      {a:'模拟数据', b:'模拟信号', m:'调制：AM/FM/PM', c:'var(--swap)', x:480},
+    ];
+    rows.forEach((r,i)=>{
+      const y=60+i*80;
+      g.append('rect').attr('x',r.x).attr('y',y).attr('width',180).attr('height',54).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2);
+      g.append('text').attr('x',r.x+90).attr('y',y+24).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text(r.a);
+      g.append('text').attr('x',r.x+90).attr('y',y+43).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10.5).text('');
+      g.append('rect').attr('x',r.x+210).attr('y',y).attr('width',160).attr('height',54).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2);
+      g.append('text').attr('x',r.x+290).attr('y',y+24).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text(r.b);
+      g.append('text').attr('x',r.x+290).attr('y',y+43).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10.5).text('');
+      g.append('path').attr('d',`M ${r.x+182} ${y+27} L ${r.x+208} ${y+27}`).attr('stroke',r.c).attr('stroke-width',2.5).attr('marker-end','url(#arr149)');
+      g.append('text').attr('x',r.x+10).attr('y',y+70).attr('fill',r.c).attr('font-size',11).attr('font-weight','700').text(r.m);
+    });
+  }
+
+  if(f===1){
+    /* 原始比特 */
+    g.append('text').attr('x',80).attr('y',80).attr('fill','var(--text-muted)').attr('font-size',11.5).attr('font-weight','700').text('原始比特');
+    g.append('path').attr('d',squareWave(80,95,60,95,135,BITS)).attr('fill','none').attr('stroke','var(--text)').attr('stroke-width',2.5);
+    BITS.forEach((b,i)=>{ g.append('text').attr('x',80+i*60+30).attr('y',158).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-family','monospace').text(b); });
+    /* NRZ */
+    g.append('text').attr('x',80).attr('y',200).attr('fill','var(--text-muted)').attr('font-size',11.5).attr('font-weight','700').text('NRZ 不归零');
+    g.append('path').attr('d',squareWave(80,215,60,215,255,BITS)).attr('fill','none').attr('stroke','var(--compare)').attr('stroke-width',2.5);
+    /* 曼彻斯特 */
+    g.append('text').attr('x',80).attr('y',300).attr('fill','var(--text-muted)').attr('font-size',11.5).attr('font-weight','700').text('曼彻斯特');
+    let md='M 80 320';
+    BITS.forEach((b,i)=>{
+      const x=80+i*60;
+      if(b===0){ md += ' L '+x+' 350 L '+(x+30)+' 350 L '+(x+30)+' 320 L '+(x+60)+' 320'; }
+      else{ md += ' L '+x+' 320 L '+(x+30)+' 320 L '+(x+30)+' 350 L '+(x+60)+' 350'; }
+    });
+    g.append('path').attr('d',md).attr('fill','none').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',560).attr('y',300).attr('fill','var(--success)').attr('font-size',12).attr('font-weight','700').text('每比特中间必跳变');
+    g.append('text').attr('x',560).attr('y',322).attr('fill','var(--text-muted)').attr('font-size',11.5).text('跳变即时钟：可自同步');
+    g.append('text').attr('x',560).attr('y',344).attr('fill','var(--text-muted)').attr('font-size',11.5).text('效率 50%，带宽翻倍');
+    g.append('text').attr('x',560).attr('y',200).attr('fill','var(--compare)').attr('font-size',12).attr('font-weight','700').text('高电平=1，低=0');
+    g.append('text').attr('x',560).attr('y',222).attr('fill','var(--text-muted)').attr('font-size',11.5).text('无自同步能力');
+    g.append('text').attr('x',560).attr('y',244).attr('fill','var(--text-muted)').attr('font-size',11.5).text('长连 0/1 时同步丢失');
+  }
+
+  if(f===2){
+    /* 三种调制正弦波 */
+    const labels=[{t:'ASK 幅移键控', s:'1=有载波 0=无载波', c:'var(--primary)'},{t:'FSK 频移键控', s:'1=高频 0=低频', c:'var(--success)'},{t:'PSK 相移键控', s:'1/0 相位翻转 180°', c:'var(--highlight)'}];
+    labels.forEach((lb,i)=>{
+      const yBase=80+i*105;
+      g.append('text').attr('x',80).attr('y',yBase-6).attr('fill',lb.c).attr('font-size',13).attr('font-weight','700').text(lb.t);
+      g.append('text').attr('x',330).attr('y',yBase-6).attr('fill','var(--text-muted)').attr('font-size',11).text('');
+      let d='M 80 '+(yBase+30);
+      for(let x=0;x<=760;x+=4){
+        const t=x/40;
+        let y;
+        if(i===0){
+          const on = BITS[Math.floor(x/95)]===1;
+          y = yBase+30 + (on? 30*Math.sin(t) : 2*Math.sin(t*4));
+        } else if(i===1){
+          const on = BITS[Math.floor(x/95)]===1;
+          y = yBase+30 + 30*Math.sin(t*(on?2.2:1.1));
+        } else {
+          const b = BITS[Math.floor(x/95)]===1;
+          y = yBase+30 + 30*Math.sin(t)*(b?1:1)*Math.cos(t*0.001)*(b?1:-1);
+        }
+        d += ' L '+(80+x)+' '+y;
+      }
+      g.append('path').attr('d',d).attr('fill','none').attr('stroke',lb.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',820).attr('y',yBase+30).attr('fill','var(--text-muted)').attr('font-size',10.5).text(lb.s);
+    });
+    g.append('text').attr('x',450).attr('y',392).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+  }
+
+  if(f===3){
+    /* PCM 三步 */
+    g.append('text').attr('x',120).attr('y',75).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('① 采样（时间离散）');
+    g.append('text').attr('x',450).attr('y',75).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('② 量化（幅度离散）');
+    g.append('text').attr('x',760).attr('y',75).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('③ 编码（二进制）');
+    /* 连续信号 */
+    let d='M 80 150';
+    for(let x=0;x<=240;x+=3){ d += ' L '+(80+x)+' '+(150+50*Math.sin(x/35)); }
+    g.append('path').attr('d',d).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    for(let x=0;x<=240;x+=20){
+      const y=150+50*Math.sin(x/35);
+      g.append('circle').attr('cx',80+x).attr('cy',y).attr('r',3.5).attr('fill','var(--highlight)');
+    }
+    /* 阶梯信号 */
+    let d2='M 330 230';
+    for(let x=0;x<=240;x+=20){
+      const y=230+50*Math.sin(x/35);
+      d2 += ' L '+(330+x)+' '+y+' L '+(330+x+20)+' '+y;
+    }
+    g.append('path').attr('d',d2).attr('fill','none').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    /* 二进制 */
+    const codes=['010','101','110','011','001','100','111','000','010','101','110','011'];
+    codes.forEach((c,i)=>{
+      g.append('text').attr('x',640+i*22).attr('y',250-i*8).attr('fill','var(--highlight)').attr('font-size',10).attr('font-family','monospace').text(c);
+    });
+    g.append('path').attr('d','M 280 205 L 326 205').attr('stroke','var(--text-muted)').attr('stroke-width',2).attr('marker-end','url(#arr149)');
+    g.append('path').attr('d','M 580 205 L 626 205').attr('stroke','var(--text-muted)').attr('stroke-width',2).attr('marker-end','url(#arr149)');
+    g.append('text').attr('x',450).attr('y',320).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',13).attr('font-weight','700').text('采样定理：采样频率 ≥ 2×信号最高频率，才能无失真还原');
+    g.append('text').attr('x',450).attr('y',350).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',352).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('电话语音 4kHz → 采样 8kHz，8 位量化 → 64 kbps 一路话音');
+  }
+
+  if(f===4){
+    g.append('rect').attr('x',70).attr('y',70).attr('width',360).attr('height',220).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',250).attr('y',108).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700').text('奈奎斯特定理');
+    g.append('text').attr('x',250).attr('y',150).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',17).attr('font-family','monospace').text('C = 2W log₂V');
+    g.append('text').attr('x',250).attr('y',185).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('W=信道带宽，V=码元离散电平数');
+    g.append('text').attr('x',250).attr('y',212).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',250).attr('y',214).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('理想无噪声信道的极限');
+    g.append('rect').attr('x',470).attr('y',70).attr('width',360).attr('height',220).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',650).attr('y',108).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',16).attr('font-weight','700').text('香农公式');
+    g.append('text').attr('x',650).attr('y',150).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',17).attr('font-family','monospace').text('C = W log₂(1+S/N)');
+    g.append('text').attr('x',650).attr('y',185).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('S/N=信噪比，W=带宽');
+    g.append('text').attr('x',650).attr('y',214).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('有噪声信道的极限');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('奈奎斯特指出「无噪声时一个码元最多携带 log₂V 比特」');
+    g.append('text').attr('x',450).attr('y',356).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('');
+    g.append('text').attr('x',450).attr('y',358).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('香农指出「噪声决定带宽换信噪比的极限」——两者共同界定信道容量上限');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr149').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

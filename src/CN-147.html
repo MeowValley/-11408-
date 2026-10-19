@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基本概念（数据、信号、信道）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>基本概念（数据、信号、信道）</h1><span class="badge">C级 · CN-147</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>物理层研究的是「比特怎么在介质上跑」，三个基础概念：<strong>数据</strong>是运送信息的实体（数字数据取离散值，如 0/1；模拟数据连续变化，如声音）。<strong>信号</strong>是数据的电气/电磁表现（数字信号是离散脉冲，模拟信号是连续波）。<strong>信道</strong>是信号传输的通道，按传输信号类型分<strong>模拟信道</strong>（传模拟信号）和<strong>数字信道</strong>（传数字信号）；按传输介质分有线（双绞线/光纤）和无线。</p>
+<p>关键区分：<strong>基带信号</strong>（信源发出的原始频带信号，含直流和低频）可以直接在信道上传输，<strong>宽带传输</strong>（频带传输）则要先调制到高频载波上。数字数据可以用数字信号发送（编码），也可以用模拟信号发送（调制）。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-147",
+  title: "基本概念（数据、信号、信道）",
+  derivation: [
+    "\\text{数据}: \\; \\text{数字数据（离散，如 0/1）} \\;|\\; \\text{模拟数据（连续，如声音）}",
+    "\\text{信号}: \\; \\text{数字信号（离散脉冲）} \\;|\\; \\text{模拟信号（连续波）}",
+    "\\text{信道}: \\; \\text{模拟信道（传模拟信号）} \\;|\\; \\text{数字信道（传数字信号）}",
+    "\\text{基带信号} = \\text{信源发出的原始频带信号} \\;\\Rightarrow\\; \\text{基带传输 / 调制后宽带传输}"
+  ],
+  exam_text: "<b>【2015 真题改编】</b>什么是基带传输？什么是频带传输？二者的区别是什么？",
+  exam_answer: "答案：<b>基带传输</b>是把信源发出的原始基带信号（含大量直流和低频分量）不经过调制直接送上信道传输，适用于近距离（如局域网）；<b>频带传输（宽带传输）</b>是先把基带信号调制到高频载波上再传输，适用于远距离和无线信道。区别在于是否经过「调制」这一环节。",
+  pitfall_list: [
+    "「数字数据」一定要用「数字信号」传输是错的——数字数据既可以用编码成数字信号（基带），也可以调制成模拟信号（频带）。",
+    "基带信号不一定是数字信号——模拟信源的原始信号也是基带信号。",
+    "信道按「传输信号类型」分模拟/数字信道，按「传输介质」分有线/无线信道，两套维度别混。"
+  ],
+  quiz_list: [
+    { question: "声音、温度属于？", options: ["数字数据", "模拟数据", "数字信号"], correct: 1 },
+    { question: "把基带信号调制到高频载波上再传输，称为？", options: ["基带传输", "频带传输", "异步传输"], correct: 1 },
+    { question: "信源发出的原始频带信号称为？", options: ["已调信号", "基带信号", "载波信号"], correct: 1 },
+  ]
+};
+
+/* ===== CN-147 专属动画：数据/信号四象限 + 波形对比 ===== */
+const STEPS = [
+  { focus:0, desc:'数据与信号各有两种形态：数字 vs 模拟' },
+  { focus:1, desc:'数字信号：离散的方波脉冲（0/1 电平跳变）' },
+  { focus:2, desc:'模拟信号：连续变化的正弦波' },
+  { focus:3, desc:'信道：按信号类型分模拟/数字，按介质分有线/无线' },
+  { focus:4, desc:'基带传输 vs 频带传输：是否经过调制' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['数据与信号','数字信号','模拟信号','信道分类','基带 vs 频带'][f]);
+
+  if(f===0){
+    const quad=[
+      {t:'数字数据', s:'离散值：0/1、字符编码', c:'var(--primary)', x:80, y:60},
+      {t:'模拟数据', s:'连续变化：声音、温度', c:'var(--success)', x:460, y:60},
+      {t:'数字信号', s:'离散脉冲：方波', c:'var(--highlight)', x:80, y:210},
+      {t:'模拟信号', s:'连续波形：正弦波', c:'var(--swap)', x:460, y:210},
+    ];
+    quad.forEach(q=>{
+      g.append('rect').attr('x',q.x).attr('y',q.y).attr('width',360).attr('height',120).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',q.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',q.x+180).attr('y',q.y+48).attr('text-anchor','middle').attr('fill',q.c).attr('font-size',18).attr('font-weight','700').text(q.t);
+      g.append('text').attr('x',q.x+180).attr('y',q.y+82).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(q.s);
+    });
+    g.append('text').attr('x',450).attr('y',365).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('');
+    g.append('text').attr('x',450).attr('y',368).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('数据是「信息实体」，信号是「数据的电磁表现」——数据经过发送器变成信号');
+  }
+
+  if(f===1){
+    /* 数字方波 */
+    g.append('rect').attr('x',80).attr('y',120).attr('width',740).attr('height',140).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+    const bits=[1,0,1,1,0,0,1,0,1,1,1,0];
+    const bw=58;
+    let d='M 100 220';
+    bits.forEach((b,i)=>{
+      const x=100+i*bw;
+      d += ' L '+x+' '+(b?160:220)+' L '+(x+bw)+' '+(b?160:220);
+    });
+    g.append('path').attr('d',d).attr('fill','none').attr('stroke','var(--highlight)').attr('stroke-width',3);
+    bits.forEach((b,i)=>{
+      g.append('text').attr('x',100+i*bw+bw/2).attr('y',252).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').attr('font-family','monospace').text(b);
+    });
+    g.append('text').attr('x',450).attr('y',100).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',14).attr('font-weight','700').text('数字信号：电平只有两种状态，跳变瞬间表示 0/1');
+    g.append('text').attr('x',450).attr('y',310).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('');
+    g.append('text').attr('x',450).attr('y',312).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('抗干扰能力强，可再生中继——误码不会累积');
+  }
+
+  if(f===2){
+    /* 模拟正弦波 */
+    g.append('rect').attr('x',80).attr('y',120).attr('width',740).attr('height',140).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+    let d='M 100 190';
+    for(let x=0;x<=720;x+=4){
+      const y=190+45*Math.sin(x/60);
+      d += ' L '+(100+x)+' '+y;
+    }
+    g.append('path').attr('d',d).attr('fill','none').attr('stroke','var(--swap)').attr('stroke-width',3);
+    g.append('text').attr('x',450).attr('y',100).attr('text-anchor','middle').attr('fill','var(--swap)').attr('font-size',14).attr('font-weight','700').text('模拟信号：幅值连续变化，携带信息于波形之中');
+    g.append('text').attr('x',450).attr('y',310).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('');
+    g.append('text').attr('x',450).attr('y',312).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('传输中噪声会叠加积累，衰减后难以还原');
+  }
+
+  if(f===3){
+    const cats=[
+      {t:'模拟信道', s:'传输模拟信号（如传统电话线）', c:'var(--primary)'},
+      {t:'数字信道', s:'传输数字信号（如光纤）', c:'var(--success)'},
+      {t:'有线信道', s:'双绞线 / 同轴电缆 / 光纤', c:'var(--highlight)'},
+      {t:'无线信道', s:'无线电波 / 微波 / 红外', c:'var(--swap)'},
+    ];
+    cats.forEach((c2,i)=>{
+      const x=70+(i%2)*420, y=65+Math.floor(i/2)*140;
+      g.append('rect').attr('x',x).attr('y',y).attr('width',390).attr('height',115).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',c2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+200).attr('y',y+48).attr('text-anchor','middle').attr('fill',c2.c).attr('font-size',17).attr('font-weight','700').text(c2.t);
+      g.append('text').attr('x',x+200).attr('y',y+82).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text(c2.s);
+    });
+    g.append('text').attr('x',450).attr('y',368).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('两套分类维度正交：光纤是「数字信道 + 有线信道」，传统电话线是「模拟信道 + 有线信道」');
+  }
+
+  if(f===4){
+    /* 基带 vs 频带 */
+    g.append('rect').attr('x',60).attr('y',60).attr('width',370).attr('height',270).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',245).attr('y',100).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',17).attr('font-weight','700').text('基带传输');
+    let d1='M 90 200';
+    for(let x=0;x<=300;x+=4){ d1 += ' L '+(90+x)+' '+(200+40*Math.sin(x/40)); }
+    g.append('path').attr('d',d1).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',245).attr('y',262).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('原始信号直接上信道');
+    g.append('text').attr('x',245).attr('y',288).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('近距离 · 局域网常用');
+    g.append('rect').attr('x',470).attr('y',60).attr('width',370).attr('height',270).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',655).attr('y',100).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',17).attr('font-weight','700').text('频带传输');
+    let d2='M 500 200';
+    for(let x=0;x<=300;x+=3){ d2 += ' L '+(500+x)+' '+(200+35*Math.sin(x/22)*Math.sin(x/90)); }
+    g.append('path').attr('d',d2).attr('fill','none').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',655).attr('y',262).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('先调制到高频载波再传');
+    g.append('text').attr('x',655).attr('y',288).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('远距离 · 无线/电话网常用');
+    g.append('text').attr('x',450).attr('y',370).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('区别只有一件事：有没有经过「调制」');
+  }
+
+  const defs = svg.append('defs');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

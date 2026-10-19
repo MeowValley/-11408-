@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算机网络的性能指标</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+.param-panel { display:flex; gap:18px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; }
+.param-panel label { font-size:13px; color:var(--text); display:flex; align-items:center; gap:8px; }
+.param-panel input[type=range] { width:150px; }
+.param-panel .val { color:var(--highlight); font-weight:700; min-width:74px; }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>计算机网络的性能指标</h1><span class="badge">C级 · CN-141</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>衡量网络快不快，指标分两大类：<strong>速率类</strong>——速率（最高数据率，bit/s）、带宽（信道能通过的最高数据率）、吞吐量（单位时间实际通过的数据量）；<strong>时延类</strong>——一个数据从一端到另一端经历的总时延 = <strong>发送时延 + 传播时延 + 处理时延 + 排队时延</strong>。</p>
+<p>最容易混淆的是<strong>发送时延</strong>（数据块从主机全部推上链路的时间，发生在网卡/发送端内部）和<strong>传播时延</strong>（比特在链路上「飞」到另一端的时间，发生在信道上）。提高带宽只能减小发送时延，对传播时延毫无帮助——这就是「光纤到户也不能让信号跑得更快」的原因。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="param-panel">
+<label>数据长度<input type="range" id="sl-len" min="100" max="10000" step="100" value="1000"><span class="val" id="v-len">1000 B</span></label>
+<label>信道带宽<input type="range" id="sl-bw" min="1" max="1000" step="1" value="100"><span class="val" id="v-bw">100 Mbps</span></label>
+<label>链路距离<input type="range" id="sl-dist" min="10" max="5000" step="10" value="1000"><span class="val" id="v-dist">1000 km</span></label>
+</div>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-141",
+  title: "计算机网络的性能指标",
+  derivation: [
+    "\\text{发送时延} = \\frac{\\text{数据块长度（bit）}}{\\text{信道带宽（bit/s）}}",
+    "\\text{传播时延} = \\frac{\\text{信道长度（m）}}{\\text{电磁波速率（m/s）}} \\;\\approx\\; \\frac{d_{\\text{km}}}{2\\times10^{5}\\ \\text{km/s}}",
+    "\\text{总时延} = \\text{发送时延} + \\text{传播时延} + \\text{处理时延} + \\text{排队时延}",
+    "\\text{时延带宽积} = \\text{传播时延} \\times \\text{带宽} \\;\\Rightarrow\\; \\text{链路上能容纳的比特数}",
+    "\\text{RTT（往返时间）} \\approx 2 \\times \\text{单向传播时延} + \\text{端部处理}",
+    "\\text{光纤中电磁波速率} \\approx 2\\times10^{8}\\ \\text{m/s} \\;\\Rightarrow\\; 1000\\ \\text{km} \\approx 5\\ \\text{ms}"
+  ],
+  exam_text: "<b>【2021 真题改编】</b>在 100 Mbps 的信道上发送一个 1000 B 的数据块，信道长 1000 km（光纤）。求发送时延和传播时延。",
+  exam_answer: "答案：发送时延 = 1000×8 bit ÷ 100×10⁶ bit/s = <b>80 μs</b>；传播时延 = 1000 km ÷ 2×10⁵ km/s = <b>5 ms</b>。<b>传播时延远大于发送时延</b>——这就是「带宽再高也快不过光速」的定量解释。注意 B（字节）要换算成 bit：1 B = 8 bit。",
+  pitfall_list: [
+    "发送时延与传播时延机理完全不同：前者在发送端内部（推数据），后者在信道上（比特飞行），提高带宽只影响前者。",
+    "「带宽」在计算机网络中指甲高数据率（bit/s），在通信原理中可指频率宽度（Hz）——两门课语境不同。",
+    "单位换算是高频失分点：1 B = 8 bit；速率 100 Mbps = 10⁸ bit/s；光纤 1000 km ≈ 5 ms 要记住。"
+  ],
+  quiz_list: [
+    { question: "提高信道带宽，可以减小时延中的哪一项？", options: ["发送时延", "传播时延", "两者都减小"], correct: 0 },
+    { question: "数据长 4000 B、带宽 100 Mbps，发送时延约为？", options: ["320 μs", "40 μs", "3.2 ms"], correct: 0 },
+    { question: "1000 km 光纤的传播时延约为？", options: ["5 μs", "5 ms", "5 s"], correct: 1 },
+  ]
+};
+
+/* ===== CN-141 专属动画：时延四段分解 + 滑块实时计算 ===== */
+const STEPS = [
+  { focus:0, desc:'速率三兄弟：速率（最高数据率）/ 带宽（最高速率）/ 吞吐量（实际通过量）' },
+  { focus:1, desc:'时延四段分解：发送 → 传播 → 处理 → 排队' },
+  { focus:2, desc:'发送时延 = 数据长度 ÷ 带宽：拖动滑块，看实时计算结果' },
+  { focus:3, desc:'传播时延 = 距离 ÷ 光速：与带宽无关，链路再快也要等电磁波' },
+  { focus:4, desc:'时延带宽积 = 传播时延 × 带宽：链路上「在飞」的比特数' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+const params = { len: 1000, bw: 100, dist: 1000 }; /* B, Mbps, km */
+
+function fmtTime(ms){
+  if(ms >= 1000) return (ms/1000).toFixed(2)+' s';
+  if(ms >= 1) return ms.toFixed(2)+' ms';
+  return (ms*1000).toFixed(0)+' μs';
+}
+
+function compute(){
+  const txMs = params.len*8/ (params.bw*1e6) * 1000;   /* 发送时延 ms */
+  const propMs = params.dist / 2e5 * 1000;              /* 传播时延 ms */
+  return { tx: txMs, prop: propMs };
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const { tx, prop } = compute();
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['速率三兄弟','时延四段分解','发送时延（可滑块联动）','传播时延','时延带宽积'][f]);
+
+  if(f===0){
+    const items=[
+      {t:'速率', s:'信道在单位时间内传输的最高数据率（bit/s）', c:'var(--primary)'},
+      {t:'带宽', s:'信道所能通过的「最高数据率」，原本指频率宽度', c:'var(--success)'},
+      {t:'吞吐量', s:'单位时间通过某个网络/信道的实际数据量（≤ 带宽）', c:'var(--highlight)'},
+    ];
+    items.forEach((it,i)=>{
+      const y=60+i*105;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',88).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',it.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',108).attr('y',y+40).attr('fill',it.c).attr('font-size',18).attr('font-weight','700').text(it.t);
+      g.append('text').attr('x',108).attr('y',y+70).attr('fill','var(--text)').attr('font-size',13).text(it.s);
+    });
+  }
+
+  if(f===1){
+    /* 链路 + 四段 */
+    g.append('rect').attr('x',80).attr('y',150).attr('width',90).attr('height',60).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2);
+    g.append('text').attr('x',125).attr('y',175).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('主机A');
+    g.append('text').attr('x',125).attr('y',195).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10).text('发送端');
+    g.append('rect').attr('x',730).attr('y',150).attr('width',90).attr('height',60).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2);
+    g.append('text').attr('x',775).attr('y',175).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('主机B');
+    g.append('text').attr('x',775).attr('y',195).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10).text('接收端');
+    g.append('rect').attr('x',330).attr('y',140).attr('width',240).attr('height',80).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--swap)').attr('stroke-width',2);
+    g.append('text').attr('x',450).attr('y',172).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('路由器（排队+处理）');
+    g.append('text').attr('x',450).attr('y',196).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10).text('在这里排队 + 处理');
+    g.append('line').attr('x1',170).attr('y1',180).attr('x2',330).attr('y2',180).attr('stroke','var(--border)').attr('stroke-width',2);
+    g.append('line').attr('x1',570).attr('y1',180).attr('x2',730).attr('y2',180).attr('stroke','var(--border)').attr('stroke-width',2);
+    const segs=[
+      {t:'① 发送时延', x:170, w:160, c:'var(--primary)', s:'数据块推上链路（在网卡里）'},
+      {t:'② 传播时延', x:330, w:240, c:'var(--highlight)', s:'比特在链路上飞行'},
+      {t:'③ 处理时延', x:330, w:240, c:'var(--swap)', s:'路由器查表/检错'},
+      {t:'④ 排队时延', x:330, w:240, c:'var(--danger)', s:'在路由器队列里等'},
+    ];
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',13.5).attr('font-weight','700').text('总时延 = 发送 + 传播 + 处理 + 排队');
+    g.append('text').attr('x',450).attr('y',328).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('①② 与线路和流量有关，③④ 与路由器负载有关');
+  }
+
+  if(f===2){
+    g.append('rect').attr('x',80).attr('y',70).attr('width',740).attr('height',110).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',105).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700').text('发送时延 = 数据长度 ÷ 带宽');
+    g.append('text').attr('x',450).attr('y',140).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-family','monospace')
+      .text('= '+params.len+' B × 8 ÷ '+(params.bw)+' Mbps = '+fmtTime(tx));
+    g.append('text').attr('x',450).attr('y',168).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('拖动上方滑块改变参数，结果实时更新');
+    /* 数据块推入动画 */
+    g.append('rect').attr('x',80).attr('y',230).attr('width',740).attr('height',46).attr('rx',8).attr('fill','var(--bg-elevated)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+    g.append('text').attr('x',95).attr('y',258).attr('fill','var(--text-muted)').attr('font-size',11.5).text('数据块');
+    const blk = g.append('rect').attr('x',90).attr('y',238).attr('width',60).attr('height',30).attr('rx',5).attr('fill','var(--primary)').attr('fill-opacity',0.8);
+    blk.append('animate').attr('attributeName','x').attr('from',90).attr('to',760).attr('dur','3s').attr('repeatCount','indefinite');
+    g.append('text').attr('x',450).attr('y',320).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('数据块被一位一位推上链路——这段时间 CPU 在「干活」，不是干等');
+  }
+
+  if(f===3){
+    g.append('rect').attr('x',80).attr('y',70).attr('width',740).attr('height',110).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',105).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',15).attr('font-weight','700').text('传播时延 = 链路距离 ÷ 电磁波速率');
+    g.append('text').attr('x',450).attr('y',140).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-family','monospace')
+      .text('= '+params.dist+' km ÷ 2×10⁵ km/s = '+fmtTime(prop));
+    g.append('text').attr('x',450).attr('y',168).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('注意：与带宽无关！带宽再高，光还是这个速度');
+    /* 飞行比特 */
+    g.append('line').attr('x1',100).attr('y1',270).attr('x2',800).attr('y2',270).attr('stroke','var(--border)').attr('stroke-width',2);
+    const bit = g.append('circle').attr('r',8).attr('fill','var(--highlight)').attr('cx',100).attr('cy',270);
+    bit.append('animate').attr('attributeName','cx').attr('from',100).attr('to',800).attr('dur','3s').attr('repeatCount','indefinite');
+    g.append('text').attr('x',100).attr('y',300).attr('fill','var(--text-muted)').attr('font-size',11.5).text('主机A');
+    g.append('text').attr('x',800).attr('y',300).attr('text-anchor','end').attr('fill','var(--text-muted)').attr('font-size',11.5).text('主机B');
+    g.append('text').attr('x',450).attr('y',350).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('比特以约 2×10⁸ m/s（光纤）在信道中传播');
+  }
+
+  if(f===4){
+    const bwBit = prop/1000 * params.bw*1e6;
+    const bwTxt = bwBit >= 1e6 ? (bwBit/1e6).toFixed(1)+' Mbit' : bwBit >= 1e3 ? (bwBit/1e3).toFixed(1)+' kbit' : bwBit.toFixed(0)+' bit';
+    g.append('rect').attr('x',80).attr('y',70).attr('width',740).attr('height',120).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',105).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',15).attr('font-weight','700').text('时延带宽积 = 传播时延 × 带宽');
+    g.append('text').attr('x',450).attr('y',140).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-family','monospace')
+      .text('= '+fmtTime(prop)+' × '+params.bw+' Mbps = '+bwTxt);
+    g.append('text').attr('x',450).attr('y',172).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('即链路上同时「在飞」的比特数');
+    g.append('text').attr('x',450).attr('y',240).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('含义：链路上「正在飞」的比特数量');
+    g.append('text').attr('x',450).attr('y',268).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('带宽越大、距离越长，链路上同时容纳的比特越多——像一条更粗更长的水管');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('RTT ≈ 2 × 传播时延 + 端部处理，是 TCP 超时重传的关键依据');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr141').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function bindParams(){
+  const sl=id=>document.getElementById(id);
+  function upd(){
+    params.len = +sl('sl-len').value;
+    params.bw  = +sl('sl-bw').value;
+    params.dist= +sl('sl-dist').value;
+    sl('v-len').textContent = params.len+' B';
+    sl('v-bw').textContent  = params.bw+' Mbps';
+    sl('v-dist').textContent= params.dist+' km';
+    renderViz();
+  }
+  ['sl-len','sl-bw','sl-dist'].forEach(id=>sl(id).addEventListener('input',upd));
+  upd();
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); bindParams(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

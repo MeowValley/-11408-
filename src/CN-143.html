@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>协议、接口与服务</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>协议、接口与服务</h1><span class="badge">C级 · CN-143</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>分层体系里有三个核心概念，必须分清：</p>
+<p><strong>协议（Protocol）</strong>：同一层内、对等实体之间通信的规则（「怎么对话」），包括三要素——<strong>语法</strong>（数据格式/结构）、<strong>语义</strong>（要发出的控制信息/完成什么动作）、<strong>同步</strong>（事件实现顺序）。<strong>接口（Interface）</strong>：同一结点内相邻层之间交换信息的连接点，下层通过接口向上层提供服务（「怎么调用」）。<strong>服务（Service）</strong>：下层能向上层提供的功能，「垂直方向」的能力。</p>
+<p>一句话记忆：<strong>协议是水平的（对等层之间），服务是垂直的（层与层之间）</strong>。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-143",
+  title: "协议、接口与服务",
+  derivation: [
+    "\\text{协议三要素}: \\; \\text{语法（数据格式）} + \\text{语义（控制信息/动作）} + \\text{同步（事件顺序）}",
+    "\\text{协议是「水平」的}: \\; \\text{对等层之间} \\; (\\text{逻辑通信})",
+    "\\text{服务是「垂直」的}: \\; \\text{下层通过接口向上层提供服务}",
+    "\\text{SDU 服务数据单元}: \\; \\text{PDU 协议数据单元} = \\text{SDU} + \\text{PCI 协议控制信息}",
+    "\\text{层次位置}: \\; \\text{物理层（比特）} < \\text{链路层（帧）} < \\text{网络层（分组/包）} < \\text{传输层（报文段）}"
+  ],
+  exam_text: "<b>【2018 真题改编】</b>协议的三要素是什么？协议与服务有什么区别？",
+  exam_answer: "答案：协议三要素是<b>语法</b>（数据的格式与结构）、<b>语义</b>（需要发出的控制信息、完成的动作与响应）、<b>同步</b>（事件实现顺序的详细说明）。区别：<b>协议是水平的</b>——控制对等层之间通信的规则（「逻辑通信」）；<b>服务是垂直的</b>——下层通过相邻层接口向上层提供能力。协议是「实现服务的手段」，协议不对上层可见。",
+  pitfall_list: [
+    "协议是水平的（对等层之间），服务/接口是垂直的（相邻层之间）——这是概念题的标准答案。",
+    "协议只规定对等层之间的通信规则，「接口」才规定相邻层之间如何交换信息。",
+    "SDU + PCI = PDU：每往下传一层，数据就被加上该层的协议控制信息（头部），逐层封装。"
+  ],
+  quiz_list: [
+    { question: "协议的三要素不包括？", options: ["语法", "同步", "带宽"], correct: 2 },
+    { question: "协议与服务的正确描述是？", options: ["协议垂直，服务水平", "协议水平，服务垂直", "两者都水平"], correct: 1 },
+    { question: "同一结点相邻层之间交换信息的连接点称为？", options: ["协议", "接口", "服务"], correct: 1 },
+  ]
+};
+
+/* ===== CN-143 专属动画：水平协议 vs 垂直服务 ===== */
+const STEPS = [
+  { focus:0, desc:'三个核心概念：协议（水平）/ 接口 / 服务（垂直）' },
+  { focus:1, desc:'协议三要素：语法 + 语义 + 同步' },
+  { focus:2, desc:'协议是「水平」的：对等层之间的逻辑通信' },
+  { focus:3, desc:'服务是「垂直」的：下层通过接口向上层提供服务' },
+  { focus:4, desc:'数据封装：每下一层加一个 PCI 头部，SDU+PCI=PDU' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['三概念','协议三要素','水平：协议','垂直：服务','封装：SDU+PCI'][f]);
+
+  if(f===0){
+    const items=[
+      {t:'协议 Protocol', s:'对等层之间通信的规则（水平）', c:'var(--primary)'},
+      {t:'接口 Interface', s:'相邻层之间交换信息的连接点', c:'var(--highlight)'},
+      {t:'服务 Service', s:'下层向上层提供的功能（垂直）', c:'var(--success)'},
+    ];
+    items.forEach((it,i)=>{
+      const y=60+i*105;
+      g.append('rect').attr('x',110).attr('y',y).attr('width',680).attr('height',88).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',it.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',140).attr('y',y+40).attr('fill',it.c).attr('font-size',18).attr('font-weight','700').text(it.t);
+      g.append('text').attr('x',140).attr('y',y+70).attr('fill','var(--text)').attr('font-size',13.5).text(it.s);
+    });
+  }
+
+  if(f===1){
+    const els=[
+      {t:'语法 Syntax', s:'数据的格式、结构与编码', e:'例：IPv4 首部固定 20 字节', c:'var(--primary)'},
+      {t:'语义 Semantics', s:'控制信息的含义、要完成的动作', e:'例：SYN=1 表示请求建立连接', c:'var(--success)'},
+      {t:'同步 Timing', s:'事件实现的先后顺序', e:'例：先三次握手，再传数据', c:'var(--highlight)'},
+    ];
+    els.forEach((el,i)=>{
+      const y=58+i*105;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',88).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',el.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',108).attr('y',y+38).attr('fill',el.c).attr('font-size',17).attr('font-weight','700').text(el.t);
+      g.append('text').attr('x',108).attr('y',y+66).attr('fill','var(--text)').attr('font-size',13).text(el.s);
+      g.append('text').attr('x',700).attr('y',y+50).attr('text-anchor','end').attr('fill','var(--text-muted)').attr('font-size',11.5).text='';
+    });
+  }
+
+  if(f===2){
+    /* 左右两个结点，同一层水平协议 */
+    const layers=['应用层','传输层','网络层','链路层','物理层'];
+    layers.forEach((l,i)=>{
+      const y=55+i*55;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',200).attr('height',46).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+      g.append('text').attr('x',180).attr('y',y+28).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text(l);
+      g.append('rect').attr('x',620).attr('y',y).attr('width',200).attr('height',46).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+      g.append('text').attr('x',720).attr('y',y+28).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text(l);
+      g.append('path').attr('d',`M 280 ${y+23} L 620 ${y+23}`).attr('stroke','var(--primary)').attr('stroke-width',2).attr('marker-end','url(#arr143)').attr('marker-start','url(#arr143u)').attr('stroke-dasharray', i===2?'':'5,5').attr('opacity', i===2?1:0.35);
+    });
+    g.append('text').attr('x',180).attr('y',40).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).attr('font-weight','700').text('主机 A');
+    g.append('text').attr('x',720).attr('y',40).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).attr('font-weight','700').text('主机 B');
+    g.append('text').attr('x',450).attr('y',222).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',13.5).attr('font-weight','700').text('网络层 ↔ 网络层：用 IP 协议「对话」');
+    g.append('text').attr('x',450).attr('y',250).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('这种「层与层直接对话」只是逻辑上的，实际数据要逐层下传再逐层上传');
+  }
+
+  if(f===3){
+    /* 垂直服务 */
+    const layers=['应用层','传输层','网络层','链路层','物理层'];
+    layers.forEach((l,i)=>{
+      const y=55+i*58;
+      g.append('rect').attr('x',250).attr('y',y).attr('width',400).attr('height',48).attr('rx',8)
+        .attr('fill','var(--bg-panel)').attr('stroke', i===1?'var(--success)':'var(--border)').attr('stroke-width', i===1?2.5:1.5);
+      g.append('text').attr('x',450).attr('y',y+29).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','600').text(l);
+      if(i<4){
+        g.append('path').attr('d',`M 450 ${y+48} L 450 ${y+58}`).attr('stroke','var(--success)').attr('stroke-width',2.5).attr('marker-end','url(#arr143s)');
+      }
+    });
+    g.append('text').attr('x',700).attr('y',140).attr('fill','var(--success)').attr('font-size',12.5).attr('font-weight','700').text('网络层通过「接口」');
+    g.append('text').attr('x',700).attr('y',160).attr('fill','var(--success)').attr('font-size',12.5).attr('font-weight','700').text('向传输层提供服务');
+    g.append('text').attr('x',700).attr('y',186).attr('fill','var(--text-muted)').attr('font-size',11).text('如：「尽力而为」的分组投递');
+    g.append('text').attr('x',450).attr('y',365).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('服务是垂直的：N 层使用 N-1 层的能力，接口是两者的「窗口」');
+  }
+
+  if(f===4){
+    /* 封装 */
+    g.append('rect').attr('x',100).attr('y',80).attr('width',180).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2);
+    g.append('text').attr('x',190).attr('y',110).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('应用层数据');
+    g.append('text').attr('x',330).attr('y',105).attr('fill','var(--text-muted)').attr('font-size',18).text('+ 传输层 PCI');
+    g.append('rect').attr('x',480).attr('y',80).attr('width',320).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2);
+    g.append('text').attr('x',640).attr('y',110).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('报文段（TCP 首部 + 数据）');
+    g.append('text').attr('x',330).attr('y',190).attr('fill','var(--text-muted)').attr('font-size',18).text('');
+    g.append('rect').attr('x',100).attr('y',220).attr('width',700).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2);
+    g.append('text').attr('x',450).attr('y',253).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13.5).attr('font-weight','700').text('继续向下：加网络层 PCI（IP 首部）→ 分组；加链路层 PCI → 帧');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',13.5).attr('font-weight','700').text('公式：PDU = SDU + PCI（协议控制信息）');
+    g.append('text').attr('x',450).attr('y',358).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('逐层封装再逐层解封——每层只认识自己加的头部');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr143').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary)');
+  defs.append('marker').attr('id','arr143u').attr('viewBox','0 0 10 10').attr('refX',1).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 10 0 L 0 5 L 10 10 z').attr('fill','var(--primary)');
+  defs.append('marker').attr('id','arr143s').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--success)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据链路层设备（网桥、交换机）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-proof infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>数据链路层设备（网桥、交换机）</h1><span class="badge">B级 · CN-165</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p><strong>网桥（Bridge）</strong>是两个端口的链路层设备：它识别 MAC 地址，只把帧转发到目的端口所在的网段，<strong>隔离冲突域</strong>（两个端口各一个冲突域）。两种网桥：<b>透明网桥</b>（即插即用，靠自学习建转发表，以太网用）和<b>源路由网桥</b>（发送方自己找路径，令牌环用，已淘汰）。</p>
+<p><strong>交换机（Switch）</strong>本质上是「多端口网桥」：每个端口一个冲突域，全双工通信，通过 MAC 地址表<strong>定向转发</strong>（不是广播）。N 个端口的交换机有 N 个冲突域，但<strong>仍是一个广播域</strong>——广播帧照样 flooding 到所有端口。直通式/存储转发式两种交换方式，VLAN 技术可以把一个交换机切成多个广播域。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-165",
+  title: "数据链路层设备（网桥、交换机）",
+  derivation: [
+    "\\text{网桥}: \\; 2\\ \\text{端口}, \\; \\text{按 MAC 地址转发}, \\; \\text{隔离冲突域}",
+    "\\text{交换机}: \\; N\\ \\text{端口} = N\\ \\text{个冲突域}, \\; \\text{但仍是 } 1\\ \\text{个广播域}",
+    "\\text{路由器}: \\; \\text{隔离广播域} + \\text{冲突域}",
+    "\\text{转发方式}: \\; \\text{存储转发（可靠慢）} \\;|\\; \\text{直通交换（快不检错）}"
+  ],
+  exam_text: "<b>【2021 真题改编】</b>一个 12 端口的以太网交换机，连接了 12 台主机，问有几个冲突域、几个广播域？",
+  exam_answer: "答案：<b>12 个冲突域、1 个广播域</b>。交换机每个端口独立成一个冲突域（各端口带宽独享、可全双工），所以 12 个；但交换机不隔离广播——广播帧依然会 flooding 到所有端口，整个交换机仍是一个广播域。若要分隔广播域，需要路由器或 VLAN。",
+  pitfall_list: [
+    "「交换机端口数 = 冲突域数，但广播域仍是 1」——这是最高频的考点，必须条件反射。",
+    "集线器所有端口同属一个冲突域；交换机每端口一个；路由器每个接口一个广播域——三级递进。",
+    "透明网桥的转发表靠「自学习」获得：收到帧就把「源 MAC → 入端口」记入表中，不是手工配置。"
+  ],
+  quiz_list: [
+    { question: "6 端口交换机连接 6 台主机，广播域数量是？", options: ["1 个", "6 个", "12 个"], correct: 0 },
+    { question: "能隔离广播域的设备是？", options: ["交换机", "路由器", "网桥"], correct: 1 },
+    { question: "透明网桥的转发表通过什么获得？", options: ["手工配置", "自学习（收到帧记源MAC+端口）", "广播请求"], correct: 1 },
+  ]
+};
+
+/* ===== CN-165 专属动画：交换机转发 + 冲突域广播域 ===== */
+const STEPS = [
+  { focus:0, desc:'网桥：两端口链路层设备，按 MAC 转发，隔离冲突域' },
+  { focus:1, desc:'交换机 = 多端口网桥：查 MAC 地址表定向转发' },
+  { focus:2, desc:'自学习：收到帧就记录「源 MAC → 入端口」，表中没有才广播' },
+  { focus:3, desc:'冲突域 vs 广播域：交换机隔离前者，路由器隔离后者' },
+  { focus:4, desc:'设备层级总对比：集线器 / 网桥 / 交换机 / 路由器' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['网桥','交换机转发','自学习','域隔离','设备对比'][f]);
+
+  if(f===0){
+    g.append('rect').attr('x',80).attr('y',150).attr('width',160).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',160).attr('y',183).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('网段 1（冲突域1）');
+    g.append('rect').attr('x',660).attr('y',150).attr('width',160).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',740).attr('y',183).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('网段 2（冲突域2）');
+    g.append('rect').attr('x',370).attr('y',140).attr('width',160).attr('height',76).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',3);
+    g.append('text').attr('x',450).attr('y',172).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',15).attr('font-weight','700').text('网桥');
+    g.append('text').attr('x',450).attr('y',196).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('2 端口 · 认 MAC');
+    g.append('path').attr('d','M 240 178 L 370 178').attr('stroke','var(--border)').attr('stroke-width',2).attr('marker-end','url(#arr165)');
+    g.append('path').attr('d','M 530 178 L 660 178').attr('stroke','var(--border)').attr('stroke-width',2).attr('marker-end','url(#arr165)');
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('');
+    g.append('text').attr('x',450).attr('y',302).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('帧的目的 MAC 在另一侧才转发，同侧不过——冲突被限制在各自网段');
+    g.append('text').attr('x',450).attr('y',332).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('效果：两段可以同时通信（串行总线 → 并行）');
+  }
+
+  if(f===1){
+    g.append('rect').attr('x',360).attr('y',140).attr('width',180).attr('height',110).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',3);
+    g.append('text').attr('x',450).attr('y',172).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',16).attr('font-weight','700').text('交换机');
+    g.append('text').attr('x',450).attr('y',200).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('MAC 地址表');
+    g.append('text').attr('x',450).attr('y',224).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10.5).text('A→口1 B→口3 C→口5');
+    const hosts=[[100,60,'A',0],[700,60,'B',1],[100,290,'C',2]];
+    hosts.forEach((h,i)=>{
+      g.append('rect').attr('x',h[0]).attr('y',h[1]).attr('width',110).attr('height',44).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2);
+      g.append('text').attr('x',h[0]+55).attr('y',h[1]+28).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('主机 '+h[2]);
+      g.append('line').attr('x1',h[0]+55).attr('y1',h[1]+44).attr('x2',450).attr('y2',195).attr('stroke','var(--border)').attr('stroke-width',1.5);
+    });
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('A 发 B：查表 → 只从口 3 发出（不是广播！）');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('其他端口完全不受影响 → 每端口独享带宽，可全双工');
+  }
+
+  if(f===2){
+    const rows=[
+      {t:'帧 1：A→B（表为空）', s:'查不到 B → 除入口外所有端口泛洪（flooding）', c:'var(--danger)'},
+      {t:'同时记录', s:'「源 MAC=A，入端口=1」写入地址表', c:'var(--primary)'},
+      {t:'B 回应：B→A', s:'查到 A 在口 1 → 定向转发；同时记录「B→口 3」', c:'var(--success)'},
+      {t:'帧 3：A→B', s:'表里已有 B → 直接定向转发，不再泛洪', c:'var(--highlight)'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=70+i*72;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',60).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',100).attr('y',y+37).attr('fill',r.c).attr('font-size',14).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',380).attr('y',y+37).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+      g.append('text').attr('x',380).attr('y',y+37).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+    });
+    g.append('text').attr('x',450).attr('y',365).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',366).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('表项有老化时间，长时间不出现的 MAC 会被删除——拓扑变化能自适应');
+  }
+
+  if(f===3){
+    g.append('text').attr('x',450).attr('y',70).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('冲突域与广播域的隔离能力：');
+    const rows=[
+      {t:'集线器 Hub', a:'不隔离', b:'不隔离', c1:'var(--danger)', c2:'var(--danger)'},
+      {t:'网桥 / 交换机', a:'每端口隔离一个', b:'不隔离（整机一个）', c1:'var(--success)', c2:'var(--danger)'},
+      {t:'路由器', a:'每个接口一个', b:'每个接口一个', c1:'var(--success)', c2:'var(--success)'},
+    ];
+    const heads=['设备','冲突域','广播域'];
+    const cw=[220,320,320];
+    let x=80;
+    heads.forEach((h,i)=>{
+      g.append('rect').attr('x',x).attr('y',95).attr('width',cw[i]-6).attr('height',36).attr('rx',5).attr('fill','var(--primary)').attr('fill-opacity',0.25).attr('stroke','var(--primary)').attr('stroke-width',1.5);
+      g.append('text').attr('x',x+cw[i]/2-3).attr('y',118).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text(h);
+      x+=cw[i];
+    });
+    rows.forEach((r,ri)=>{
+      const y=137+ri*66;
+      x=80;
+      [r.t,r.a,r.b].forEach((v,ci)=>{
+        const col = ci===1?r.c1:(ci===2?r.c2:'var(--primary)');
+        g.append('rect').attr('x',x).attr('y',y).attr('width',cw[ci]-6).attr('height',54).attr('rx',5)
+          .attr('fill','var(--bg-panel)').attr('stroke',col).attr('stroke-width', ci===0?2:1.5);
+        g.append('text').attr('x',x+14).attr('y',y+33).attr('fill','var(--text)').attr('font-size',13).attr('font-weight', ci===0?'700':'400').text(v);
+        x+=cw[ci];
+      });
+    });
+    g.append('text').attr('x',450).attr('y',350).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('');
+    g.append('text').attr('x',450).attr('y',352).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('VLAN 技术可以让交换机也隔离广播域（按端口划分逻辑局域网）');
+  }
+
+  if(f===4){
+    const devs=[
+      {t:'集线器', l:'物理层', s:'广播所有端口，共享带宽', c:'var(--danger)'},
+      {t:'网桥', l:'链路层', s:'两端口，按 MAC 转发', c:'var(--swap)'},
+      {t:'交换机', l:'链路层', s:'多端口网桥，定向转发', c:'var(--highlight)'},
+      {t:'路由器', l:'网络层', s:'按 IP 转发，隔离广播域', c:'var(--success)'},
+    ];
+    devs.forEach((d,i)=>{
+      const x=60+(i%2)*420, y=60+Math.floor(i/2)*150;
+      g.append('rect').attr('x',x).attr('y',y).attr('width',390).attr('height',130).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',d.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+22).attr('y',y+44).attr('fill',d.c).attr('font-size',17).attr('font-weight','700').text(d.t);
+      g.append('text').attr('x',x+22).attr('y',y+76).attr('fill','var(--text-muted)').attr('font-size',12).attr('font-weight','700').text('工作层：'+d.l);
+      g.append('text').attr('x',x+22).attr('y',y+104).attr('fill','var(--text)').attr('font-size',12.5).text(d.s);
+      g.append('text').attr('x',x+22).attr('y',y+104).attr('fill','var(--text)').attr('font-size',12.5).text(d.s);
+    });
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr165').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

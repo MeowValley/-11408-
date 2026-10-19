@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>局域网与以太网（IEEE 802.3）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>局域网与以太网（IEEE 802.3）</h1><span class="badge">B级 · CN-163</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>局域网（LAN）的特点是：覆盖范围小（1~2km）、<strong>广播式通信</strong>（一个发所有站收，按 MAC 地址过滤）、高数据率、低误码率、归属单一机构。IEEE 802 标准把数据链路层拆成两层：<strong>逻辑链路控制 LLC</strong>（向上提供统一接口）和 <strong>介质访问控制 MAC</strong>（封装帧、寻址、差错检测）。</p>
+<p>以太网（IEEE 802.3）是局域网的事实标准，采用 <strong>CSMA/CD + 曼彻斯特编码 + 无连接不可靠</strong> 服务。帧格式：目的地址(6B) + 源地址(6B) + 类型(2B) + 数据(46~1500B) + FCS(4B)，最短 64B、最长 1518B。适配器（网卡）收到帧先校验 FCS，出错静默丢弃——<strong>不重传、无连接</strong>，重传交给 TCP。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-163",
+  title: "局域网与以太网（IEEE 802.3）",
+  derivation: [
+    "\\text{以太网帧}: \\; \\underbrace{6B}_{\\text{目的}} + \\underbrace{6B}_{\\text{源}} + \\underbrace{2B}_{\\text{类型}} + \\underbrace{46{\\sim}1500B}_{\\text{数据}} + \\underbrace{4B}_{\\text{FCS}}",
+    "\\text{最短帧} = 64B, \\quad \\text{最长帧} = 1518B",
+    "\\text{争用期} = 2\\tau = 51.2\\ \\mu s \\; (\\text{10 Mbps 以太网})",
+    "\\text{以太网服务}: \\; \\text{无连接、不可靠（不确认、不重传，交给上层）}",
+    "\\text{MAC 地址}: \\; 6B = 48\\ \\text{bit，全球唯一，烧在网卡 ROM 里}"
+  ],
+  exam_text: "<b>【2016 真题改编】</b>以太网帧的数据段最小长度是多少？为什么要规定这个最小值？",
+  exam_answer: "答案：数据段最小 <b>46 字节</b>（加上 18 字节首尾部正好 64 字节最短帧）。原因：CSMA/CD 的「边发边听」要能检测到最远端传来的冲突信号，帧必须有最短长度限制——51.2 μs 争用期 × 10 Mbps = 512 bit = 64 B，其中首尾 18 B，所以数据至少 46 B。不够 46 B 的数据字段要<strong>填充</strong>（padding）到 46 B。",
+  pitfall_list: [
+    "以太网「不可靠」：网卡校验失败就静默丢弃，不通知对方、不重传——重传是 TCP 的事。",
+    "MAC 地址 48 位全球唯一，但只在同一广播域内有效，跨路由器就不认了。",
+    "最短帧 64 B = 目的6 + 源6 + 类型2 + 数据46 + FCS4；记「数据至少 46」而不是「帧至少 46」。"
+  ],
+  quiz_list: [
+    { question: "以太网帧的数据段最小长度是？", options: ["46 B", "64 B", "18 B"], correct: 0 },
+    { question: "以太网提供的服务是？", options: ["面向连接可靠", "无连接不可靠", "有确认无连接"], correct: 1 },
+    { question: "MAC 地址长度是？", options: ["32 位", "48 位", "64 位"], correct: 1 },
+  ]
+};
+
+/* ===== CN-163 专属动画：以太网帧结构 + 收发流程 ===== */
+const STEPS = [
+  { focus:0, desc:'以太网帧结构：6+6+2+46~1500+4，最短 64B 最长 1518B' },
+  { focus:1, desc:'帧格式逐字段解析：地址、类型、数据、FCS 校验' },
+  { focus:2, desc:'发送流程：适配器封装 → CSMA/CD 发送 → 冲突处理' },
+  { focus:3, desc:'接收流程：收帧 → 校验 FCS → 按目的 MAC 过滤 → 上交或丢弃' },
+  { focus:4, desc:'以太网演进：10M → 100M → 1G → 10G，从共享式到交换式' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['帧结构','字段解析','发送流程','接收流程','以太网演进'][f]);
+
+  if(f===0){
+    const parts=[
+      {t:'目的地址', s:'6 B', x:60, w:150, c:'var(--primary)'},
+      {t:'源地址', s:'6 B', x:220, w:150, c:'var(--success)'},
+      {t:'类型', s:'2 B', x:380, w:80, c:'var(--highlight)'},
+      {t:'数据', s:'46~1500 B', x:470, w:230, c:'var(--swap)'},
+      {t:'FCS', s:'4 B', x:710, w:100, c:'var(--compare)'},
+    ];
+    parts.forEach((p,i)=>{
+      g.append('rect').attr('x',p.x).attr('y',120).attr('width',p.w).attr('height',90).attr('rx',8)
+        .attr('fill','var(--bg-panel)').attr('stroke',p.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',p.x+p.w/2).attr('y',158).attr('text-anchor','middle').attr('fill',p.c).attr('font-size',15).attr('font-weight','700').text(p.t);
+      g.append('text').attr('x',p.x+p.w/2).attr('y',188).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-family','monospace').text(p.s);
+      if(i<4) g.append('path').attr('d',`M ${p.x+p.w+2} 165 L ${p.x+p.w+26} 165`).attr('stroke','var(--text-muted)').attr('stroke-width',1.5).attr('marker-end','url(#arr163)');
+    });
+    g.append('text').attr('x',450).attr('y',255).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('');
+    g.append('text').attr('x',450).attr('y',257).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('帧总长 64 ~ 1518 字节（数据不足 46 B 要填充）');
+    g.append('text').attr('x',450).attr('y',290).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',292).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('没有「帧起始/结束定界符」——用前导码同步 + FCS 保证完整');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('');
+    g.append('text').attr('x',450).attr('y',342).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('对比：最短 64B 由争用期决定，最长 1518B 是历史经验值');
+  }
+
+  if(f===1){
+    const rows=[
+      {f:'目的 MAC', s:'接收方网卡地址，6 字节全球唯一', e:'FF-FF-FF-FF-FF-FF = 广播', c:'var(--primary)'},
+      {f:'源 MAC', s:'发送方网卡地址', e:'烧在网卡 ROM，可软件改', c:'var(--success)'},
+      {f:'类型', s:'上层协议类型（0x0800=IP）', e:'告诉适配器交给谁', c:'var(--highlight)'},
+      {f:'数据', s:'来自 IP 层的分组', e:'46~1500 B，不足则填充', c:'var(--swap)'},
+      {f:'FCS', s:'CRC-32 循环冗余校验', e:'4 字节，校验整帧（除 FCS 本身）', c:'var(--compare)'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=60+i*60;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2);
+      g.append('text').attr('x',100).attr('y',y+31).attr('fill',r.c).attr('font-size',14).attr('font-weight','700').text(r.f);
+      g.append('text').attr('x',230).attr('y',y+31).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+      g.append('text').attr('x',230).attr('y',y+31).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+      g.append('text').attr('x',760).attr('y',y+31).attr('text-anchor','end').attr('fill','var(--text-muted)').attr('font-size',11.5).text(r.e);
+    });
+    g.append('text').attr('x',450).attr('y',370).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+  }
+
+  if(f===2){
+    const steps=[
+      {t:'① 封装', s:'上层数据 + 目的/源 MAC + 类型 + FCS 组成帧', c:'var(--primary)'},
+      {t:'② 监听', s:'CSMA/CD：信道忙则等待，闲则发送', c:'var(--success)'},
+      {t:'③ 发送', s:'边发边听，检测冲突信号', c:'var(--highlight)'},
+      {t:'④ 冲突处理', s:'停发 + 32bit 干扰信号 + 二进制指数退避重发', c:'var(--danger)'},
+    ];
+    steps.forEach((s2,i)=>{
+      const y=70+i*72;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',60).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',s2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',100).attr('y',y+37).attr('fill',s2.c).attr('font-size',15).attr('font-weight','700').text(s2.t);
+      g.append('text').attr('x',250).attr('y',y+37).attr('fill','var(--text)').attr('font-size',13).text(s2.s);
+      if(i<3) g.append('path').attr('d','M 450 '+(y+60)+' L 450 '+(y+72)).attr('stroke','var(--border)').attr('stroke-width',1.5).attr('marker-end','url(#arr163)');
+    });
+  }
+
+  if(f===3){
+    g.append('text').attr('x',80).attr('y',80).attr('fill','var(--text)').attr('font-size',13.5).attr('font-weight','700').text('接收方网卡的工作：');
+    g.append('rect').attr('x',80).attr('y',100).attr('width',740).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2);
+    g.append('text').attr('x',100).attr('y',133).attr('fill','var(--primary-strong)').attr('font-size',14).attr('font-weight','700').text('① 收帧');
+    g.append('text').attr('x',220).attr('y',133).attr('fill','var(--text)').attr('font-size',12.5).text(' Manchester 解码，还原比特');
+    g.append('rect').attr('x',80).attr('y',168).attr('width',740).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2);
+    g.append('text').attr('x',100).attr('y',201).attr('fill','var(--success)').attr('font-size',14).attr('font-weight','700').text('② 校验');
+    g.append('text').attr('x',220).attr('y',201).attr('fill','var(--text)').attr('font-size',12.5).text('CRC 重算比对 FCS，失败静默丢弃（不发 NAK！）');
+    g.append('rect').attr('x',80).attr('y',236).attr('width',740).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2);
+    g.append('text').attr('x',100).attr('y',269).attr('fill','var(--highlight)').attr('font-size',14).attr('font-weight','700').text('③ 过滤');
+    g.append('text').attr('x',220).attr('y',269).attr('fill','var(--text)').attr('font-size',12.5).text('目的 MAC = 本站/广播/组播 → 收下，否则丢弃');
+    g.append('rect').attr('x',80).attr('y',304).attr('width',740).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--swap)').attr('stroke-width',2);
+    g.append('text').attr('x',100).attr('y',337).attr('fill','var(--swap)').attr('font-size',14).attr('font-weight','700').text('④ 上交');
+    g.append('text').attr('x',220).attr('y',337).attr('fill','var(--text)').attr('font-size',12.5).text('按「类型」字段交给 IP 层（0x0800）或其他协议');
+  }
+
+  if(f===4){
+    const rows=[
+      {t:'10 Mbps', s:'同轴电缆，共享式总线，CSMA/CD', c:'var(--compare)'},
+      {t:'100 Mbps 快速以太网', s:'双绞线，仍可用 CSMA/CD（争用期缩小）', c:'var(--swap)'},
+      {t:'1 Gbps 千兆以太网', s:'全双工 + 交换机，告别 CSMA/CD', c:'var(--highlight)'},
+      {t:'10 Gbps+', s:'全双工交换，光纤为主', c:'var(--success)'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=70+i*72;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',60).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',100).attr('y',y+37).attr('fill',r.c).attr('font-size',15).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',340).attr('y',y+37).attr('fill','var(--text)').attr('font-size',13).text(r.s);
+    });
+    g.append('text').attr('x',450).attr('y',365).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',366).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('趋势：速率越来越高、共享变交换、半双工变全双工——CSMA/CD 逐步退出历史');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr163').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

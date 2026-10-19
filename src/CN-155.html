@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>流量控制与可靠传输机制</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>流量控制与可靠传输机制</h1><span class="badge">B级 · CN-155</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>发送方发太快、接收方处理不过来，数据就会溢出丢失——<strong>流量控制</strong>就是给发送方的发送速率「踩刹车」。经典机制是<strong>滑动窗口协议</strong>：发送方维护一个「发送窗口」，只有落在窗口内的帧才允许发送；接收方通过 ACK 确认帧把窗口向前滑动，确认多少就能再发多少。</p>
+<p>可靠传输 = 流量控制 + 差错处理的组合。三种典型协议：<strong>停止-等待</strong>（窗口=1，发一等）、<strong>后退 N 帧 GBN</strong>（窗口>1，出错整体重传）、<strong>选择重传 SR</strong>（窗口>1，只重传坏帧）。窗口大小与序号空间的关系是高频考点：GBN 的窗口 ≤ 2^n−1，SR 的窗口 ≤ 2^(n−1)。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-155",
+  title: "流量控制与可靠传输机制",
+  derivation: [
+    "\\text{滑动窗口}: \\; \\text{发送方只能发窗口内的帧}, \\; \\text{ACK 到达则窗口前移}",
+    "\\text{GBN 窗口上限}: \\; W_{T} \\le 2^{n} - 1 \\; (n\\ \\text{为序号位数})",
+    "\\text{SR 窗口上限}: \\; W_{T} = W_{R} \\le 2^{n-1}",
+    "\\text{可靠传输}: \\; \\text{流量控制} + \\text{差错控制（确认 + 重传 + 编号）}"
+  ],
+  exam_text: "<b>【2022 真题改编】</b>若帧序号用 3 位二进制编号，后退 N 帧协议的最大发送窗口是多少？选择重传协议呢？",
+  exam_answer: "答案：GBN 最大窗口 = 2³−1 = <b>7</b>（必须留一个序号空间区分「新帧」和「重传的旧帧」）；SR 最大窗口 = 2^(3−1) = <b>4</b>（发送窗口=接收窗口≤一半，否则 ACK 丢失时无法区分新旧帧）。这两个数字是滑动窗口考点的标准答案。",
+  pitfall_list: [
+    "GBN 窗口 ≤ 2^n−1、SR 窗口 ≤ 2^(n−1)——两个公式别记混，SR 更严格。",
+    "累积确认（GBN）确认「到第 n 号都收到了」，选择重传（SR）逐个确认，这是本质区别。",
+    "流量控制是「别发太快」，拥塞控制是「别把网络堵了」——前者是接收方能力问题，后者是网络负载问题，两层都做。"
+  ],
+  quiz_list: [
+    { question: "序号 3 位时，GBN 最大发送窗口是？", options: ["4", "7", "8"], correct: 1 },
+    { question: "序号 3 位时，SR 最大窗口是？", options: ["4", "7", "8"], correct: 0 },
+    { question: "GBN 协议采用的确认方式是？", options: ["累积确认", "逐个确认", "负确认"], correct: 0 },
+  ]
+};
+
+/* ===== CN-155 专属动画：滑动窗口机制 ===== */
+const STEPS = [
+  { focus:0, desc:'流量控制 = 给发送方踩刹车，核心机制是滑动窗口' },
+  { focus:1, desc:'发送窗口：只有窗口内的帧才允许发送（已确认的滑出窗外）' },
+  { focus:2, desc:'ACK 到达：窗口向前滑动，腾出新的发送许可' },
+  { focus:3, desc:'三种协议对比：停止-等待 / GBN / SR' },
+  { focus:4, desc:'窗口上限公式：GBN ≤ 2^n−1，SR ≤ 2^(n−1)' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function drawWindow(g, base, sent, acked, winSize, total){
+  const bw=54;
+  for(let i=0;i<total;i++){
+    const x=base+i*bw;
+    let fill='var(--bg-elevated)', stroke='var(--border)', col='var(--text-muted)';
+    if(i<acked){ fill='var(--success)'; col='#fff'; stroke='var(--success)'; }
+    else if(i<sent){ fill='var(--primary)'; col='#fff'; stroke='var(--primary)'; }
+    else if(i<sent+winSize){ fill='var(--highlight)'; col='var(--text)'; stroke='var(--highlight)'; }
+    g.append('rect').attr('x',x).attr('y',150).attr('width',bw-4).attr('height',44).attr('rx',6)
+      .attr('fill',fill).attr('fill-opacity',(i>=sent&&i<sent+winSize)?0.25:1).attr('stroke',stroke).attr('stroke-width',2);
+    g.append('text').attr('x',x+(bw-4)/2).attr('y',178).attr('text-anchor','middle').attr('fill',col).attr('font-size',13).attr('font-weight','700').attr('font-family','monospace').text(i);
+  }
+  /* 窗口框 */
+  const wx = base+sent*bw, ww = winSize*bw-4;
+  g.append('rect').attr('x',wx).attr('y',144).attr('width',ww).attr('height',56).attr('rx',8)
+    .attr('fill','none').attr('stroke','var(--highlight)').attr('stroke-width',2.5).attr('stroke-dasharray','6,4');
+  g.append('text').attr('x',wx+ww/2).attr('y',136).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12).attr('font-weight','700').text('发送窗口 W=4');
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['滑动窗口','窗口内才能发','ACK 滑动窗口','三协议对比','窗口上限'][f]);
+
+  if(f===0){
+    g.append('rect').attr('x',100).attr('y',120).attr('width',170).attr('height',64).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',185).attr('y',156).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('发送方');
+    g.append('rect').attr('x',630).attr('y',120).attr('width',170).attr('height',64).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',715).attr('y',156).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('接收方');
+    g.append('path').attr('d','M 270 140 L 630 140').attr('stroke','var(--highlight)').attr('stroke-width',3).attr('marker-end','url(#arr155)');
+    g.append('text').attr('x',450).attr('y',132).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12).attr('font-weight','700').text('数据帧（受窗口限制）');
+    g.append('path').attr('d','M 630 165 L 270 165').attr('stroke','var(--success)').attr('stroke-width',2).attr('marker-end','url(#arr155s)');
+    g.append('text').attr('x',450).attr('y',190).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',12).attr('font-weight','700').text('ACK 确认帧（确认即许可）');
+    g.append('text').attr('x',450).attr('y',250).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('');
+    g.append('text').attr('x',450).attr('y',252).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('形象理解：ACK 就像「餐厅取号」——确认一个号，才放行一个新帧');
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',302).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('接收方缓存满了怎么办？→ 用「接收窗口」限制，或用「零窗口」通知暂停');
+  }
+
+  if(f===1){
+    g.append('text').attr('x',80).attr('y',95).attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('发送方视角（绿=已确认，蓝=已发送未确认，黄框=可发送窗口）：');
+    drawWindow(g, 110, 4, 2, 4, 10);
+    g.append('text').attr('x',80).attr('y',230).attr('fill','var(--success)').attr('font-size',12).attr('font-weight','700').text('■ 已确认（滑出窗外，可重用序号）');
+    g.append('text').attr('x',80).attr('y',256).attr('fill','var(--primary)').attr('font-size',12).attr('font-weight','700').text('■ 已发送未确认（在窗内，等 ACK）');
+    g.append('text').attr('x',80).attr('y',282).attr('fill','var(--highlight)').attr('font-size',12).attr('font-weight','700').text('■ 窗口内未发送（随时可发）');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',332).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('帧 0、1 已被 ACK 确认；帧 2、3 在路上；窗口限制最多再发 4 帧');
+  }
+
+  if(f===2){
+    g.append('text').attr('x',80).attr('y',95).attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('收到 ACK 2 → 窗口右端前移 2 格（绿=已确认）：');
+    drawWindow(g, 110, 6, 4, 4, 10);
+    g.append('path').attr('d','M 330 226 L 330 210').attr('stroke','var(--success)').attr('stroke-width',2.5).attr('marker-end','url(#arr155u)');
+    g.append('text').attr('x',345).attr('y',240).attr('fill','var(--success)').attr('font-size',12).attr('font-weight','700').text('窗口滑动');
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('每确认一个帧，发送方就获得「多发送一个帧」的许可——速率自适应接收方处理能力');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('窗口大小由接收方通过 ACK 中的「窗口字段」通告（TCP 亦然）');
+  }
+
+  if(f===3){
+    const rows=[
+      {t:'停止-等待', w:'W = 1', a:'每帧单独确认', r:'超时重发那一帧', u:'低（大部分时间在等）', c:'var(--compare)'},
+      {t:'GBN 后退N帧', w:'W ≤ 2ⁿ−1', a:'累积确认', r:'出错帧及其后全部重发', u:'高（无需逐个等）', c:'var(--swap)'},
+      {t:'SR 选择重传', w:'W ≤ 2ⁿ⁻¹', a:'逐个确认', r:'只重发出错的那一帧', u:'最高（需接收缓冲）', c:'var(--success)'},
+    ];
+    const heads=['协议','发送窗口','确认方式','重传策略','信道利用率'];
+    const cw=[120,110,130,230,240];
+    let x=40;
+    heads.forEach((h,i)=>{
+      g.append('rect').attr('x',x).attr('y',70).attr('width',cw[i]-4).attr('height',34).attr('rx',5).attr('fill','var(--primary)').attr('fill-opacity',0.25).attr('stroke','var(--primary)').attr('stroke-width',1.5);
+      g.append('text').attr('x',x+cw[i]/2-2).attr('y',92).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text(h);
+      x+=cw[i];
+    });
+    rows.forEach((r,ri)=>{
+      const y=110+ri*72;
+      const vals=[r.t,r.w,r.a,r.r,r.u];
+      x=40;
+      vals.forEach((v,ci)=>{
+        g.append('rect').attr('x',x).attr('y',y).attr('width',cw[ci]-4).attr('height',60).attr('rx',5)
+          .attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width', ci===0?2:1);
+        g.append('text').attr('x',x+12).attr('y',y+35).attr('fill', ci===0?r.c:'var(--text)').attr('font-size',12).attr('font-weight', ci===0?'700':'400').text(v);
+        x+=cw[ci];
+      });
+    });
+  }
+
+  if(f===4){
+    g.append('rect').attr('x',120).attr('y',80).attr('width',330).attr('height',170).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--swap)').attr('stroke-width',2.5);
+    g.append('text').attr('x',285).attr('y',120).attr('text-anchor','middle').attr('fill','var(--swap)').attr('font-size',16).attr('font-weight','700').text('GBN 后退 N 帧');
+    g.append('text').attr('x',285).attr('y',165).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',18).attr('font-family','monospace').text('W ≤ 2ⁿ − 1');
+    g.append('text').attr('x',285).attr('y',205).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('序号 3 位 → W 最大 7');
+    g.append('rect').attr('x',470).attr('y',80).attr('width',330).attr('height',170).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',635).attr('y',120).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',16).attr('font-weight','700').text('SR 选择重传');
+    g.append('text').attr('x',635).attr('y',165).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',18).attr('font-family','monospace').text('W ≤ 2ⁿ⁻¹');
+    g.append('text').attr('x',635).attr('y',205).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('序号 3 位 → W 最大 4');
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('为什么 GBN 不能取满 2ⁿ？');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',332).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('若 W=2ⁿ，ACK 全部丢失时无法区分「重发的旧帧 0」和「新帧 0」，必须至少空一个号');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr155').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--highlight)');
+  defs.append('marker').attr('id','arr155s').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--success)');
+  defs.append('marker').attr('id','arr155u').attr('viewBox','0 0 10 10').attr('refX',1).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 10 0 L 0 5 L 10 10 z').attr('fill','var(--success)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,4451 @@
+{
+  "meta": {
+    "generated_at": "2026-10-18T09:10:58.404Z",
+    "total_topics": 436,
+    "description": "考研11408全量知识点台账，课件批量生成的唯一数据源",
+    "source": [
+      "spec/outline/*.md",
+      "spec/exams/*_exams.json"
+    ],
+    "anim_level_distribution": {
+      "A": 142,
+      "B": 120,
+      "C": 174
+    }
+  },
+  "subject_distribution": {
+    "408": 186,
+    "数学一": 133,
+    "英语一": 29,
+    "政治": 88
+  },
+  "topics": [
+    {
+      "id": "MA-01",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "函数的概念、性质（有界性、单调性、奇偶性、周期性）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-02",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "复合函数、反函数、分段函数、隐函数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-03",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "极限的定义（数列极限、函数极限）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-04",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "极限的计算方法（四则运算、两个重要极限、等价无穷小替换、洛必达法则）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-05",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "无穷小量与无穷大量的比较（高阶、低阶、同阶、等价）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-06",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "函数的连续性（连续的定义、间断点的类型）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-07",
+      "subject": "数学一",
+      "chapter": "一、函数、极限、连续",
+      "name": "闭区间上连续函数的性质（有界性、最值定理、介值定理、零点定理）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-08",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "导数与微分的概念及其几何意义",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-09",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "可导与连续的关系",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-10",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "求导法则（四则运算、复合函数、隐函数、参数方程、反函数）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-11",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "高阶导数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-12",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "微分中值定理（罗尔定理、拉格朗日中值定理、柯西中值定理、泰勒中值定理）",
+      "frequency": "中",
+      "exam_refs": [
+        "2024-Q5"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-13",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "洛必达法则",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-14",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "函数单调性、极值与最值",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-15",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "函数凹凸性与拐点",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-16",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "曲率与曲率半径（数一）",
+      "frequency": "冷门",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-17",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "函数图形的描绘",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-18",
+      "subject": "数学一",
+      "chapter": "二、一元函数微分学",
+      "name": "弧微分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-19",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "不定积分的概念与性质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-20",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "换元积分法（第一类、第二类）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-21",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "分部积分法",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-22",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "有理函数、三角函数有理式、简单无理函数的积分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-23",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "定积分的概念与性质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-24",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "微积分基本定理（牛顿-莱布尼茨公式）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-25",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "变限积分函数及其求导",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-26",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "定积分的计算（换元法、分部积分法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-27",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "反常积分（无穷区间、无界函数）及其敛散性判别",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-28",
+      "subject": "数学一",
+      "chapter": "三、一元函数积分学",
+      "name": "定积分的应用（平面图形面积、旋转体体积、弧长、物理应用）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-29",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "向量的概念、线性运算、数量积、向量积、混合积",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-30",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "平面方程（点法式、一般式）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-31",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "直线方程（点向式、参数式、一般式）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-32",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "直线与平面的关系（夹角、位置关系）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-33",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "曲面方程（旋转曲面、柱面、二次曲面）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-34",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "空间曲线及其方程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-35",
+      "subject": "数学一",
+      "chapter": "四、向量代数与空间解析几何（数一独有）",
+      "name": "点到平面、点到直线的距离",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-36",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "多元函数的概念、极限与连续",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-37",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "偏导数的概念与计算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-38",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "全微分的概念与计算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-39",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "多元复合函数求导（链式法则）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-40",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "隐函数求导",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-41",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "多元函数极值与最值",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-42",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "条件极值与拉格朗日乘数法",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-43",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "方向导数与梯度",
+      "frequency": "中",
+      "exam_refs": [
+        "2020-Q7"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-44",
+      "subject": "数学一",
+      "chapter": "五、多元函数微分学",
+      "name": "多元函数微分学的几何应用（切平面、法线、空间曲线切线与法平面）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-45",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "二重积分的概念、性质与计算（直角坐标、极坐标）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-46",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "三重积分的概念、性质与计算（直角坐标、柱面坐标、球面坐标）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-47",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "第一类曲线积分（对弧长的曲线积分）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-48",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "第二类曲线积分（对坐标的曲线积分）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-49",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "格林公式及其应用（积分与路径无关的条件）",
+      "frequency": "中",
+      "exam_refs": [
+        "2019-Q16"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-50",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "第一类曲面积分（对面积的曲面积分）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-51",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "第二类曲面积分（对坐标的曲面积分）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-52",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "高斯公式（散度）",
+      "frequency": "中",
+      "exam_refs": [
+        "2018-Q18"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-53",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "斯托克斯公式（旋度）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-54",
+      "subject": "数学一",
+      "chapter": "六、多元函数积分学（数一独有，重点难点）",
+      "name": "场论初步（梯度、散度、旋度）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-55",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "常数项级数的概念与性质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-56",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "正项级数审敛法（比较、比值、根值、积分判别法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-57",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "交错级数与莱布尼茨判别法",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-58",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "绝对收敛与条件收敛",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-59",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "幂级数的收敛半径、收敛区间、收敛域",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-60",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "幂级数的和函数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-61",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "函数的幂级数展开（泰勒级数、麦克劳林级数）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-62",
+      "subject": "数学一",
+      "chapter": "七、无穷级数",
+      "name": "傅里叶级数（数一独有）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-63",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "微分方程的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-64",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "一阶微分方程（可分离变量、齐次、一阶线性、伯努利）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-65",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "可降阶的高阶微分方程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-66",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "高阶线性微分方程解的结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-67",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "二阶常系数齐次线性微分方程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-68",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "二阶常系数非齐次线性微分方程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-69",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "欧拉方程（数一）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-70",
+      "subject": "数学一",
+      "chapter": "八、常微分方程",
+      "name": "微分方程的应用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-71",
+      "subject": "数学一",
+      "chapter": "一、行列式",
+      "name": "行列式的概念与性质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-72",
+      "subject": "数学一",
+      "chapter": "一、行列式",
+      "name": "行列式按行（列）展开",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-73",
+      "subject": "数学一",
+      "chapter": "一、行列式",
+      "name": "克拉默法则",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-74",
+      "subject": "数学一",
+      "chapter": "二、矩阵",
+      "name": "矩阵的概念与运算（加法、数乘、乘法、转置）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-75",
+      "subject": "数学一",
+      "chapter": "二、矩阵",
+      "name": "逆矩阵（定义、性质、求法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-76",
+      "subject": "数学一",
+      "chapter": "二、矩阵",
+      "name": "伴随矩阵",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-77",
+      "subject": "数学一",
+      "chapter": "二、矩阵",
+      "name": "初等变换与初等矩阵",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-78",
+      "subject": "数学一",
+      "chapter": "二、矩阵",
+      "name": "矩阵的秩",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-79",
+      "subject": "数学一",
+      "chapter": "三、向量",
+      "name": "向量组的线性表示与线性组合",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-80",
+      "subject": "数学一",
+      "chapter": "三、向量",
+      "name": "向量组的线性相关与线性无关",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-81",
+      "subject": "数学一",
+      "chapter": "三、向量",
+      "name": "向量组的秩与极大线性无关组",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-82",
+      "subject": "数学一",
+      "chapter": "三、向量",
+      "name": "向量空间（数一独有）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-83",
+      "subject": "数学一",
+      "chapter": "三、向量",
+      "name": "线性方程组的解的结构（基础解系）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-84",
+      "subject": "数学一",
+      "chapter": "四、线性方程组",
+      "name": "齐次线性方程组有非零解的条件",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-85",
+      "subject": "数学一",
+      "chapter": "四、线性方程组",
+      "name": "非齐次线性方程组有解的条件",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-86",
+      "subject": "数学一",
+      "chapter": "四、线性方程组",
+      "name": "线性方程组的通解",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-87",
+      "subject": "数学一",
+      "chapter": "五、矩阵的特征值与特征向量",
+      "name": "特征值与特征向量的概念与计算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-88",
+      "subject": "数学一",
+      "chapter": "五、矩阵的特征值与特征向量",
+      "name": "相似矩阵",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-89",
+      "subject": "数学一",
+      "chapter": "五、矩阵的特征值与特征向量",
+      "name": "实对称矩阵的对角化",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-90",
+      "subject": "数学一",
+      "chapter": "六、二次型",
+      "name": "二次型及其矩阵表示",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-91",
+      "subject": "数学一",
+      "chapter": "六、二次型",
+      "name": "化二次型为标准形（配方法、正交变换法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-92",
+      "subject": "数学一",
+      "chapter": "六、二次型",
+      "name": "正定二次型与正定矩阵",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-93",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "随机事件与样本空间",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-94",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "事件的关系与运算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-95",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "概率的定义与性质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-96",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "古典概型、几何概型",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-97",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "条件概率",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-98",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "全概率公式与贝叶斯公式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-99",
+      "subject": "数学一",
+      "chapter": "一、随机事件与概率",
+      "name": "事件的独立性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-100",
+      "subject": "数学一",
+      "chapter": "二、随机变量及其分布",
+      "name": "随机变量与分布函数",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-101",
+      "subject": "数学一",
+      "chapter": "二、随机变量及其分布",
+      "name": "离散型随机变量及其分布律",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-102",
+      "subject": "数学一",
+      "chapter": "二、随机变量及其分布",
+      "name": "连续型随机变量及其概率密度",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-103",
+      "subject": "数学一",
+      "chapter": "二、随机变量及其分布",
+      "name": "常见分布（0-1分布、二项分布、泊松分布、均匀分布、指数分布、正态分布）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-104",
+      "subject": "数学一",
+      "chapter": "二、随机变量及其分布",
+      "name": "随机变量函数的分布",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-105",
+      "subject": "数学一",
+      "chapter": "三、多维随机变量及其分布",
+      "name": "二维随机变量、联合分布函数",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-106",
+      "subject": "数学一",
+      "chapter": "三、多维随机变量及其分布",
+      "name": "边缘分布",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-107",
+      "subject": "数学一",
+      "chapter": "三、多维随机变量及其分布",
+      "name": "条件分布",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-108",
+      "subject": "数学一",
+      "chapter": "三、多维随机变量及其分布",
+      "name": "随机变量的独立性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-109",
+      "subject": "数学一",
+      "chapter": "三、多维随机变量及其分布",
+      "name": "两个随机变量函数的分布",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-110",
+      "subject": "数学一",
+      "chapter": "四、随机变量的数字特征",
+      "name": "数学期望",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-111",
+      "subject": "数学一",
+      "chapter": "四、随机变量的数字特征",
+      "name": "方差",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-112",
+      "subject": "数学一",
+      "chapter": "四、随机变量的数字特征",
+      "name": "协方差与相关系数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-113",
+      "subject": "数学一",
+      "chapter": "四、随机变量的数字特征",
+      "name": "矩、协方差矩阵",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-114",
+      "subject": "数学一",
+      "chapter": "五、大数定律与中心极限定理",
+      "name": "切比雪夫不等式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-115",
+      "subject": "数学一",
+      "chapter": "五、大数定律与中心极限定理",
+      "name": "大数定律",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-116",
+      "subject": "数学一",
+      "chapter": "五、大数定律与中心极限定理",
+      "name": "中心极限定理",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-117",
+      "subject": "数学一",
+      "chapter": "六、数理统计的基本概念",
+      "name": "总体、样本、统计量",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-118",
+      "subject": "数学一",
+      "chapter": "六、数理统计的基本概念",
+      "name": "抽样分布（χ²分布、t分布、F分布）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-119",
+      "subject": "数学一",
+      "chapter": "六、数理统计的基本概念",
+      "name": "正态总体的抽样分布",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-120",
+      "subject": "数学一",
+      "chapter": "七、参数估计",
+      "name": "点估计（矩估计、极大似然估计）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-121",
+      "subject": "数学一",
+      "chapter": "七、参数估计",
+      "name": "估计量的评选标准（无偏性、有效性、相合性）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "MA-122",
+      "subject": "数学一",
+      "chapter": "七、参数估计",
+      "name": "区间估计（正态总体均值与方差的区间估计）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-123",
+      "subject": "数学一",
+      "chapter": "八、假设检验（数一独有）",
+      "name": "假设检验的基本概念",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q22"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-124",
+      "subject": "数学一",
+      "chapter": "八、假设检验（数一独有）",
+      "name": "正态总体均值的假设检验",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q22"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-125",
+      "subject": "数学一",
+      "chapter": "八、假设检验（数一独有）",
+      "name": "正态总体方差的假设检验",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q22"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-126",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "空间解析几何与向量代数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-127",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "三重积分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-128",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "两类曲线积分、两类曲面积分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-129",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "格林公式、高斯公式、斯托克斯公式、场论",
+      "frequency": "中",
+      "exam_refs": [
+        "2019-Q16",
+        "2018-Q18"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-130",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "傅里叶级数",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "MA-131",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "向量空间",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-132",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "假设检验",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q22"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "MA-133",
+      "subject": "数学一",
+      "chapter": "数一 vs 数二 / 数三 独有考点（标记）",
+      "name": "区间估计（数二不考概率，数三不考区间估计）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-01",
+      "subject": "408",
+      "chapter": "一、基本概念",
+      "name": "数据结构的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-02",
+      "subject": "408",
+      "chapter": "一、基本概念",
+      "name": "算法的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-03",
+      "subject": "408",
+      "chapter": "一、基本概念",
+      "name": "时间复杂度和空间复杂度分析",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-04",
+      "subject": "408",
+      "chapter": "二、线性表",
+      "name": "线性表的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-05",
+      "subject": "408",
+      "chapter": "二、线性表",
+      "name": "线性表的实现",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-06",
+      "subject": "408",
+      "chapter": "二、线性表",
+      "name": "顺序存储（顺序表）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-07",
+      "subject": "408",
+      "chapter": "二、线性表",
+      "name": "链式存储（链表）",
+      "frequency": "中",
+      "exam_refs": [
+        "2021-Q41"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-08",
+      "subject": "408",
+      "chapter": "二、线性表",
+      "name": "线性表的应用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-09",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "栈和队列的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-10",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "栈和队列的顺序存储结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-11",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "栈和队列的链式存储结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-12",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "多维数组的存储",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-13",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "特殊矩阵的压缩存储",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-14",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "栈、队列和数组的应用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-15",
+      "subject": "408",
+      "chapter": "三、栈、队列和数组",
+      "name": "串（串的模式匹配、KMP 算法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-16",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-17",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "二叉树",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-18",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "二叉树的定义及其主要特征",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-19",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "二叉树的顺序存储结构和链式存储结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-20",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "二叉树的遍历",
+      "frequency": "中",
+      "exam_refs": [
+        "2017-Q41"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-21",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "线索二叉树",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-22",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "哈夫曼树与哈夫曼编码",
+      "frequency": "中",
+      "exam_refs": [
+        "2019-Q6"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-23",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树、森林",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-24",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树的存储结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "DS-25",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树与二叉树的转换",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-26",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "森林与二叉树的转换",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-27",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树和森林的遍历",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-28",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "树与二叉树的应用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-29",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "二叉排序树（BST）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-30",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "平衡二叉树（AVL）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-31",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "红黑树",
+      "frequency": "冷门",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-32",
+      "subject": "408",
+      "chapter": "四、树与二叉树",
+      "name": "并查集",
+      "frequency": "冷门",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-33",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "图的基本概念",
+      "frequency": "高",
+      "exam_refs": [
+        "2020-Q7"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-34",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "图的存储结构（邻接矩阵、邻接表）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-35",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "图的遍历（DFS、BFS）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-36",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "图的应用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-37",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "最小生成树（Prim、Kruskal）",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-38",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "最短路径（Dijkstra、Floyd）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-39",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "拓扑排序",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q41"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-40",
+      "subject": "408",
+      "chapter": "五、图",
+      "name": "关键路径（AOE 网）",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-41",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "顺序查找",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-42",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "折半查找（二分查找）",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-43",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "分块查找",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-44",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "二叉排序树查找",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-45",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "平衡二叉树查找",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-46",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "B 树与 B+ 树",
+      "frequency": "中",
+      "exam_refs": [
+        "2018-Q8"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "DS-47",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "散列表（哈希表）及其冲突处理",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-48",
+      "subject": "408",
+      "chapter": "六、查找",
+      "name": "KMP 算法",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-49",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "插入排序（直接插入、折半插入、希尔排序）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-50",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "交换排序（冒泡排序、快速排序）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-51",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "选择排序（简单选择排序、堆排序）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-52",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "归并排序",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-53",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "基数排序",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-54",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "各种内部排序算法的比较",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "DS-55",
+      "subject": "408",
+      "chapter": "七、排序",
+      "name": "外部排序",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-56",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "计算机发展历程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-57",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "计算机系统层次结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-58",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "计算机的基本组成",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-59",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "计算机的性能指标",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-60",
+      "subject": "408",
+      "chapter": "二、数据的表示和运算",
+      "name": "数制与编码",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-61",
+      "subject": "408",
+      "chapter": "二、数据的表示和运算",
+      "name": "定点数的表示和运算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-62",
+      "subject": "408",
+      "chapter": "二、数据的表示和运算",
+      "name": "浮点数的表示和运算",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-63",
+      "subject": "408",
+      "chapter": "二、数据的表示和运算",
+      "name": "算术逻辑单元（ALU）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-64",
+      "subject": "408",
+      "chapter": "三、存储系统",
+      "name": "存储器的分类与层次结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-65",
+      "subject": "408",
+      "chapter": "三、存储系统",
+      "name": "主存储器（SRAM、DRAM、ROM）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-66",
+      "subject": "408",
+      "chapter": "三、存储系统",
+      "name": "高速缓冲存储器（Cache）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-67",
+      "subject": "408",
+      "chapter": "三、存储系统",
+      "name": "虚拟存储器",
+      "frequency": "中",
+      "exam_refs": [
+        "2019-Q44"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-68",
+      "subject": "408",
+      "chapter": "三、存储系统",
+      "name": "存储器的校验",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-69",
+      "subject": "408",
+      "chapter": "四、指令系统",
+      "name": "指令格式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-70",
+      "subject": "408",
+      "chapter": "四、指令系统",
+      "name": "指令的寻址方式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-71",
+      "subject": "408",
+      "chapter": "四、指令系统",
+      "name": "CISC 与 RISC",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-72",
+      "subject": "408",
+      "chapter": "四、指令系统",
+      "name": "机器级代码的表示",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-73",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "CPU 的功能和基本结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-74",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "指令执行过程（指令周期）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-75",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "数据通路",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-76",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "控制器的功能和工作原理",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-77",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "指令流水线",
+      "frequency": "中",
+      "exam_refs": [
+        "2018-Q18"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-78",
+      "subject": "408",
+      "chapter": "五、中央处理器（CPU）",
+      "name": "中断系统",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-79",
+      "subject": "408",
+      "chapter": "六、总线",
+      "name": "总线概述",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-80",
+      "subject": "408",
+      "chapter": "六、总线",
+      "name": "总线的分类与结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-81",
+      "subject": "408",
+      "chapter": "六、总线",
+      "name": "总线仲裁与控制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-82",
+      "subject": "408",
+      "chapter": "六、总线",
+      "name": "总线性能指标",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-83",
+      "subject": "408",
+      "chapter": "七、输入/输出系统",
+      "name": "I/O 系统的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-84",
+      "subject": "408",
+      "chapter": "七、输入/输出系统",
+      "name": "外部设备",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CO-85",
+      "subject": "408",
+      "chapter": "七、输入/输出系统",
+      "name": "I/O 接口",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CO-86",
+      "subject": "408",
+      "chapter": "七、输入/输出系统",
+      "name": "I/O 控制方式（程序查询、程序中断、DMA、通道）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CO-87",
+      "subject": "408",
+      "chapter": "七、输入/输出系统",
+      "name": "中断系统",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-88",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "操作系统的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-89",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "操作系统的发展历程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-90",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "操作系统的运行环境",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-91",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "操作系统的体系结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-92",
+      "subject": "408",
+      "chapter": "一、计算机系统概述",
+      "name": "虚拟机",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-93",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程与线程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-94",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程的概念、组成、特征",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-95",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程的状态与转换",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-96",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程控制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-97",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程通信",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-98",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "线程的概念与多线程模型",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-99",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "CPU 调度",
+      "frequency": "高",
+      "exam_refs": [
+        "2024-Q30"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-100",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "调度的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-101",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "调度算法（FCFS、SJF、RR、优先级、多级反馈队列）",
+      "frequency": "中",
+      "exam_refs": [
+        "2024-Q30"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-102",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "同步与互斥",
+      "frequency": "高",
+      "exam_refs": [
+        "2022-Q45"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-103",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "进程同步与互斥的基本概念",
+      "frequency": "高",
+      "exam_refs": [
+        "2022-Q45"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-104",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "信号量机制（PV 操作）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-105",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "经典同步问题（生产者-消费者、读者-写者、哲学家进餐）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-106",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "死锁",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-107",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "死锁的概念与必要条件",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-108",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "死锁预防",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-109",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "死锁避免（银行家算法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-110",
+      "subject": "408",
+      "chapter": "二、进程与线程",
+      "name": "死锁检测与解除",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-111",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "内存管理概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-112",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "内存管理的功能",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-113",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "程序装入与链接",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-114",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "连续分配管理方式",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-115",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "非连续分配管理方式（分页、分段、段页式）",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-116",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "虚拟内存管理",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-117",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "虚拟内存的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-118",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "请求分页管理方式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-119",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "页面置换算法（OPT、FIFO、LRU、CLOCK）",
+      "frequency": "中",
+      "exam_refs": [
+        "2020-Q45"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "OS-120",
+      "subject": "408",
+      "chapter": "三、内存管理",
+      "name": "抖动与工作集",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-121",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件系统基础",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-122",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件的概念与属性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-123",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件的逻辑结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-124",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件的物理结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-125",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "目录",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-126",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "目录的基本概念",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-127",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "目录结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-128",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "目录操作",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-129",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件系统",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-130",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件系统的全局结构",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-131",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件存储空间的管理",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-132",
+      "subject": "408",
+      "chapter": "四、文件管理",
+      "name": "文件共享与保护",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-133",
+      "subject": "408",
+      "chapter": "五、输入/输出管理",
+      "name": "I/O 管理概述",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "OS-134",
+      "subject": "408",
+      "chapter": "五、输入/输出管理",
+      "name": "I/O 控制方式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-135",
+      "subject": "408",
+      "chapter": "五、输入/输出管理",
+      "name": "设备独立性软件",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-136",
+      "subject": "408",
+      "chapter": "五、输入/输出管理",
+      "name": "缓冲管理",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "OS-137",
+      "subject": "408",
+      "chapter": "五、输入/输出管理",
+      "name": "磁盘和固态硬盘（磁盘调度算法）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-138",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "计算机网络概述",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-139",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "计算机网络的概念、组成与功能",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-140",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "计算机网络的分类",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-141",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "计算机网络的性能指标",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-142",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "计算机网络体系结构与参考模型",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-143",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "分层结构、协议、接口、服务",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-144",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "OSI 参考模型",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-145",
+      "subject": "408",
+      "chapter": "一、计算机网络体系结构",
+      "name": "TCP/IP 模型",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-146",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "通信基础",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-147",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "基本概念（数据、信号、信道）",
+      "frequency": "高",
+      "exam_refs": [
+        "2020-Q7"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-148",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "信道的极限容量（奈奎斯特定理、香农定理）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-149",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "编码与调制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-150",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "传输介质",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-151",
+      "subject": "408",
+      "chapter": "二、物理层",
+      "name": "物理层设备（中继器、集线器）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-152",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "数据链路层的功能",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-153",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "组帧",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-154",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "差错控制（检错编码、纠错编码）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-155",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "流量控制与可靠传输机制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-156",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "停止-等待协议",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-157",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "后退 N 帧协议（GBN）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-158",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "选择重传协议（SR）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-159",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "介质访问控制",
+      "frequency": "中",
+      "exam_refs": [
+        "2020-Q35"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-160",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "信道划分（FDM、TDM、WDM、CDMA）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-161",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "随机访问（ALOHA、CSMA、CSMA/CD、CSMA/CA）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-162",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "轮询访问（令牌传递）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-163",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "局域网（以太网、IEEE 802.3）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-164",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "广域网",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-165",
+      "subject": "408",
+      "chapter": "三、数据链路层",
+      "name": "数据链路层设备（网桥、交换机）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-166",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "网络层的功能",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-167",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "路由算法（静态路由、动态路由、距离向量、链路状态）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-168",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "IPv4（地址、子网划分、CIDR、ARP、DHCP、ICMP）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-169",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "IPv6",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-170",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "路由协议（RIP、OSPF、BGP）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-171",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "IP 组播",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-172",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "移动 IP",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-173",
+      "subject": "408",
+      "chapter": "四、网络层",
+      "name": "网络层设备（路由器）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-174",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "传输层提供的服务",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-175",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "UDP 协议",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-176",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 协议",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-177",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 的特点",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-178",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 连接管理（三次握手、四次挥手）",
+      "frequency": "中",
+      "exam_refs": [
+        "2023-Q33"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-179",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 可靠传输",
+      "frequency": "中",
+      "exam_refs": [
+        "2021-Q36"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-180",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 流量控制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-181",
+      "subject": "408",
+      "chapter": "五、传输层",
+      "name": "TCP 拥塞控制",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "CN-182",
+      "subject": "408",
+      "chapter": "六、应用层",
+      "name": "网络应用模型（C/S、P2P）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-183",
+      "subject": "408",
+      "chapter": "六、应用层",
+      "name": "DNS 域名系统",
+      "frequency": "中",
+      "exam_refs": [
+        "2022-Q40"
+      ],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-184",
+      "subject": "408",
+      "chapter": "六、应用层",
+      "name": "FTP 文件传输协议",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "CN-185",
+      "subject": "408",
+      "chapter": "六、应用层",
+      "name": "电子邮件（SMTP、POP3、IMAP）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "CN-186",
+      "subject": "408",
+      "chapter": "六、应用层",
+      "name": "万维网（WWW、HTTP、HTTPS）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "B"
+    },
+    {
+      "id": "EN-01",
+      "subject": "英语一",
+      "chapter": "（一）完形填空（英语知识运用）—— 10 分",
+      "name": "20 题，每题 0.5 分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-02",
+      "subject": "英语一",
+      "chapter": "（一）完形填空（英语知识运用）—— 10 分",
+      "name": "一篇 240-280 词短文，留 20 个空白，四选一",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-03",
+      "subject": "英语一",
+      "chapter": "（一）完形填空（英语知识运用）—— 10 分",
+      "name": "考查重点：词汇辨析（形近词、近义词）、固定搭配、语法结构、上下文逻辑关系（转折、因果、递进）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-04",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "4 篇文章，每篇 5 题，每题 2 分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-05",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "每篇约 400-500 词，总约 1600 词",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-06",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "文章选材：学术期刊、专业评论（《经济学人》《卫报》《纽约时报》等英美主流刊物）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-07",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "考查重点：",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-08",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "细节题（约 40%）",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-09",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "推理题（约 20%）",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-10",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "态度题（约 15%）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-11",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "主旨题（约 15%）",
+      "frequency": "高",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-12",
+      "subject": "英语一",
+      "chapter": "（二）阅读理解 Part A（传统阅读）—— 40 分",
+      "name": "词义猜测题（约 10%）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-13",
+      "subject": "英语一",
+      "chapter": "（三）阅读理解 Part B（新题型）—— 10 分",
+      "name": "5 题，每题 2 分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-14",
+      "subject": "英语一",
+      "chapter": "（三）阅读理解 Part B（新题型）—— 10 分",
+      "name": "文章 500-600 词",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-15",
+      "subject": "英语一",
+      "chapter": "（三）阅读理解 Part B（新题型）—— 10 分",
+      "name": "三种备选题型（每次选其一）：",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-16",
+      "subject": "英语一",
+      "chapter": "（三）阅读理解 Part B（新题型）—— 10 分",
+      "name": "考查重点：语篇衔接、逻辑梳理（指代、转折词、段落主旨呼应）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-17",
+      "subject": "英语一",
+      "chapter": "（四）阅读理解 Part C（翻译）—— 10 分",
+      "name": "从一篇约 400 词学术短文中选取 5 个长难句，每句 2 分",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-18",
+      "subject": "英语一",
+      "chapter": "（四）阅读理解 Part C（翻译）—— 10 分",
+      "name": "英译汉",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-19",
+      "subject": "英语一",
+      "chapter": "（四）阅读理解 Part C（翻译）—— 10 分",
+      "name": "考查重点：长难句拆解、语法分析（定语从句、状语从句、名词性从句、倒装、省略）、精准翻译",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-20",
+      "subject": "英语一",
+      "chapter": "（五）写作 —— 30 分",
+      "name": "小作文 Part A：应用文写作，约 100 词，10 分（书信、通知、备忘录等）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-21",
+      "subject": "英语一",
+      "chapter": "（五）写作 —— 30 分",
+      "name": "大作文 Part B：图画作文，160-200 词，20 分",
+      "frequency": "高",
+      "exam_refs": [
+        "2023-大作文"
+      ],
+      "status": "pending",
+      "anim_level": "A"
+    },
+    {
+      "id": "EN-22",
+      "subject": "英语一",
+      "chapter": "三、词汇要求（5500 词汇表）",
+      "name": "大纲词汇 5529 个（2026 年调整）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-23",
+      "subject": "英语一",
+      "chapter": "三、词汇要求（5500 词汇表）",
+      "name": "词汇考查从\"单纯记忆\"转向\"语境理解\"",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-24",
+      "subject": "英语一",
+      "chapter": "三、词汇要求（5500 词汇表）",
+      "name": "核心高频词汇、真题语境搭配、多义词用法",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-25",
+      "subject": "英语一",
+      "chapter": "四、语法条目（大纲要求）",
+      "name": "名词、代词、形容词、副词、动词（时态、语态、情态动词）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-26",
+      "subject": "英语一",
+      "chapter": "四、语法条目（大纲要求）",
+      "name": "非谓语动词（不定式、动名词、分词）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-27",
+      "subject": "英语一",
+      "chapter": "四、语法条目（大纲要求）",
+      "name": "各类从句（定语从句、状语从句、名词性从句）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-28",
+      "subject": "英语一",
+      "chapter": "四、语法条目（大纲要求）",
+      "name": "倒装、省略、强调、虚拟语气",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "EN-29",
+      "subject": "英语一",
+      "chapter": "四、语法条目（大纲要求）",
+      "name": "句子成分与句子结构分析（长难句拆解）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-01",
+      "subject": "政治",
+      "chapter": "一、马克思主义是关于无产阶级和人类解放的科学",
+      "name": "马克思主义的创立与发展",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-02",
+      "subject": "政治",
+      "chapter": "一、马克思主义是关于无产阶级和人类解放的科学",
+      "name": "马克思主义的鲜明特征",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-03",
+      "subject": "政治",
+      "chapter": "一、马克思主义是关于无产阶级和人类解放的科学",
+      "name": "马克思主义中国化时代化的历史进程（新增）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-04",
+      "subject": "政治",
+      "chapter": "二、世界的物质性及发展规律（唯物论与辩证法）",
+      "name": "世界的物质统一性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-05",
+      "subject": "政治",
+      "chapter": "二、世界的物质性及发展规律（唯物论与辩证法）",
+      "name": "物质与意识的辩证关系",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-06",
+      "subject": "政治",
+      "chapter": "二、世界的物质性及发展规律（唯物论与辩证法）",
+      "name": "唯物辩证法的基本规律（对立统一规律、量变质变规律、否定之否定规律）",
+      "frequency": "中",
+      "exam_refs": [
+        "2023-Q1"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-07",
+      "subject": "政治",
+      "chapter": "二、世界的物质性及发展规律（唯物论与辩证法）",
+      "name": "联系与发展的基本环节",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-08",
+      "subject": "政治",
+      "chapter": "二、世界的物质性及发展规律（唯物论与辩证法）",
+      "name": "矛盾规律（普遍性与特殊性、主要矛盾与矛盾主要方面）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-09",
+      "subject": "政治",
+      "chapter": "三、实践与认识及其发展规律（认识论）",
+      "name": "实践与认识的辩证关系",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-10",
+      "subject": "政治",
+      "chapter": "三、实践与认识及其发展规律（认识论）",
+      "name": "认识的本质与过程",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-11",
+      "subject": "政治",
+      "chapter": "三、实践与认识及其发展规律（认识论）",
+      "name": "真理的绝对性与相对性",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-12",
+      "subject": "政治",
+      "chapter": "三、实践与认识及其发展规律（认识论）",
+      "name": "真理与价值的辩证关系",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-13",
+      "subject": "政治",
+      "chapter": "三、实践与认识及其发展规律（认识论）",
+      "name": "认识世界和改造世界",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-14",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "社会存在与社会意识",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-15",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "生产力与生产关系、经济基础与上层建筑",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-16",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "社会基本矛盾及其运动规律",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-17",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "人类普遍交往与世界历史的形成发展（新增）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-18",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "社会形态更替的一般规律及特殊形式",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-19",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "人民群众在历史发展中的作用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-20",
+      "subject": "政治",
+      "chapter": "四、人类社会及其发展规律（唯物史观）",
+      "name": "群众、阶级、政党、领袖的关系（新增）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-21",
+      "subject": "政治",
+      "chapter": "五、资本主义的本质及规律（政治经济学）",
+      "name": "商品二因素与劳动二重性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-22",
+      "subject": "政治",
+      "chapter": "五、资本主义的本质及规律（政治经济学）",
+      "name": "价值规律及其作用",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-23",
+      "subject": "政治",
+      "chapter": "五、资本主义的本质及规律（政治经济学）",
+      "name": "剩余价值理论",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-24",
+      "subject": "政治",
+      "chapter": "五、资本主义的本质及规律（政治经济学）",
+      "name": "资本有机构成",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-25",
+      "subject": "政治",
+      "chapter": "五、资本主义的本质及规律（政治经济学）",
+      "name": "资本主义基本矛盾与经济危机",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-26",
+      "subject": "政治",
+      "chapter": "六、资本主义的发展及趋势",
+      "name": "垄断资本主义",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-27",
+      "subject": "政治",
+      "chapter": "六、资本主义的发展及趋势",
+      "name": "当代资本主义新变化",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-28",
+      "subject": "政治",
+      "chapter": "七、社会主义社会的发展及其规律",
+      "name": "社会主义从空想到科学、从理论到实践",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-29",
+      "subject": "政治",
+      "chapter": "七、社会主义社会的发展及其规律",
+      "name": "社会主义在实践中发展和完善",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-30",
+      "subject": "政治",
+      "chapter": "八、共产主义崇高理想及其最终实现",
+      "name": "共产主义社会的基本特征",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-31",
+      "subject": "政治",
+      "chapter": "八、共产主义崇高理想及其最终实现",
+      "name": "实现共产主义的必然性",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-32",
+      "subject": "政治",
+      "chapter": "一、毛泽东思想及其历史地位",
+      "name": "毛泽东思想的形成和发展",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-33",
+      "subject": "政治",
+      "chapter": "一、毛泽东思想及其历史地位",
+      "name": "毛泽东思想的主要内容和活的灵魂",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-34",
+      "subject": "政治",
+      "chapter": "二、新民主主义革命理论",
+      "name": "新民主主义革命的总路线和基本纲领",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-35",
+      "subject": "政治",
+      "chapter": "二、新民主主义革命理论",
+      "name": "新民主主义革命的道路和基本经验",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-36",
+      "subject": "政治",
+      "chapter": "三、社会主义改造理论",
+      "name": "从新民主主义到社会主义的转变",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-37",
+      "subject": "政治",
+      "chapter": "三、社会主义改造理论",
+      "name": "社会主义改造道路和历史经验",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-38",
+      "subject": "政治",
+      "chapter": "四、社会主义建设道路初步探索的理论成果",
+      "name": "初步探索的重要理论成果",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-39",
+      "subject": "政治",
+      "chapter": "四、社会主义建设道路初步探索的理论成果",
+      "name": "初步探索的意义和经验教训",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-40",
+      "subject": "政治",
+      "chapter": "五、中国特色社会主义理论体系",
+      "name": "邓小平理论",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-41",
+      "subject": "政治",
+      "chapter": "五、中国特色社会主义理论体系",
+      "name": "\"三个代表\"重要思想",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-42",
+      "subject": "政治",
+      "chapter": "五、中国特色社会主义理论体系",
+      "name": "科学发展观",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-43",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "中国特色社会主义进入新时代",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-44",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "中国式现代化（本质特征、五个特征）",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-45",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "新质生产力（科技创新引领，高质量发展与现代化产业体系）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-46",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "共同富裕",
+      "frequency": "低",
+      "exam_refs": [
+        "2022-Q35"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-47",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "\"十个明确\"\"十四个坚持\"",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-48",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "五位一体总体布局、四个全面战略布局",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-49",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "高质量发展与新发展格局",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-50",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "高水平对外开放",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-51",
+      "subject": "政治",
+      "chapter": "六、习近平新时代中国特色社会主义思想（新思想）",
+      "name": "十五五规划",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-52",
+      "subject": "政治",
+      "chapter": "七、坚持和发展中国特色社会主义的总任务",
+      "name": "实现中华民族伟大复兴的中国梦",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-53",
+      "subject": "政治",
+      "chapter": "七、坚持和发展中国特色社会主义的总任务",
+      "name": "全面建设社会主义现代化国家",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-54",
+      "subject": "政治",
+      "chapter": "八、实现中华民族伟大复兴的重要保障（第十二章，变动最大）",
+      "name": "坚持总体国家安全观",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-55",
+      "subject": "政治",
+      "chapter": "八、实现中华民族伟大复兴的重要保障（第十二章，变动最大）",
+      "name": "强军思想（习大大强军思想，与其他思想一样前加\"坚持\"）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-56",
+      "subject": "政治",
+      "chapter": "八、实现中华民族伟大复兴的重要保障（第十二章，变动最大）",
+      "name": "加快国防和军队现代化（强调\"加快\"）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-57",
+      "subject": "政治",
+      "chapter": "八、实现中华民族伟大复兴的重要保障（第十二章，变动最大）",
+      "name": "坚持\"一国两制\"，推进祖国完全统一（强调\"完全统一\"）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-58",
+      "subject": "政治",
+      "chapter": "一、反对外国侵略的斗争",
+      "name": "资本-帝国主义对中国的侵略",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-59",
+      "subject": "政治",
+      "chapter": "一、反对外国侵略的斗争",
+      "name": "抵御外国武装侵略、争取民族独立的斗争",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-60",
+      "subject": "政治",
+      "chapter": "二、对国家出路的早期探索",
+      "name": "洋务运动的历史作用及失败（2026 简化表述，原\"及其失败\"）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-61",
+      "subject": "政治",
+      "chapter": "二、对国家出路的早期探索",
+      "name": "戊戌维新运动",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-62",
+      "subject": "政治",
+      "chapter": "二、对国家出路的早期探索",
+      "name": "辛亥革命",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-63",
+      "subject": "政治",
+      "chapter": "三、开天辟地的大事变",
+      "name": "新文化运动和五四运动",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-64",
+      "subject": "政治",
+      "chapter": "三、开天辟地的大事变",
+      "name": "马克思主义的传播与中国共产党的成立",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-65",
+      "subject": "政治",
+      "chapter": "三、开天辟地的大事变",
+      "name": "中国革命的新局面",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-66",
+      "subject": "政治",
+      "chapter": "三、开天辟地的大事变",
+      "name": "大革命的失败及其教训（新增）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-67",
+      "subject": "政治",
+      "chapter": "四、中国革命新道路",
+      "name": "农村包围城市、武装夺取政权的道路",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-68",
+      "subject": "政治",
+      "chapter": "五、中华民族的抗日战争",
+      "name": "抗日民族统一战线的形成",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-69",
+      "subject": "政治",
+      "chapter": "五、中华民族的抗日战争",
+      "name": "中国共产党在抗日战争中的中流砥柱作用（史料补充）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-70",
+      "subject": "政治",
+      "chapter": "五、中华民族的抗日战争",
+      "name": "抗日战争的胜利及其意义",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-71",
+      "subject": "政治",
+      "chapter": "六、为新中国而奋斗",
+      "name": "解放战争",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-72",
+      "subject": "政治",
+      "chapter": "六、为新中国而奋斗",
+      "name": "建立人民民主专政的新中国",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-73",
+      "subject": "政治",
+      "chapter": "六、为新中国而奋斗",
+      "name": "中国革命重心从农村转向城市（中共中央进驻北平香山，新增）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-74",
+      "subject": "政治",
+      "chapter": "一、领悟人生真谛、把握人生方向",
+      "name": "人生观、价值观",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-75",
+      "subject": "政治",
+      "chapter": "一、领悟人生真谛、把握人生方向",
+      "name": "理想信念",
+      "frequency": "低",
+      "exam_refs": [
+        "2024-Q37"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-76",
+      "subject": "政治",
+      "chapter": "三、继承优良传统、弘扬中国精神",
+      "name": "民族精神与时代精神",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-77",
+      "subject": "政治",
+      "chapter": "三、继承优良传统、弘扬中国精神",
+      "name": "坚定中国特色社会主义文化自信（案例更新）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-78",
+      "subject": "政治",
+      "chapter": "四、明确价值要求、践行价值准则",
+      "name": "社会主义核心价值观",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-79",
+      "subject": "政治",
+      "chapter": "五、遵守道德规范、锤炼道德品格",
+      "name": "社会公德、职业道德、家庭美德、个人品德",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-80",
+      "subject": "政治",
+      "chapter": "六、学习法治思想、提升法治素养",
+      "name": "法治建设（时代内涵更新）",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-81",
+      "subject": "政治",
+      "chapter": "六、学习法治思想、提升法治素养",
+      "name": "宪法与法律体系",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-82",
+      "subject": "政治",
+      "chapter": "形势与政策（2026 考查时间：2025 年 1 月 - 12 月）",
+      "name": "国内时政热点（二十届三中全会、新质生产力、高质量发展等）",
+      "frequency": "高",
+      "exam_refs": [
+        "2022-Q16"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-83",
+      "subject": "政治",
+      "chapter": "形势与政策（2026 考查时间：2025 年 1 月 - 12 月）",
+      "name": "国际时政热点（大国关系、全球治理等）",
+      "frequency": "高",
+      "exam_refs": [
+        "2022-Q16"
+      ],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-84",
+      "subject": "政治",
+      "chapter": "形势与政策（2026 考查时间：2025 年 1 月 - 12 月）",
+      "name": "党的最新重要会议精神",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-85",
+      "subject": "政治",
+      "chapter": "当代世界经济与政治",
+      "name": "世界多极化、经济全球化",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-86",
+      "subject": "政治",
+      "chapter": "当代世界经济与政治",
+      "name": "全球治理体系变革",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-87",
+      "subject": "政治",
+      "chapter": "当代世界经济与政治",
+      "name": "构建人类命运共同体",
+      "frequency": "中",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    },
+    {
+      "id": "POL-88",
+      "subject": "政治",
+      "chapter": "当代世界经济与政治",
+      "name": "中国外交政策",
+      "frequency": "低",
+      "exam_refs": [],
+      "status": "pending",
+      "anim_level": "C"
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>介质访问控制</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>介质访问控制</h1><span class="badge">B级 · CN-159</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>多台主机共享同一条信道时，谁来说话、说完轮到谁？这就是<strong>介质访问控制（MAC 子层）</strong>要解决的问题。三大类方案：</p>
+<p><strong>① 信道划分（静态划分）</strong>：把信道切成多份互不干扰——频分 FDM（分频率）、时分 TDM（分时间片）、波分 WDM（光纤分波长）、码分 CDMA（分码片序列）。<strong>② 随机访问</strong>：谁想发就发，冲突了就退避重来——ALOHA、CSMA、CSMA/CD（以太网）、CSMA/CA（WiFi）。<strong>③ 轮询访问</strong>：令牌传递，轮到谁谁发，永不冲突——令牌环、令牌总线。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-159",
+  title: "介质访问控制",
+  derivation: [
+    "\\text{MAC 三大类}: \\; \\underbrace{\\text{信道划分}}_{\\text{FDM/TDM/WDM/CDMA}} + \\underbrace{\\text{随机访问}}_{\\text{ALOHA/CSMA/CD/CA}} + \\underbrace{\\text{轮询访问}}_{\\text{令牌}}",
+    "\\text{FDM}: \\; \\text{分频率，各用户频段不同}",
+    "\\text{TDM}: \\; \\text{分时间片，轮流占用整个带宽}",
+    "\\text{CDMA}: \\; \\text{各用户用不同码片序列，可同时同频发送}"
+  ],
+  exam_text: "<b>【2016 真题改编】</b>FDM、TDM、CDMA 三者的本质区别是什么？",
+  exam_answer: "答案：FDM 在<b>频率维度</b>划分（所有用户同时传、各占不同频段，边界留保护频带）；TDM 在<b>时间维度</b>划分（所有用户同一频段、轮流占时间片）；CDMA 在<b>码型维度</b>划分（所有用户<b>同时同频</b>发送，用互相正交的码片序列区分，接收端用同一码序列相关运算提取）。CDMA 频率利用率最高，是 3G 的基础。",
+  pitfall_list: [
+    "TDM 是「轮流用整个带宽」，不是「各用一部分带宽」——时间片内某用户独占全部频率资源。",
+    "统计时分复用 STDM 比同步 TDM 效率高：按需分配时隙，空闲用户不占。",
+    "随机访问（CSMA/CD）与轮询访问（令牌）的区别：前者可能冲突，后者逻辑上无环无冲突。"
+  ],
+  quiz_list: [
+    { question: "所有用户同时、同频、用不同码序列通信的是？", options: ["FDM", "TDM", "CDMA"], correct: 2 },
+    { question: "TDM 中一个用户占用时间片时？", options: ["占用整个带宽", "占用部分带宽", "随机带宽"], correct: 0 },
+    { question: "下列哪种属于随机访问协议？", options: ["令牌环", "CSMA/CD", "TDM"], correct: 1 },
+  ]
+};
+
+/* ===== CN-159 专属动画：信道划分 vs 随机访问 vs 轮询 ===== */
+const STEPS = [
+  { focus:0, desc:'MAC 三大方案：信道划分（静态）/ 随机访问 / 轮询访问' },
+  { focus:1, desc:'信道划分：FDM 分频率 / TDM 分时间 / CDMA 分码型' },
+  { focus:2, desc:'随机访问：想发就发，冲突退避——ALOHA → CSMA → CSMA/CD' },
+  { focus:3, desc:'轮询访问：令牌传递，轮到才发，逻辑无环永不冲突' },
+  { focus:4, desc:'三类方案对比：效率 / 冲突 / 适用场景' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['三大方案','信道划分','随机访问','轮询访问','方案对比'][f]);
+
+  if(f===0){
+    const cards=[
+      {t:'① 信道划分', s:'静态切分信道，互不干扰', e:'FDM / TDM / WDM / CDMA', c:'var(--primary)'},
+      {t:'② 随机访问', s:'想发就发，冲突后重试', e:'ALOHA / CSMA / CD / CA', c:'var(--highlight)'},
+      {t:'③ 轮询访问', s:'令牌依次传递，无冲突', e:'令牌环 / 令牌总线', c:'var(--success)'},
+    ];
+    cards.forEach((c2,i)=>{
+      const x=60+i*280;
+      g.append('rect').attr('x',x).attr('y',80).attr('width',260).attr('height',200).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',c2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+130).attr('y',135).attr('text-anchor','middle').attr('fill',c2.c).attr('font-size',18).attr('font-weight','700').text(c2.t);
+      g.append('text').attr('x',x+130).attr('y',180).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text(c2.s);
+      g.append('text').attr('x',x+130).attr('y',180).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text(c2.s);
+      g.append('text').attr('x',x+130).attr('y',225).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text(c2.e);
+    });
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',332).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('无线（WiFi）用 CSMA/CA，有线（以太网）用 CSMA/CD，各有「冲突检测/避免」策略');
+  }
+
+  if(f===1){
+    /* FDM 频带 */
+    g.append('text').attr('x',80).attr('y',80).attr('fill','var(--primary)').attr('font-size',13).attr('font-weight','700').text('FDM 频分复用：');
+    const fcols=['var(--primary)','var(--success)','var(--highlight)','var(--compare)'];
+    for(let i=0;i<4;i++){
+      g.append('rect').attr('x',80+i*100).attr('y',95).attr('width',96).attr('height',44).attr('rx',4).attr('fill',fcols[i]).attr('fill-opacity',0.3).attr('stroke',fcols[i]).attr('stroke-width',2);
+      g.append('text').attr('x',128+i*100).attr('y',122).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('用户'+(i+1));
+    }
+    /* TDM 时隙 */
+    g.append('text').attr('x',80).attr('y',190).attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('TDM 时分复用：');
+    const tcols=['var(--primary)','var(--success)','var(--highlight)','var(--compare)'];
+    for(let i=0;i<4;i++){
+      g.append('rect').attr('x',80+i*100).attr('y',205).attr('width',96).attr('height',44).attr('rx',4).attr('fill',tcols[i]).attr('fill-opacity',0.35).attr('stroke',tcols[i]).attr('stroke-width',2);
+      g.append('text').attr('x',128+i*100).attr('y',232).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('时隙'+(i+1));
+    }
+    /* CDMA */
+    g.append('text').attr('x',80).attr('y',300).attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('CDMA 码分复用：');
+    for(let i=0;i<4;i++){
+      g.append('rect').attr('x',80+i*100).attr('y',315).attr('width',96).attr('height',44).attr('rx',4).attr('fill','var(--highlight)').attr('fill-opacity',0.25).attr('stroke','var(--highlight)').attr('stroke-width',2);
+      g.append('text').attr('x',128+i*100).attr('y',342).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',11).attr('font-weight','700').text('码序列'+(i+1));
+    }
+    g.append('text').attr('x',560).attr('y',118).attr('fill','var(--text-muted)').attr('font-size',11.5).text('各占不同频段，同时传输');
+    g.append('text').attr('x',560).attr('y',228).attr('fill','var(--text-muted)').attr('font-size',11.5).text('轮流占整个带宽');
+    g.append('text').attr('x',560).attr('y',338).attr('fill','var(--text-muted)').attr('font-size',11.5).text('同时同频，码型区分');
+  }
+
+  if(f===2){
+    g.append('text').attr('x',80).attr('y',80).attr('fill','var(--text)').attr('font-size',13.5).attr('font-weight','700').text('随机访问演进（冲突越来越多机制来解决）：');
+    const rows=[
+      {t:'纯 ALOHA', s:'想发就发，冲突后随机退避', u:'吞吐量最高 18.4%', c:'var(--compare)'},
+      {t:'时隙 ALOHA', s:'只在时隙起点发，冲突窗口减半', u:'吞吐量最高 36.8%', c:'var(--swap)'},
+      {t:'CSMA', s:'发前先监听（1-坚持/非坚持/p-坚持）', u:'冲突继续减少', c:'var(--highlight)'},
+      {t:'CSMA/CD', s:'边发边听，冲突立即停发（以太网）', u:'效率大幅提升', c:'var(--success)'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=95+i*62;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',52).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2);
+      g.append('text').attr('x',100).attr('y',y+32).attr('fill',r.c).attr('font-size',14).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',250).attr('y',y+32).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+      g.append('text').attr('x',250).attr('y',y+32).attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+      g.append('text').attr('x',760).attr('y',y+32).attr('text-anchor','end').attr('fill','var(--text-muted)').attr('font-size',11.5).text(r.u);
+    });
+    g.append('text').attr('x',450).attr('y',365).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',366).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('注意：CSMA/CD 用于有线（可边发边检测）；无线不能同时收发的场景用 CSMA/CA（避免）');
+  }
+
+  if(f===3){
+    /* 令牌环 */
+    const nodes=[[450,90],[640,160],[600,300],[300,300],[260,160]];
+    nodes.forEach((n,i)=>{
+      g.append('circle').attr('cx',n[0]).attr('cy',n[1]).attr('r',26).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+      g.append('text').attr('x',n[0]).attr('y',n[1]+5).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('站'+(i+1));
+    });
+    for(let i=0;i<5;i++){
+      const a=nodes[i], b=nodes[(i+1)%5];
+      g.append('path').attr('d',`M ${a[0]+(b[0]-a[0])*0.25} ${a[1]+(b[1]-a[1])*0.25} L ${a[0]+(b[0]-a[0])*0.75} ${a[1]+(b[1]-a[1])*0.75}`)
+        .attr('stroke','var(--border)').attr('stroke-width',2).attr('marker-end','url(#arr159)');
+    }
+    /* 令牌 */
+    g.append('circle').attr('cx',450).attr('cy',90).attr('r',12).attr('fill','var(--highlight)');
+    g.append('text').attr('x',450).attr('y',94).attr('text-anchor','middle').attr('fill','#1a2333').attr('font-size',10).attr('font-weight','700').text('令牌');
+    g.append('text').attr('x',450).attr('y',370).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('令牌沿环逐站传递：拿到令牌才能发，发完把令牌交给下一站');
+  }
+
+  if(f===4){
+    const rows=[
+      {t:'信道划分', a:'无冲突', b:'固定分配，轻负载浪费', c:'实时/广播场景', col:'var(--primary)'},
+      {t:'随机访问', a:'有冲突需解决', b:'按需竞争，重负载效率低', c:'以太网/WiFi', col:'var(--highlight)'},
+      {t:'轮询访问', a:'无冲突', b:'令牌开销，重负载公平', c:'令牌环/工业控制', col:'var(--success)'},
+    ];
+    rows.forEach((r,i)=>{
+      const y=80+i*95;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',80).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke',r.col).attr('stroke-width',2.5);
+      g.append('text').attr('x',105).attr('y',y+32).attr('fill',r.col).attr('font-size',15).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',105).attr('y',y+58).attr('fill','var(--text-muted)').attr('font-size',11.5).text('冲突：'+r.a);
+      g.append('text').attr('x',320).attr('y',y+32).attr('fill','var(--text)').attr('font-size',12.5).text(r.b);
+      g.append('text').attr('x',320).attr('y',y+58).attr('fill','var(--text-muted)').attr('font-size',11.5).text('典型：'+r.c);
+    });
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr159').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

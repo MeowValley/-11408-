@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>广域网</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>广域网</h1><span class="badge">B级 · CN-164</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>广域网（WAN）覆盖几十到上万公里，通常由电信运营商建设，采用<b>点对点</b>链路和<b>存储转发</b>。与局域网最大的区别：局域网是广播式（一个发大家收），广域网是点对点（一跳一跳存转）。</p>
+<p>广域网只覆盖 OSI 的<strong>低三层</strong>（物理/链路/网络），高层协议由主机处理。经典数据链路层协议：<b>PPP（点对点协议）</b>——因特网用户拨号/宽带接入的标准，支持多种网络层协议、差错检测、身份验证（PAP/CHAP），面向字节填充，<b>不可靠（不确认不重传）</b>；<b>HDLC</b>——面向比特的可靠传输，用零比特填充和 CRC，是很多协议的老祖宗。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-164",
+  title: "广域网",
+  derivation: [
+    "\\text{广域网覆盖}: \\; \\text{物理层} + \\text{数据链路层} + \\text{网络层（低三层）}",
+    "\\text{PPP 帧}: \\; \\underbrace{\\texttt{0x7E}}_{\\text{定界}} + \\underbrace{\\texttt{0xFF}}_{\\text{地址}} + \\underbrace{\\texttt{0x03}}_{\\text{控制}} + \\underbrace{\\text{Protocol}}_{\\text{协议}} + \\underbrace{\\text{Data}}_{\\text{数据}} + \\underbrace{\\text{FCS}}_{\\text{校验}} + \\underbrace{\\texttt{0x7E}}_{\\text{定界}}",
+    "\\text{PPP 特点}: \\; \\text{面向字节、不可靠、支持多协议、支持认证}",
+    "\\text{HDLC 特点}: \\; \\text{面向比特、可靠（确认重传）、零比特填充}"
+  ],
+  exam_text: "<b>【2017 真题改编】</b>PPP 协议与 HDLC 协议的主要区别是什么？",
+  exam_answer: "答案：① PPP <b>面向字节</b>（用字符填充/转义），HDLC <b>面向比特</b>（用零比特填充）；② PPP <b>不可靠</b>（不确认不重传，检错后丢弃），HDLC 提供<b>可靠传输</b>（序号+确认+重传）；③ PPP 支持多种网络层协议（IP/IPX 等）和身份认证（PAP/CHAP），HDLC 不支持；④ PPP 帧有 0x7E 定界符，HDLC 也用 01111110 但填充方式不同。PPP 是因特网接入事实标准，HDLC 是 ISO 标准。",
+  pitfall_list: [
+    "PPP 和 HDLC 都只实现「不可靠」或「可靠」中的一个——PPP 不确认不重传，HDLC 有确认重传，别搞反。",
+    "PPP 的地址字段恒为 0xFF（广播地址）、控制字段恒为 0x03（无编号帧）——因为 PPP 只能点对点，这两个字段没有实际意义。",
+    "广域网「存储转发」与局域网「广播」是传输方式差异，根因是拓扑与距离：WAN 点对点多跳，LAN 共享总线。"
+  ],
+  quiz_list: [
+    { question: "PPP 协议提供的传输是？", options: ["可靠（确认重传）", "不可靠（检错丢弃）", "面向连接"], correct: 1 },
+    { question: "HDLC 采用的比特填充规则是？", options: ["5 连 1 后插 0", "7 连 1 后插 0", "字符转义"], correct: 0 },
+    { question: "广域网协议工作在哪几层？", options: ["低三层", "全部七层", "只有网络层"], correct: 0 },
+  ]
+};
+
+/* ===== CN-164 专属动画：WAN 架构 + PPP 帧 ===== */
+const STEPS = [
+  { focus:0, desc:'广域网：点对点链路 + 存储转发，一跳一跳传' },
+  { focus:1, desc:'WAN vs LAN：传输方式与拓扑的根本差异' },
+  { focus:2, desc:'PPP 帧格式：7E FF 03 + 协议 + 数据 + FCS' },
+  { focus:3, desc:'PPP 工作流程：LCP 建链 → 认证 → NCP 配网络层 → 传数据 → 释放' },
+  { focus:4, desc:'HDLC vs PPP：面向比特可靠 vs 面向字节不可靠' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['广域网架构','WAN vs LAN','PPP 帧格式','PPP 工作流程','HDLC vs PPP'][f]);
+
+  if(f===0){
+    /* 站点 - 路由器 - 交换机 云 */
+    g.append('rect').attr('x',60).attr('y',150).attr('width',130).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',125).attr('y',183).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('主机 A');
+    g.append('rect').attr('x',710).attr('y',150).attr('width',130).attr('height',56).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',775).attr('y',183).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('主机 B');
+    /* 路由器 */
+    [[280,90],[280,240],[450,165],[620,90],[620,240]].forEach((p,i)=>{
+      g.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',22).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2.5);
+      g.append('text').attr('x',p[0]).attr('y',p[1]+4).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',11).attr('font-weight','700').text('R'+(i+1));
+    });
+    const links=[[0,1],[1,2],[2,3],[2,4],[3,5],[4,5],[5,6]];
+    const pts=[[125,178],[280,112],[280,240],[450,165],[620,112],[620,240],[775,178]];
+    links.forEach(e=>{
+      g.append('path').attr('d',`M ${pts[e[0]][0]} ${pts[e[0]][1]} L ${pts[e[1]][0]} ${pts[e[1]][1]}`).attr('stroke','var(--border)').attr('stroke-width',1.8);
+    });
+    /* 分组流动 */
+    const flow='M 190 178 L 258 128 L 440 160 L 598 128 L 710 178';
+    g.append('circle').attr('r',7).attr('fill','var(--highlight)').attr('opacity',0.95)
+      .append('animateMotion').attr('dur','3.5s').attr('repeatCount','indefinite').attr('path',flow);
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',332).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('分组在路由器之间逐跳存储转发——每个路由器都要查路由表决定下一跳');
+  }
+
+  if(f===1){
+    const rows=[
+      {a:'覆盖范围 1~2 km', b:'覆盖范围几十~上万公里', a1:'广播式（一个发大家收）', b1:'点对点（逐跳存转）', c1:'var(--primary)', c2:'var(--highlight)'},
+      {a:'高数据率低误码', b:'相对低速率高误码', a2:'MAC 层用 CSMA/CD/CA', b2:'MAC 层用 PPP/HDLC', c3:'var(--success)', c4:'var(--swap)'},
+    ];
+    g.append('text').attr('x',250).attr('y',60).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700').text('局域网 LAN');
+    g.append('text').attr('x',650).attr('y',60).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',16).attr('font-weight','700').text('广域网 WAN');
+    const items=[
+      {l:'覆盖', a:'1~2 km', b:'几十~上万 km', c1:'var(--primary)', c2:'var(--highlight)'},
+      {l:'传输方式', a:'广播式，大家共享信道', b:'点对点，逐跳存储转发', c1:'var(--success)', c2:'var(--swap)'},
+      {l:'链路层协议', a:'以太网 CSMA/CD', b:'PPP / HDLC / 帧中继', c1:'var(--primary)', c2:'var(--highlight)'},
+      {l:'拥塞控制', a:'基本不需要', b:'很重要（长距离大流量）', c1:'var(--success)', c2:'var(--swap)'},
+    ];
+    items.forEach((it,i)=>{
+      const y=80+i*68;
+      g.append('text').attr('x',80).attr('y',y+30).attr('fill','var(--text-muted)').attr('font-size',12.5).attr('font-weight','700').text(it.l);
+      g.append('rect').attr('x',180).attr('y',y).attr('width',300).attr('height',54).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',it.c1).attr('stroke-width',2);
+      g.append('text').attr('x',330).attr('y',y+32).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(it.a);
+      g.append('rect').attr('x',500).attr('y',y).attr('width',320).attr('height',54).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',it.c2).attr('stroke-width',2);
+      g.append('text').attr('x',660).attr('y',y+32).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(it.b);
+    });
+  }
+
+  if(f===2){
+    const parts=[
+      {t:'7E', s:'定界', x:60, w:70, c:'var(--danger)'},
+      {t:'FF', s:'地址', x:140, w:70, c:'var(--text-muted)'},
+      {t:'03', s:'控制', x:220, w:70, c:'var(--text-muted)'},
+      {t:'Protocol', s:'协议', x:300, w:120, c:'var(--primary)'},
+      {t:'Data', s:'数据', x:430, w:290, c:'var(--success)'},
+      {t:'FCS', s:'校验', x:730, w:80, c:'var(--highlight)'},
+      {t:'7E', s:'定界', x:820, w:60, c:'var(--danger)'},
+    ];
+    parts.forEach((p,i)=>{
+      g.append('rect').attr('x',p.x).attr('y',120).attr('width',p.w).attr('height',90).attr('rx',8)
+        .attr('fill','var(--bg-panel)').attr('stroke',p.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',p.x+p.w/2).attr('y',158).attr('text-anchor','middle').attr('fill',p.c).attr('font-size',14).attr('font-weight','700').attr('font-family','monospace').text(p.t);
+      g.append('text').attr('x',p.x+p.w/2).attr('y',188).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text(p.s);
+    });
+    g.append('text').attr('x',450).attr('y',260).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',262).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('地址 FF、控制 03 是固定值（PPP 只用于点对点，无寻址需要）');
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',13).attr('font-weight','700').text('Protocol 字段：0x0021=IP 数据报，0xC021=链路控制 LCP，0x8021=NCP');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('透明传输：数据中出现 0x7E/0x7D 要转义（字节填充），与 HDLC 的零比特填充不同');
+  }
+
+  if(f===3){
+    const steps=[
+      {t:'① 链路建立', s:'LCP 协商选项（认证方式、压缩等），发送配置请求/确认', c:'var(--primary)'},
+      {t:'② 身份认证', s:'PAP（明文两步）或 CHAP（挑战应答，安全）', c:'var(--success)'},
+      {t:'③ 网络层配置', s:'NCP 为每种网络协议分配参数（IP 地址等）', c:'var(--highlight)'},
+      {t:'④ 数据传输', s:'收发数据报；检错失败直接丢弃（不可靠）', c:'var(--swap)'},
+      {t:'⑤ 链路释放', s:'LCP 释放数据链路层连接，通知下层断开', c:'var(--danger)'},
+    ];
+    steps.forEach((s2,i)=>{
+      const y=55+i*62;
+      g.append('rect').attr('x',80).attr('y',y).attr('width',740).attr('height',52).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke',s2.c).attr('stroke-width',2);
+      g.append('text').attr('x',100).attr('y',y+32).attr('fill',s2.c).attr('font-size',14).attr('font-weight','700').text(s2.t);
+      g.append('text').attr('x',250).attr('y',y+32).attr('fill','var(--text)').attr('font-size',12.5).text(s2.s);
+      g.append('text').attr('x',250).attr('y',y+32).attr('fill','var(--text)').attr('font-size',12.5).text(s2.s);
+    });
+  }
+
+  if(f===4){
+    g.append('rect').attr('x',70).attr('y',60).attr('width',370).attr('height',250).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('rect').attr('x',70).attr('y',60).attr('width',370).attr('height',250).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',255).attr('y',100).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',17).attr('font-weight','700').text('HDLC');
+    g.append('text').attr('x',255).attr('y',140).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('面向比特 · 零比特填充');
+    g.append('text').attr('x',255).attr('y',170).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('可靠传输（序号+确认+重传）');
+    g.append('text').attr('x',255).attr('y',200).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('只支持单一网络层协议');
+    g.append('text').attr('x',255).attr('y',235).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('ISO 标准 · 用于专线');
+    g.append('rect').attr('x',470).attr('y',60).attr('width',370).attr('height',250).attr('rx',12).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',655).attr('y',100).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',17).attr('font-weight','700').text('PPP');
+    g.append('text').attr('x',655).attr('y',140).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('面向字节 · 字符转义');
+    g.append('text').attr('x',655).attr('y',170).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('不可靠（检错后丢弃）');
+    g.append('text').attr('x',655).attr('y',200).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text('支持多协议 + 身份认证');
+    g.append('text').attr('x',655).attr('y',235).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('因特网接入事实标准');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('');
+    g.append('text').attr('x',450).attr('y',342).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('一句话：HDLC 面向比特且可靠，PPP 面向字节且不可靠');
+  }
+
+  const defs = svg.append('defs');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

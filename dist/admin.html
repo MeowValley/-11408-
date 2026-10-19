@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理员后台 · 考研11408</title>
+<style>
+:root {
+  --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550;
+  --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff;
+  --highlight:#ffb020; --success:#2dd4a7; --danger:#ff5c7a; --swap:#ff9f43;
+  --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35);
+  --font:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+}
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --danger:#ef4444; --swap:#f97316;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.6; -webkit-font-smoothing:antialiased; min-height:100vh; }
+.app { max-width:1100px; margin:0 auto; padding:16px; }
+
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; flex-wrap:wrap; }
+.topbar h1 { font-size:18px; font-weight:700; }
+.topbar .right { display:flex; gap:8px; align-items:center; }
+.btn { padding:8px 16px; border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text); background:var(--bg-elevated); transition:all .15s; }
+.btn:hover { border-color:var(--primary); color:var(--primary-strong); }
+.btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.btn.danger { background:transparent; color:var(--danger); border-color:var(--danger); }
+.btn.small { padding:4px 10px; font-size:12px; }
+.theme-btn { font-size:20px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; padding:4px 10px; cursor:pointer; }
+
+/* 登录页 */
+.login-wrap { display:flex; align-items:center; justify-content:center; min-height:80vh; }
+.login-card { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:32px; width:100%; max-width:360px; box-shadow:var(--shadow); }
+.login-card h2 { text-align:center; margin-bottom:20px; }
+.login-card input { width:100%; padding:10px 14px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:15px; margin-bottom:14px; }
+.login-card input:focus { outline:none; border-color:var(--primary); }
+.login-card .err { color:var(--danger); font-size:13px; margin-bottom:10px; text-align:center; }
+
+/* 面板 */
+.panel { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+.panel h2 { font-size:16px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.tab-bar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.tab { padding:8px 18px; background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+.tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* 表格 */
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); }
+th { color:var(--text-muted); font-weight:600; }
+tr:hover { background:var(--bg-elevated); }
+.badge { font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700; }
+.badge.pending { background:rgba(255,159,67,0.15); color:var(--swap); border:1px solid var(--swap); }
+.badge.resolved { background:rgba(45,212,167,0.15); color:var(--success); border:1px solid var(--success); }
+
+/* 表单 */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-grid .full { grid-column:1/-1; }
+.form-grid label { font-size:13px; color:var(--text-muted); display:block; margin-bottom:4px; }
+.form-grid input, .form-grid select, .form-grid textarea { width:100%; padding:8px 12px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:14px; }
+.form-grid textarea { min-height:70px; resize:vertical; }
+.upload-zone { border:2px dashed var(--border); border-radius:8px; padding:24px; text-align:center; cursor:pointer; color:var(--text-muted); margin-top:8px; }
+.upload-zone:hover { border-color:var(--primary); }
+
+/* 响应式 */
+@media (max-width:768px) {
+  .form-grid { grid-template-columns:1fr; }
+  table { display:block; overflow-x:auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ 登录页 ============ -->
+  <div class="login-wrap" id="login-view">
+    <div class="login-card">
+      <h2>🔐 管理员登录</h2>
+      <div class="err" id="login-err"></div>
+      <input type="password" id="login-pwd" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn primary" style="width:100%;" onclick="doLogin()">登录</button>
+      <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:14px;">默认密码 admin123</p>
+    </div>
+  </div>
+
+  <!-- ============ 后台主界面 ============ -->
+  <div id="admin-view" style="display:none;">
+    <div class="topbar">
+      <h1>⚙️ 考研11408 管理后台</h1>
+      <div class="right">
+        <button class="theme-btn" id="theme-btn" title="切换主题">🌙</button>
+        <button class="btn" onclick="location.href='/quiz.html'">📝 刷题页</button>
+        <button class="btn danger" onclick="logout()">退出</button>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" data-tab="reports" onclick="switchTab('reports')">📮 纠错管理</div>
+      <div class="tab" data-tab="questions" onclick="switchTab('questions')">📚 题库管理</div>
+      <div class="tab" data-tab="skills" onclick="switchTab('skills')">💡 做题技巧</div>
+      <div class="tab" data-tab="users" onclick="switchTab('users')">👥 用户管理</div>
+      <div class="tab" data-tab="courseware" onclick="switchTab('courseware')">🎬 课件管理</div>
+    </div>
+
+    <!-- 纠错管理 -->
+    <div class="panel" id="tab-reports">
+      <h2>📮 用户纠错记录</h2>
+      <div id="reports-list"><p style="color:var(--text-muted);">加载中...</p></div>
+    </div>
+
+    <!-- 题库管理 -->
+    <div class="panel" id="tab-questions" style="display:none;">
+      <h2>📚 题库管理（当前 <span id="q-count">0</span> 道题）</h2>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn" onclick="showUpload()">📤 上传 JSON 批量导入</button>
+        <button class="btn primary" onclick="showAddForm()">➕ 手动添加题目</button>
+        <input type="text" id="q-search" placeholder="🔍 搜索题目..." style="flex:1;min-width:200px;padding:8px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;color:var(--text);" oninput="renderQuestions()">
+      </div>
+      <div id="upload-zone" class="upload-zone" style="display:none;" onclick="document.getElementById('file-input').click()">
+        📤 点击上传 .json 文件（题目数组格式）
+        <input type="file" id="file-input" accept=".json" style="display:none;" onchange="handleUpload(this)">
+      </div>
+      <div id="add-form" class="form-grid" style="display:none;">
+        <div><label>科目</label><select id="add-subject"><option>408</option><option>数学一</option><option>政治</option><option>英语一</option></select></div>
+        <div><label>章节</label><input id="add-chapter" placeholder="如：数据结构"></div>
+        <div><label>题型</label><select id="add-type"><option>单选</option><option>多选</option></select></div>
+        <div><label>动画课件ID（可选）</label><input id="add-anim" placeholder="如 DS-50"></div>
+        <div class="full"><label>题干</label><textarea id="add-question"></textarea></div>
+        <div class="full"><label>选项（每行一个）</label><textarea id="add-options" placeholder="A选项&#10;B选项&#10;C选项&#10;D选项"></textarea></div>
+        <div><label>答案索引（从0开始）</label><input id="add-answer" placeholder="如 0"></div>
+        <div class="full"><label>解析</label><textarea id="add-explanation"></textarea></div>
+        <div class="full"><button class="btn primary" onclick="submitAdd()">提交题目</button></div>
+      </div>
+      <div id="questions-list"></div>
+    </div>
+
+    <!-- 课件管理 -->
+    <div class="panel" id="tab-courseware" style="display:none;">
+      <h2>🎬 动画课件管理</h2>
+      <div id="cw-stats" style="margin-bottom:14px;"></div>
+      <div id="courseware-list"><p style="color:var(--text-muted);">加载中...</p></div>
+    </div>
+
+    <!-- 做题技巧管理 -->
+    <div class="panel" id="tab-skills" style="display:none;">
+      <h2>💡 做题技巧管理</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">为每个知识点配置「做题技巧」，会展示在对应课件页中。</p>
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div><label>知识点 ID</label><input id="skill-topic-id" placeholder="如 DS-50"></div>
+        <div><label>知识点名称</label><input id="skill-topic-name" placeholder="如 快速排序"></div>
+        <div class="full"><label>做题技巧（每行一条）</label><textarea id="skill-text" style="min-height:100px;" placeholder="技巧1：...&#10;技巧2：..."></textarea></div>
+        <div class="full"><button class="btn primary" onclick="saveSkill()">💾 保存技巧</button></div>
+      </div>
+      <div id="skills-list"><p style="color:var(--text-muted);">加载中...</p></div>
+    </div>
+
+    <!-- 用户管理 -->
+    <div class="panel" id="tab-users" style="display:none;">
+      <h2>👥 用户管理</h2>
+      <div id="users-list"><p style="color:var(--text-muted);">加载中...</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let TOKEN = localStorage.getItem('admin_token') || '';
+let currentTab = 'reports';
+let allReports = [];
+let allQuestions = [];
+
+/* ---------- 主题 ---------- */
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  updateThemeBtn();
+}
+function updateThemeBtn() { document.getElementById('theme-btn').textContent = document.documentElement.getAttribute('data-theme')==='light' ? '☀️' : '🌙'; }
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const c = document.documentElement.getAttribute('data-theme');
+  const n = c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+  updateThemeBtn();
+});
+
+/* ---------- 登录 ---------- */
+async function doLogin() {
+  const pwd = document.getElementById('login-pwd').value;
+  try {
+    const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pwd}) });
+    const d = await r.json();
+    if (d.ok) {
+      TOKEN = d.token;
+      localStorage.setItem('admin_token', TOKEN);
+      showAdmin();
+    } else {
+      document.getElementById('login-err').textContent = d.error || '登录失败';
+    }
+  } catch(e) { document.getElementById('login-err').textContent = '网络错误'; }
+}
+function logout() { TOKEN=''; localStorage.removeItem('admin_token'); location.reload(); }
+function showAdmin() {
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('admin-view').style.display = 'block';
+  switchTab('reports');
+}
+
+/* ---------- Tab 切换 ---------- */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
+  document.getElementById('tab-reports').style.display = tab==='reports' ? 'block' : 'none';
+  document.getElementById('tab-questions').style.display = tab==='questions' ? 'block' : 'none';
+  document.getElementById('tab-courseware').style.display = tab==='courseware' ? 'block' : 'none';
+  document.getElementById('tab-skills').style.display = tab==='skills' ? 'block' : 'none';
+  document.getElementById('tab-users').style.display = tab==='users' ? 'block' : 'none';
+  if (tab==='reports') loadReports();
+  else if (tab==='questions') loadQuestions();
+  else if (tab==='courseware') loadCourseware();
+  else if (tab==='skills') loadSkills();
+  else if (tab==='users') loadUsers();
+}
+
+/* ---------- 纠错管理 ---------- */
+async function loadReports() {
+  const r = await fetch('/api/admin/reports', { headers:{Authorization:'Bearer '+TOKEN} });
+  allReports = await r.json();
+  renderReports();
+}
+function renderReports() {
+  const el = document.getElementById('reports-list');
+  if (!allReports.length) { el.innerHTML = '<p style="color:var(--text-muted);">暂无纠错记录</p>'; return; }
+  const pending = allReports.filter(r => r.status === 'pending');
+  el.innerHTML = `
+    ${pending.length ? `<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+      <label style="font-size:13px;color:var(--text-muted);cursor:pointer;"><input type="checkbox" id="select-all" onchange="toggleSelectAll()"> 全选待处理</label>
+      <button class="btn small primary" onclick="resolveSelected()">✅ 批量标记已解决</button>
+    </div>` : ''}
+    <table>
+    <tr><th>${pending.length?'选择':''}</th><th>ID</th><th>题目</th><th>类型</th><th>详情</th><th>状态</th><th>时间</th><th>操作</th></tr>
+    ${allReports.map(r => `
+      <tr>
+        <td>${r.status==='pending' ? `<input type="checkbox" class="report-check" value="${r.id}">` : ''}</td>
+        <td style="font-size:11px;">${r.id}</td>
+        <td>${r.question_id}</td>
+        <td>${r.error_type}</td>
+        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;" title="${r.detail}">${r.detail}</td>
+        <td><span class="badge ${r.status}">${r.status==='resolved'?'已解决':'待处理'}</span></td>
+        <td style="font-size:11px;">${r.created_at}</td>
+        <td>${r.status==='pending' ? `<button class="btn small primary" onclick="resolveReport('${r.id}')">标记已解决</button>` : '—'}</td>
+      </tr>`).join('')}
+  </table>`;
+}
+function toggleSelectAll() {
+  const checked = document.getElementById('select-all').checked;
+  document.querySelectorAll('.report-check').forEach(c => c.checked = checked);
+}
+async function resolveSelected() {
+  const ids = [...document.querySelectorAll('.report-check:checked')].map(c => c.value);
+  if (!ids.length) { alert('请先勾选要处理的纠错'); return; }
+  await fetch('/api/admin/reports/resolve-batch', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body:JSON.stringify({ids}) });
+  loadReports();
+}
+async function resolveReport(id) {
+  await fetch(`/api/admin/reports/${id}/resolve`, { method:'POST', headers:{Authorization:'Bearer '+TOKEN} });
+  loadReports();
+}
+
+/* ---------- 题库管理 ---------- */
+async function loadQuestions() {
+  const r = await fetch('/api/admin/questions', { headers:{Authorization:'Bearer '+TOKEN} });
+  allQuestions = await r.json();
+  document.getElementById('q-count').textContent = allQuestions.length;
+  renderQuestions();
+}
+function renderQuestions() {
+  const kw = (document.getElementById('q-search').value || '').toLowerCase();
+  const list = allQuestions.filter(q => !kw || q.question.toLowerCase().includes(kw) || q.id.toLowerCase().includes(kw));
+  const el = document.getElementById('questions-list');
+  if (!list.length) { el.innerHTML = '<p style="color:var(--text-muted);margin-top:12px;">无匹配题目</p>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>科目</th><th>章节</th><th>题干</th><th>动画</th><th>操作</th></tr>
+    ${list.map(q => `
+      <tr>
+        <td>${q.id}</td>
+        <td>${q.subject}</td>
+        <td>${q.chapter||''}</td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">${q.question}</td>
+        <td>${q.animation_id ? `<a href="/${q.animation_id}.html" target="_blank" style="color:var(--primary-strong);">🎬</a>` : '—'}</td>
+        <td>
+          <button class="btn small" onclick="editQuestion('${q.id}')">✏️ 编辑</button>
+          <button class="btn small danger" onclick="deleteQuestion('${q.id}')">🗑️ 删除</button>
+        </td>
+      </tr>`).join('')}
+  </table>`;
+}
+
+/* ---------- 编辑 / 删除 ---------- */
+function editQuestion(id) {
+  const q = allQuestions.find(x => x.id === id);
+  if (!q) return;
+  // 回填添加表单
+  document.getElementById('add-subject').value = q.subject;
+  document.getElementById('add-chapter').value = q.chapter || '';
+  document.getElementById('add-type').value = q.type || '单选';
+  document.getElementById('add-anim').value = q.animation_id || '';
+  document.getElementById('add-question').value = q.question;
+  document.getElementById('add-options').value = (Array.isArray(q.options) ? q.options : []).join('\n');
+  document.getElementById('add-answer').value = Array.isArray(q.answer) ? q.answer.join(',') : q.answer;
+  document.getElementById('add-explanation').value = q.explanation || '';
+  // 标记为编辑模式，存储原 id
+  document.getElementById('add-form').dataset.editId = id;
+  document.getElementById('add-form').style.display = 'grid';
+  // 滚动到表单
+  document.getElementById('add-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deleteQuestion(id) {
+  if (!confirm(`确定删除题目 ${id} 吗？此操作不可恢复。`)) return;
+  const r = await fetch(`/api/admin/questions/${id}`, { method:'DELETE', headers:{Authorization:'Bearer '+TOKEN} });
+  const d = await r.json();
+  if (d.ok) { alert('✅ 已删除'); loadQuestions(); }
+  else alert('❌ 删除失败');
+}
+
+async function submitAdd() {
+  const options = document.getElementById('add-options').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const editId = document.getElementById('add-form').dataset.editId;
+  const q = {
+    id: editId || ('Q' + Date.now()),
+    subject: document.getElementById('add-subject').value,
+    chapter: document.getElementById('add-chapter').value,
+    type: document.getElementById('add-type').value,
+    question: document.getElementById('add-question').value,
+    options,
+    answer: parseInt(document.getElementById('add-answer').value),
+    explanation: document.getElementById('add-explanation').value,
+    animation_id: document.getElementById('add-anim').value || null,
+  };
+  if (!q.question || !options.length) { alert('请填写题干和选项'); return; }
+  const r = await fetch('/api/admin/questions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body:JSON.stringify([q]) });
+  const d = await r.json();
+  alert(editId ? '✅ 题目已更新' : '✅ 题目已添加');
+  document.getElementById('add-form').style.display = 'none';
+  document.getElementById('add-form').dataset.editId = '';
+  loadQuestions();
+}
+
+/* ---------- 上传导入 ---------- */
+function showUpload() { document.getElementById('upload-zone').style.display = 'block'; }
+async function handleUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const questions = JSON.parse(text);
+  const r = await fetch('/api/admin/questions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body:JSON.stringify(questions) });
+  const d = await r.json();
+  alert(`✅ 导入成功：${d.imported} 道题`);
+  document.getElementById('upload-zone').style.display = 'none';
+  loadQuestions();
+}
+
+/* ---------- 手动添加 ---------- */
+function showAddForm() { document.getElementById('add-form').style.display = document.getElementById('add-form').style.display==='none' ? 'grid' : 'none'; }
+// submitAdd 已在上面定义（支持编辑回填）
+
+/* ---------- 课件管理 ---------- */
+async function loadCourseware() {
+  const r = await fetch('/api/admin/courseware', { headers:{Authorization:'Bearer '+TOKEN} });
+  const d = await r.json();
+  document.getElementById('cw-stats').innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div class="stat-mini" style="background:var(--bg-elevated);padding:12px 18px;border-radius:8px;"><b style="color:var(--success);font-size:20px;">${d.generated}</b> 已生成</div>
+      <div class="stat-mini" style="background:var(--bg-elevated);padding:12px 18px;border-radius:8px;"><b style="color:var(--text-muted);font-size:20px;">${d.missing}</b> 未生成</div>
+      <div class="stat-mini" style="background:var(--bg-elevated);padding:12px 18px;border-radius:8px;"><b style="color:var(--primary-strong);font-size:20px;">${d.total_topics}</b> 总知识点</div>
+      <div class="stat-mini" style="background:var(--bg-elevated);padding:12px 18px;border-radius:8px;">覆盖率 <b style="color:var(--highlight);font-size:20px;">${Math.round(d.generated/d.total_topics*100)}%</b></div>
+    </div>`;
+  const el = document.getElementById('courseware-list');
+  if (!d.list.length) { el.innerHTML = '<p style="color:var(--text-muted);">暂无已生成课件</p>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>知识点</th><th>科目</th><th>章节</th><th>考频</th><th>动画级别</th><th>操作</th></tr>
+    ${d.list.map(c => `
+      <tr>
+        <td>${c.id}</td>
+        <td>${c.name}</td>
+        <td>${c.subject}</td>
+        <td>${c.chapter}</td>
+        <td><span class="badge pending">${c.frequency||''}</span></td>
+        <td>${c.anim_level||''}</td>
+        <td><a href="/${c.file}" target="_blank" style="color:var(--primary-strong);">🎬 查看</a></td>
+      </tr>`).join('')}
+  </table>`;
+}
+
+/* ---------- 做题技巧管理 ---------- */
+let allSkills = [];
+async function loadSkills() {
+  const r = await fetch('/api/skills');
+  allSkills = await r.json();
+  renderSkills();
+}
+function renderSkills() {
+  const el = document.getElementById('skills-list');
+  if (!allSkills.length) { el.innerHTML = '<p style="color:var(--text-muted);">暂无做题技巧，请在下方添加</p>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>知识点</th><th>技巧内容</th><th>更新时间</th><th>操作</th></tr>
+    ${allSkills.map(s => `
+      <tr>
+        <td>${s.topic_id}</td>
+        <td>${s.topic_name || ''}</td>
+        <td style="max-width:320px;white-space:pre-wrap;">${s.skill_text}</td>
+        <td style="font-size:11px;">${(s.updated_at||'').slice(0,16)}</td>
+        <td><button class="btn small" onclick="editSkill('${s.topic_id}')">✏️ 编辑</button></td>
+      </tr>`).join('')}
+  </table>`;
+}
+function editSkill(id) {
+  const s = allSkills.find(x => x.topic_id === id);
+  if (!s) return;
+  document.getElementById('skill-topic-id').value = s.topic_id;
+  document.getElementById('skill-topic-name').value = s.topic_name || '';
+  document.getElementById('skill-text').value = s.skill_text || '';
+}
+async function saveSkill() {
+  const payload = {
+    topic_id: document.getElementById('skill-topic-id').value.trim(),
+    topic_name: document.getElementById('skill-topic-name').value.trim(),
+    skill_text: document.getElementById('skill-text').value.trim(),
+  };
+  if (!payload.topic_id || !payload.skill_text) { alert('请填写知识点 ID 和技巧内容'); return; }
+  const r = await fetch('/api/admin/skills', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOKEN}, body:JSON.stringify(payload) });
+  const d = await r.json();
+  if (d.ok) { alert('✅ 技巧已保存'); loadSkills(); }
+  else alert('❌ 保存失败：' + d.error);
+}
+
+/* ---------- 用户管理 ---------- */
+async function loadUsers() {
+  const r = await fetch('/api/admin/users', { headers:{Authorization:'Bearer '+TOKEN} });
+  const users = await r.json();
+  const el = document.getElementById('users-list');
+  if (!users.length) { el.innerHTML = '<p style="color:var(--text-muted);">暂无注册用户</p>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>ID</th><th>用户名</th><th>注册时间</th><th>操作</th></tr>
+    ${users.map(u => `
+      <tr>
+        <td>${u.id}</td>
+        <td>${u.username}</td>
+        <td style="font-size:11px;">${(u.created_at||'').slice(0,16)}</td>
+        <td><button class="btn small danger" onclick="deleteUser('${u.id}','${u.username}')">🗑️ 删除</button></td>
+      </tr>`).join('')}
+  </table>`;
+}
+async function deleteUser(id, name) {
+  if (!confirm(`确定删除用户「${name}」吗？其错题本/收藏等数据将一并删除。`)) return;
+  const r = await fetch('/api/admin/users/' + id, { method:'DELETE', headers:{Authorization:'Bearer '+TOKEN} });
+  const d = await r.json();
+  if (d.ok) { alert('✅ 已删除'); loadUsers(); }
+  else alert('❌ 删除失败');
+}
+
+/* ---------- 初始化 ---------- */
+initTheme();
+if (TOKEN) { showAdmin(); }
+</script>
+</body>
+</html>

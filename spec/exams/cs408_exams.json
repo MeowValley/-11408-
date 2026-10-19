@@ -1,0 +1,104 @@
+{
+  "subject": "408",
+  "exam_years_covered": "2009-2026",
+  "source": [
+    {
+      "url": "http://mp.weixin.qq.com/s?__biz=MzkyMjU5NTU0Nw==&mid=2247489353&idx=1&sn=ebd5142657e2b61bcca55181b56efa4f",
+      "机构": "王道计算机考研官方考频表",
+      "说明": "408 历年 18 年真题（2009-2026）逐考点考频统计，含逐年题号"
+    },
+    {
+      "url": "https://kaoyan.xdf.cn/202610/15420042.html",
+      "机构": "新东方考研网（大题考点分布）"
+    },
+    {
+      "url": "https://blog.csdn.net/gitblog_00773/article/details/151473146",
+      "机构": "CSDN 408 真题考频统计（13 年）"
+    }
+  ],
+  "抓取日期": "2026-10-18",
+  "说明": "408 为统考科目，真题公开，考点映射依据王道官方考频表与历年真题题号。topic_id 与 spec/outline/cs408.md 的大纲三级条目对齐。",
+  "题目总量": 480,
+  "统计口径": "40 题/年 × 18 年 = 720 题次（含小题），综合应用题 7 题/年。以下按【考点】聚合代表性真题，未逐题枚举（真题全文受版权限制，仅存考点映射与考频）。",
+  "questions": [
+    {"id": "2018-Q12", "year": 2018, "type": "单选题", "topic_id": "DS-03-02", "topic_name": "循环队列的判空判满", "question_text": "循环队列（数组存储）中 rear 与 front 指针关系判断队空/队满的条件", "analysis_summary": "队空 rear==front；队满 (rear+1)%MaxSize==front（牺牲一个单元）或增设 size 计数。", "difficulty": "中"},
+    {"id": "2019-Q8", "year": 2019, "type": "单选题", "topic_id": "DS-01-01", "topic_name": "时间复杂度与空间复杂度", "question_text": "分析给定算法的时间复杂度", "analysis_summary": "时间复杂度与空间复杂度分析是 408 最高频考点（15 年 22 次），需掌握大 O 记号与循环嵌套分析。", "difficulty": "易"},
+    {"id": "2021-Q41", "year": 2021, "type": "综合应用题", "topic_id": "DS-02-02", "topic_name": "线性表的链式存储（单链表）", "question_text": "单链表算法设计（如查找倒数第 k 个节点、公共后缀）", "analysis_summary": "链表算法大题 13 年连考，8 年为链表/顺序表主题。双指针技巧是核心。", "difficulty": "难"},
+    {"id": "2019-Q6", "year": 2019, "type": "单选题", "topic_id": "DS-04-02", "topic_name": "哈夫曼树与哈夫曼编码", "question_text": "哈夫曼树构建与 WPL 计算", "analysis_summary": "哈夫曼树 15 年考 15 次，高频考点。掌握权值最小两子树合并法求 WPL。", "difficulty": "中"},
+    {"id": "2017-Q41", "year": 2017, "type": "综合应用题", "topic_id": "DS-04-02", "topic_name": "二叉树的遍历", "question_text": "二叉树遍历序列推导与算法", "analysis_summary": "二叉树遍历 15 年考 13 次，小题考遍历序列，大题考递归算法。", "difficulty": "中"},
+    {"id": "2020-Q7", "year": 2020, "type": "单选题", "topic_id": "DS-05-01", "topic_name": "图的基本概念与存储", "question_text": "图的邻接矩阵/邻接表存储", "analysis_summary": "图的存储与基本操作高频，邻接矩阵与邻接表的空间/时间特性对比。", "difficulty": "易"},
+    {"id": "2022-Q41", "year": 2022, "type": "综合应用题", "topic_id": "DS-05-04", "topic_name": "拓扑排序", "question_text": "拓扑排序算法与 AOV 网", "analysis_summary": "拓扑排序 15 年考 9 次，掌握入度表法。", "difficulty": "中"},
+    {"id": "2018-Q8", "year": 2018, "type": "单选题", "topic_id": "DS-06-04", "topic_name": "B 树与 B+ 树", "question_text": "B 树/B+ 树的定义、阶数、查找", "analysis_summary": "B 树/B+ 树年年考（15 年 12 次），掌握关键字个数与子树个数关系。", "difficulty": "中"},
+    {"id": "2023-Q41", "year": 2023, "type": "综合应用题", "topic_id": "DS-06-05", "topic_name": "散列表", "question_text": "散列表构造与冲突处理（线性探测/链地址）", "analysis_summary": "散列表 15 年考 9 次，掌握装载因子与 ASL 计算。", "difficulty": "中"},
+    {"id": "2024-Q10", "year": 2024, "type": "单选题", "topic_id": "DS-07-02", "topic_name": "快速排序", "question_text": "快速排序的趟数与复杂度", "analysis_summary": "排序算法每年必考，快速排序掌握枢轴划分与稳定性。", "difficulty": "中"},
+    {"id": "2020-Q43", "year": 2020, "type": "综合应用题", "topic_id": "CO-03-03", "topic_name": "Cache 与主存的映射方式", "question_text": "Cache 映射地址计算与命中率", "analysis_summary": "Cache 映射 15 年考 16 次，大题必考地址计算（标记位/块号/块内地址）。", "difficulty": "难"},
+    {"id": "2023-Q13", "year": 2023, "type": "单选题", "topic_id": "CO-02-01", "topic_name": "定点数的编码表示", "question_text": "补码/原码/反码/移码的表示范围", "analysis_summary": "定点数编码 15 年考 26 次（最高频），掌握各码制表示范围与运算。", "difficulty": "易"},
+    {"id": "2018-Q18", "year": 2018, "type": "单选题", "topic_id": "CO-05-04", "topic_name": "指令流水线", "question_text": "流水线性能计算（吞吐率、加速比）", "analysis_summary": "指令流水线 15 年考 16 次，掌握流水线周期与冲突。", "difficulty": "中"},
+    {"id": "2021-Q22", "year": 2021, "type": "单选题", "topic_id": "CO-05-06", "topic_name": "程序中断方式", "question_text": "中断响应与中断屏蔽", "analysis_summary": "程序中断方式 15 年考 24 次，掌握中断优先级与屏蔽字。", "difficulty": "中"},
+    {"id": "2019-Q44", "year": 2019, "type": "综合应用题", "topic_id": "CO-03-04", "topic_name": "虚拟存储器（页式虚拟存储）", "question_text": "页式虚拟存储地址转换与缺页中断", "analysis_summary": "虚拟存储器 15 年考 19 次，页表与 TLB 的地址转换是核心。", "difficulty": "难"},
+    {"id": "2022-Q45", "year": 2022, "type": "综合应用题", "topic_id": "OS-02-03", "topic_name": "同步与互斥（PV 操作）", "question_text": "经典同步问题（生产者-消费者）", "analysis_summary": "PV 操作 15 年考 22 次，大题高频。掌握信号量机制。", "difficulty": "难"},
+    {"id": "2023-Q45", "year": 2023, "type": "综合应用题", "topic_id": "OS-02-04", "topic_name": "死锁与银行家算法", "question_text": "银行家算法判断安全序列", "analysis_summary": "银行家算法是大题高频，掌握安全性检测。", "difficulty": "中"},
+    {"id": "2020-Q45", "year": 2020, "type": "综合应用题", "topic_id": "OS-03-02", "topic_name": "页面置换算法（LRU/FIFO/OPT）", "question_text": "缺页率计算与页面置换", "analysis_summary": "虚拟内存管理 15 年考 33 次（最高频），缺页率计算是大题主要形态。", "difficulty": "难"},
+    {"id": "2024-Q30", "year": 2024, "type": "单选题", "topic_id": "OS-02-02", "topic_name": "CPU 调度算法", "question_text": "周转时间/等待时间计算", "analysis_summary": "CPU 调度 15 年考 22 次，掌握 FCFS/SJF/RR 的周转时间。", "difficulty": "中"},
+    {"id": "2019-Q47", "year": 2019, "type": "综合应用题", "topic_id": "CN-04-03", "topic_name": "子网划分与 CIDR", "question_text": "IP 地址子网划分与路由聚合", "analysis_summary": "子网划分是计网大题高频，掌握子网掩码计算。", "difficulty": "中"},
+    {"id": "2023-Q33", "year": 2023, "type": "单选题", "topic_id": "CN-05-03", "topic_name": "TCP 连接管理（三次握手）", "question_text": "TCP 三次握手/四次挥手过程", "analysis_summary": "TCP 连接管理 14 年考 11 次，三次握手/四次挥手是选择+大题高频。", "difficulty": "中"},
+    {"id": "2021-Q36", "year": 2021, "type": "单选题", "topic_id": "CN-05-04", "topic_name": "TCP 可靠传输与拥塞控制", "question_text": "TCP 拥塞控制（慢启动/拥塞避免）", "analysis_summary": "TCP 拥塞控制是大题必背，掌握拥塞窗口变化。", "difficulty": "难"},
+    {"id": "2020-Q35", "year": 2020, "type": "单选题", "topic_id": "CN-03-05", "topic_name": "介质访问控制（CSMA/CD）", "question_text": "CSMA/CD 与以太网帧", "analysis_summary": "介质访问控制 15 年考 15 次，掌握 CSMA/CD 与碰撞检测。", "difficulty": "中"},
+    {"id": "2022-Q40", "year": 2022, "type": "单选题", "topic_id": "CN-06-02", "topic_name": "DNS 域名系统", "question_text": "DNS 解析过程", "analysis_summary": "DNS 是应用层选择常客，掌握递归与迭代查询。", "difficulty": "易"}
+  ],
+  "考点考频统计": {
+    "数据结构": {
+      "时间复杂度与空间复杂度": {"考频": 22, "topic_id": "DS-01-01"},
+      "哈夫曼树与哈夫曼编码": {"考频": 15, "topic_id": "DS-04-02"},
+      "二叉树的遍历": {"考频": 13, "topic_id": "DS-04-02"},
+      "图的基本概念与存储": {"考频": 40, "topic_id": "DS-05-01"},
+      "B树/B+树": {"考频": 12, "topic_id": "DS-06-04"},
+      "散列表": {"考频": 9, "topic_id": "DS-06-05"},
+      "二叉排序树": {"考频": 9, "topic_id": "DS-04-04"},
+      "拓扑排序": {"考频": 9, "topic_id": "DS-05-04"},
+      "平衡二叉树": {"考频": 8, "topic_id": "DS-04-04"},
+      "堆排序": {"考频": 7, "topic_id": "DS-07-02"},
+      "关键路径": {"考频": 6, "topic_id": "DS-05-04"},
+      "最小生成树": {"考频": 5, "topic_id": "DS-05-04"},
+      "折半查找": {"考频": 5, "topic_id": "DS-06-02"},
+      "串的模式匹配（KMP）": {"考频": 3, "topic_id": "DS-03-05"}
+    },
+    "计算机组成原理": {
+      "定点数的编码表示": {"考频": 26, "topic_id": "CO-02-01"},
+      "程序中断方式": {"考频": 24, "topic_id": "CO-05-06"},
+      "虚拟存储器的基本概念": {"考频": 19, "topic_id": "CO-03-04"},
+      "Cache与主存的映射": {"考频": 16, "topic_id": "CO-03-03"},
+      "寻址方式": {"考频": 16, "topic_id": "CO-04-02"},
+      "指令格式及执行过程": {"考频": 16, "topic_id": "CO-04-01"},
+      "指令流水线": {"考频": 16, "topic_id": "CO-05-04"},
+      "浮点数的表示与运算": {"考频": 14, "topic_id": "CO-02-02"},
+      "数据通路": {"考频": 13, "topic_id": "CO-05-03"},
+      "计算机性能指标": {"考频": 12, "topic_id": "CO-01-04"}
+    },
+    "操作系统": {
+      "虚拟内存管理（页面置换）": {"考频": 33, "topic_id": "OS-03-02"},
+      "同步与互斥（PV操作）": {"考频": 22, "topic_id": "OS-02-03"},
+      "CPU调度与上下文切换": {"考频": 22, "topic_id": "OS-02-02"},
+      "非连续分配管理方式（分页/分段）": {"考频": 22, "topic_id": "OS-03-01"},
+      "中断和异常的处理": {"考频": 16, "topic_id": "OS-02-01"},
+      "进程的状态与转换": {"考频": 15, "topic_id": "OS-02-01"},
+      "死锁（银行家算法）": {"考频": 12, "topic_id": "OS-02-04"},
+      "文件的逻辑/物理结构": {"考频": 12, "topic_id": "OS-04-01"},
+      "磁盘调度算法": {"考频": 11, "topic_id": "OS-05-03"}
+    },
+    "计算机网络": {
+      "介质访问控制": {"考频": 15, "topic_id": "CN-03-05"},
+      "TCP基本机制（握手/挥手）": {"考频": 12, "topic_id": "CN-05-03"},
+      "路由选择与路由转发": {"考频": 12, "topic_id": "CN-04-02"},
+      "TCP可靠传输/拥塞控制": {"考频": 8, "topic_id": "CN-05-04"},
+      "子网划分与CIDR": {"考频": 8, "topic_id": "CN-04-03"},
+      "ARP/HTTP/DNS/FTP": {"考频": 10, "topic_id": "CN-06-02"},
+      "香农定理与编码调制": {"考频": 6, "topic_id": "CN-02-01"}
+    }
+  },
+  "大纲零考察知识点": [
+    {"topic_id": "DS-04-02", "topic_name": "并查集", "说明": "王道考频表标注 0 次，近 15 年未直接考查"},
+    {"topic_id": "DS-04-02", "topic_name": "红黑树", "说明": "王道考频表标注 0 次，408 大纲提及但近 15 年未考查"}
+  ],
+  "真题超纲项": []
+}

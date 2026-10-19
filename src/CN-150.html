@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>传输介质</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>传输介质</h1><span class="badge">B级 · CN-150</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>传输介质分「导向性」和「非导向性」两大类：<strong>导向介质</strong>（电磁波沿固体传播）：双绞线（便宜、局域常用，分屏蔽/非屏蔽）、同轴电缆（抗干扰强于双绞线，分基带/宽带）、光纤（光脉冲导传播，带宽极大、衰减极小、抗电磁干扰，分单模/多模）；<strong>非导向介质</strong>（自由空间传播）：无线电波、微波、红外、激光——WiFi、4G/5G、卫星通信都靠它。</p>
+<p>评价指标四条：<strong>带宽</strong>（最高速率）、<strong>传输距离</strong>（衰减决定）、<strong>抗干扰性</strong>（噪声抵抗）、<strong>性价比</strong>。光纤是长距离骨干网的绝对主力，双绞线垄断「最后 100 米」。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CN-150",
+  title: "传输介质",
+  derivation: [
+    "\\text{导向介质}: \\; \\text{双绞线} + \\text{同轴电缆} + \\text{光纤}",
+    "\\text{非导向介质}: \\; \\text{无线电波} + \\text{微波} + \\text{红外} + \\text{激光}",
+    "\\text{评价四指标}: \\; \\text{带宽} + \\text{传输距离} + \\text{抗干扰性} + \\text{性价比}",
+    "\\text{光纤}: \\; \\text{单模（芯细、距离远、贵）} \\;|\\; \\text{多模（芯粗、距离近、便宜）}"
+  ],
+  exam_text: "<b>【2017 真题改编】</b>与双绞线、同轴电缆相比，光纤作为传输介质的主要优势是什么？",
+  exam_answer: "答案：① <b>带宽极大</b>（容量比铜缆高几个数量级）；② <b>衰减极小</b>，长距离传输无需太多中继；③ <b>抗电磁干扰能力强</b>（光信号不受雷电/电机干扰）；④ 绝缘性好、不漏光、保密性好；⑤ 体积小重量轻。缺点是造价高、连接和分路困难（熔接需专门设备）。",
+  pitfall_list: [
+    "双绞线有两类：屏蔽双绞线（STP，贵、抗干扰强）与非屏蔽双绞线（UTP，便宜、局域网最常用），别搞反。",
+    "光纤里跑的是「光脉冲」不是电磁波，靠全反射在纤芯中传播——这是它抗电磁干扰的根本原因。",
+    "同轴电缆分 50Ω 基带（用于传送基带信号，局域网早期）和 75Ω 宽带（用于频带信号，有线电视），用途不同。"
+  ],
+  quiz_list: [
+    { question: "光纤中传输的是？", options: ["电信号", "光脉冲", "无线电波"], correct: 1 },
+    { question: "局域网中最常用的传输介质是？", options: ["光纤", "非屏蔽双绞线 UTP", "同轴电缆"], correct: 1 },
+    { question: "下列哪项不是导向介质？", options: ["双绞线", "微波", "光纤"], correct: 1 },
+  ]
+};
+
+/* ===== CN-150 专属动画：介质家族对比 ===== */
+const STEPS = [
+  { focus:0, desc:'传输介质两大家族：导向性（固体中导引）vs 非导向性（自由空间）' },
+  { focus:1, desc:'双绞线：便宜好用，局域网「最后 100 米」主力' },
+  { focus:2, desc:'同轴电缆：抗干扰强于双绞线，有线电视/早期局域网' },
+  { focus:3, desc:'光纤：光脉冲全反射传播，带宽大、损耗小、抗干扰——骨干网主力' },
+  { focus:4, desc:'无线介质：无线电波/微波/红外——WiFi 与移动通信的基础' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700')
+    .text(['介质家族','双绞线','同轴电缆','光纤','无线介质'][f]);
+
+  if(f===0){
+    g.append('rect').attr('x',60).attr('y',60).attr('width',380).attr('height',280).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',250).attr('y',100).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',17).attr('font-weight','700').text('导向性介质');
+    g.append('text').attr('x',250).attr('y',136).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('电磁波沿固体介质传播');
+    ['双绞线（UTP/STP）','同轴电缆（基带/宽带）','光纤（单模/多模）'].forEach((t,i)=>{
+      g.append('rect').attr('x',100).attr('y',160+i*56).attr('width',300).attr('height',44).attr('rx',8).attr('fill','var(--bg-elevated)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+      g.append('text').attr('x',250).attr('y',187+i*56).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text(t);
+    });
+    g.append('rect').attr('x',470).attr('y',60).attr('width',380).attr('height',280).attr('rx',12)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',660).attr('y',100).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',17).attr('font-weight','700').text('非导向性介质');
+    g.append('text').attr('x',660).attr('y',136).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('电磁波在自由空间传播');
+    ['无线电波（广播/电视）','微波（卫星/地面中继）','红外 / 激光（短距离）'].forEach((t,i)=>{
+      g.append('rect').attr('x',510).attr('y',160+i*56).attr('width',300).attr('height',44).attr('rx',8).attr('fill','var(--bg-elevated)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+      g.append('text').attr('x',660).attr('y',187+i*56).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text(t);
+    });
+    g.append('text').attr('x',450).attr('y',372).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('');
+  }
+
+  if(f===1){
+    g.append('text').attr('x',450).attr('y',72).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('双绞线：两根绝缘铜线按规则绞合，抵消电磁干扰');
+    /* 双绞线示意 */
+    g.append('circle').attr('cx',200).attr('cy',200).attr('r',55).attr('fill','none').attr('stroke','var(--swap)').attr('stroke-width',7).attr('stroke-dasharray','18 10');
+    g.append('circle').attr('cx',200).attr('cy',200).attr('r',55).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',7).attr('stroke-dasharray','10 18');
+    g.append('text').attr('x',200).attr('y',285).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('');
+    g.append('text').attr('x',200).attr('y',290).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('两根线绞合抵消干扰');
+    const info=[
+      ['STP 屏蔽双绞线','外包金属屏蔽层，抗干扰强、价高'],
+      ['UTP 非屏蔽双绞线','无屏蔽层，便宜，以太网最常用'],
+      ['常用类别','Cat5e / Cat6 / Cat6a / Cat7'],
+    ];
+    info.forEach((it,i)=>{
+      const y=110+i*72;
+      g.append('rect').attr('x',330).attr('y',y).attr('width',500).attr('height',58).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--swap)').attr('stroke-width',1.5);
+      g.append('text').attr('x',350).attr('y',y+24).attr('fill','var(--swap)').attr('font-size',13.5).attr('font-weight','700').text(it[0]);
+      g.append('text').attr('x',350).attr('y',y+46).attr('fill','var(--text)').attr('font-size',12).text(it[1]);
+    });
+    g.append('text').attr('x',450).attr('y',350).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('传输距离一般 100 米内——这就是「最后 100 米」的由来');
+  }
+
+  if(f===2){
+    g.append('text').attr('x',450).attr('y',72).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('同轴电缆：内导体 + 绝缘层 + 外屏蔽层，抗干扰强于双绞线');
+    /* 横截面 */
+    g.append('circle').attr('cx',220).attr('cy',190).attr('r',70).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+    g.append('circle').attr('cx',220).attr('cy',190).attr('r',55).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',4);
+    g.append('circle').attr('cx',220).attr('cy',190).attr('r',38).attr('fill','none').attr('stroke','var(--text-muted)').attr('stroke-width',1.5).attr('stroke-dasharray','3,3');
+    g.append('circle').attr('cx',220).attr('cy',190).attr('r',16).attr('fill','var(--swap)').attr('fill-opacity',0.6).attr('stroke','var(--swap)').attr('stroke-width',2);
+    g.append('text').attr('x',220).attr('y',285).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('');
+    g.append('text').attr('x',220).attr('y',290).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('内导体（铜芯）');
+    const info=[
+      ['50Ω 基带同轴电缆','传送基带数字信号，早期 10Base5/10Base2'],
+      ['75Ω 宽带同轴电缆','传送频分复用的模拟信号，有线电视 CATV'],
+      ['特点','带宽较高、抗干扰较好，已被双绞线和光纤大量替代'],
+    ];
+    info.forEach((it,i)=>{
+      const y=110+i*72;
+      g.append('rect').attr('x',330).attr('y',y).attr('width',500).attr('height',58).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',1.5);
+      g.append('text').attr('x',350).attr('y',y+24).attr('fill','var(--primary-strong)').attr('font-size',13.5).attr('font-weight','700').text(it[0]);
+      g.append('text').attr('x',350).attr('y',y+46).attr('fill','var(--text)').attr('font-size',12).text(it[1]);
+    });
+  }
+
+  if(f===3){
+    g.append('text').attr('x',450).attr('y',72).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('光纤：纤芯内全反射传导光脉冲，单模 vs 多模');
+    /* 光纤全反射示意 */
+    g.append('rect').attr('x',80).attr('y',110).attr('width',360).attr('height',120).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+    g.append('line').attr('x1',90).attr('y1',150).attr('x2',430).attr('y2',150).attr('stroke','var(--primary)').attr('stroke-width',2).attr('stroke-dasharray','6,4');
+    g.append('line').attr('x1',90).attr('y1',190).attr('x2',430).attr('y2',190).attr('stroke','var(--primary)').attr('stroke-width',2).attr('stroke-dasharray','6,4');
+    /* 折线光束 */
+    let d='M 100 130';
+    for(let i=0;i<6;i++){ d += ' L '+(100+(i+0.5)*50)+' '+(i%2?125:195)+' L '+(100+(i+1)*50)+' '+(i%2?125:195); }
+    g.append('path').attr('d',d).attr('fill','none').attr('stroke','var(--highlight)').attr('stroke-width',3);
+    g.append('text').attr('x',260).attr('y',250).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('');
+    g.append('text').attr('x',260).attr('y',255).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text('光在纤芯-包层界面全反射，曲折前进');
+    const info=[
+      ['单模光纤','芯径约 9μm，一束光直线传播，距离远、价高，用于长途干线'],
+      ['多模光纤','芯径约 50/62.5μm，多束光多条路径，距离近、便宜，用于楼内'],
+      ['核心优势','带宽极大 + 衰减小 + 抗电磁干扰 + 保密好'],
+    ];
+    info.forEach((it,i)=>{
+      const y=110+i*72;
+      g.append('rect').attr('x',490).attr('y',y).attr('width',360).attr('height',58).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',1.5);
+      g.append('text').attr('x',508).attr('y',y+24).attr('fill','var(--success)').attr('font-size',13.5).attr('font-weight','700').text(it[0]);
+      g.append('text').attr('x',508).attr('y',y+46).attr('fill','var(--text)').attr('font-size',11.5).text(it[1]);
+    });
+    g.append('text').attr('x',450).attr('y',350).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('骨干网/海缆几乎全部是光纤——互联网的「高速公路」');
+  }
+
+  if(f===4){
+    const cards=[
+      {t:'无线电波', s:'全方向传播，易穿透建筑', e:'广播、电视、WiFi、蓝牙', c:'var(--primary)'},
+      {t:'微波', s:'直线传播，需中继或卫星', e:'卫星通信、5G 回传', c:'var(--success)'},
+      {t:'红外 / 激光', s:'方向性强，不能穿墙', e:'遥控器、室内光通信', c:'var(--swap)'},
+    ];
+    cards.forEach((c2,i)=>{
+      const x=70+i*270;
+      g.append('rect').attr('x',x).attr('y',70).attr('width',250).attr('height',200).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',c2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+125).attr('y',120).attr('text-anchor','middle').attr('fill',c2.c).attr('font-size',17).attr('font-weight','700').text(c2.t);
+      g.append('text').attr('x',x+125).attr('y',158).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text(c2.s);
+      g.append('text').attr('x',x+125).attr('y',200).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text(c2.e);
+    });
+    /* 波纹 */
+    for(let i=1;i<=3;i++){
+      g.append('path').attr('d',`M 450 ${370-i*10} Q 410 ${370-i*18} 380 ${370-i*6}`).attr('fill','none').attr('stroke','var(--text-muted)').attr('stroke-width',1.2).attr('opacity',0.6);
+    }
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('');
+    g.append('text').attr('x',450).attr('y',340).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('无线介质优点：无需布线、灵活移动；缺点：易受干扰、安全性差、需频段管制');
+  }
+
+  const defs = svg.append('defs');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>
