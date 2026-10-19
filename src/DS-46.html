@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B 树与 B+ 树</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>B 树与 B+ 树</h1><span class="badge">B级 · DS-46</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>B 树是多路平衡查找树，用于数据库索引。m 阶 B 树：每个节点最多 m-1 个关键字、m 个孩子。B+ 树是 B 树的变体：所有数据在叶子，叶子用链表串联，适合范围查询。下面动画对比 B 树和 B+ 树。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-46",
+  title: "B 树与 B+ 树",
+  derivation: [
+    "m \\text{ 阶 B 树：最多 } m-1 \\text{ 关键字，} m \\text{ 孩子}",
+    "\\text{B+ 树：数据全在叶子，叶子链表串联}"
+  ],
+  exam_text: "<b>【真题】</b>B+ 树相比 B 树更适合什么查询？",
+  exam_answer: "答案：范围查询。B+ 树所有数据在叶子节点且叶子用链表串联，可以顺序扫描，范围查询效率高。",
+  pitfall_list: [
+    "B 树每个节点既存关键字又存数据，B+ 树数据只在叶子。",
+    "B+ 树叶子节点用链表串联，适合范围查询和顺序遍历。",
+    "m 阶 B 树最多 m-1 个关键字，m 个孩子。"
+  ],
+  quiz_list: [
+    { question: "B+ 树适合什么查询？", options: ["范围查询", "随机查询", "点查询"], correct: 0 },
+    { question: "m 阶 B 树最多几个关键字？", options: ["m-1", "m", "m+1"], correct: 0 },
+  ]
+};
+
+/* ===== DS-46 专属动画：B树 vs B+树 ===== */
+const STEPS = [
+  { mode:'b', desc:'B 树：每个节点同时存关键字和数据，共 3 层' },
+  { mode:'b', desc:'B 树查找可能在中间节点命中，路径较短' },
+  { mode:'bp', desc:'B+ 树：数据全在叶子节点，内部节点只存索引' },
+  { mode:'bp', desc:'B+ 树叶子用链表串联，范围查询直接顺序扫描' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const isBP = step.mode==='bp';
+
+  // 三层结构
+  const levels = [
+    {y:60, nodes:['10','20'], color:'var(--primary)'},
+    {y:160, nodes:['5','8','15','25','30'], color:isBP?'var(--swap)':'var(--success)'},
+    {y:270, nodes:['1','3','6','7','9','12','14','18','22','28','35'], color:isBP?'var(--success)':'var(--swap)'},
+  ];
+  levels.forEach((lv,li)=>{
+    const totalW = lv.nodes.length * 55;
+    const startX = (W - totalW)/2;
+    lv.nodes.forEach((v,i)=>{
+      const x = startX + i*55;
+      const isLeaf = li===2;
+      g.append('rect').attr('x',x).attr('y',lv.y).attr('width',46).attr('height',40).attr('rx',6)
+        .attr('fill',lv.color).attr('opacity',0.4).attr('stroke',lv.color).attr('stroke-width',1);
+      g.append('text').attr('x',x+23).attr('y',lv.y+25).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',11).attr('font-weight','700').text(v);
+    });
+  });
+
+  // B+ 树叶子链表
+  if(isBP){
+    const leafY = 270;
+    g.append('line').attr('x1',40).attr('y1',leafY+20).attr('x2',860).attr('y2',leafY+20).attr('stroke','var(--highlight)').attr('stroke-width',2).attr('stroke-dasharray','4,4');
+    g.append('text').attr('x',450).attr('y',leafY+60).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('叶子链表串联 → 范围查询');
+  }
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1700); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text||''}</p>`;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

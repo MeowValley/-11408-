@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>指令的寻址方式</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>指令的寻址方式</h1><span class="badge">A级 · CO-70</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text">寻址方式就是「怎么找到操作数」。立即寻址：数直接在指令里；直接寻址：指令里存的是地址；间接寻址：指令里存的是「存地址的地址」；寄存器寻址：数在寄存器里。不同方式速度、灵活性各不相同。</div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "CO-70",
+  title: "指令的寻址方式",
+  derivation: ["\\text{立即寻址：} OP \\;\\#imm","\\text{直接寻址：} OP \\;A \\Rightarrow \\text{访问 } M[A]","\\text{间接寻址：} OP \\;A \\Rightarrow M[A] \\Rightarrow M[M[A]]","\\text{变址寻址：} EA = A + (IX)"],
+  exam_text: "<b>【真题】</b>下列寻址方式中，操作数在指令中直接给出的是？",
+  exam_answer: "答案：立即寻址。立即寻址的地址码字段就是操作数本身，不需访存取操作数，速度最快。",
+  pitfall_list: ["立即寻址操作数在指令里，不用访存，最快但数的大小受指令长度限制。","直接寻址：地址码是操作数的有效地址（访存1次）。","间接寻址：地址码是「地址的地址」（访存2次），最慢但灵活。","寄存器寻址不访存，速度也很快。"],
+  quiz_list: [{"question":"操作数直接在指令中的是？","options":["立即寻址","直接寻址","间接寻址","变址寻址"],"correct":0},{"question":"需要访存2次的是？","options":["间接寻址","直接寻址","立即寻址","寄存器寻址"],"correct":0}],
+  intuition_text: "寻址方式就是「怎么找到操作数」。立即寻址：数直接在指令里；直接寻址：指令里存的是地址；间接寻址：指令里存的是「存地址的地址」；寄存器寻址：数在寄存器里。不同方式速度、灵活性各不相同。"
+};
+
+/* ===== CO-70 专属动画：指令的寻址方式 ===== */
+const STEPS = [{"focus":0,"desc":"指令格式：操作码 + 寻址特征 + 形式地址 A；寻址方式决定「A 怎么变成 EA」"},{"focus":1,"desc":"立即寻址：#A —— 形式地址本身就是操作数，不访问主存，最快"},{"focus":2,"desc":"直接寻址：EA = A —— 按 A 取一次主存，就拿到操作数"},{"focus":3,"desc":"间接寻址：EA = (A) —— 主存里存的是「地址的地址」，要访存两次"},{"focus":4,"desc":"寄存器寻址（0 次访存）与寄存器间接寻址（1 次访存）"},{"focus":5,"desc":"变址 EA = A + (IX)、相对 EA = A + PC —— 支持数组与程序浮动"},{"focus":6,"desc":"对比：访存次数越多越慢；立即/寄存器最快，间接最灵活也最慢"}];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+/* —— 通用几何工具（仅坐标/样式辅助，每个知识点的动画编排均为独立手写） —— */
+function box(g,x,y,w,h,stroke,fillOp,rx){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',rx===undefined?8:rx)
+    .attr('fill',stroke).attr('fill-opacity',fillOp===undefined?0.1:fillOp).attr('stroke',stroke).attr('stroke-width',2);
+}
+function txt(g,x,y,s,fill,size,anchor,weight){
+  g.append('text').attr('x',x).attr('y',y).attr('text-anchor',anchor||'middle')
+    .attr('fill',fill||'var(--text)').attr('font-size',size||13).attr('font-weight',weight||400).text(s);
+}
+function ln(g,x1,y1,x2,y2,stroke,sw,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',stroke).attr('stroke-width',sw||1.6).attr('stroke-dasharray',dash||'');
+}
+function arw(g,x1,y1,x2,y2,color,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',color).attr('stroke-width',2).attr('stroke-dasharray',dash||'').attr('marker-end','url(#arwGen)');
+}
+function circ(g,cx,cy,r,fill,stroke,sw){
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill',fill)
+    .attr('stroke',stroke||'none').attr('stroke-width',sw||0);
+}
+function chip(g,x,y,w,h,label,color,sub){
+  box(g,x,y,w,h,color,0.14);
+  txt(g,x+w/2,y+(sub?h/2-4:h/2+5),label,color,13,'middle','700');
+  if(sub) txt(g,x+w/2,y+h/2+14,sub,'var(--text-muted)',10.5);
+}
+function title(g,s){
+  txt(g,450,28,s,'var(--primary-strong)',15,'middle','700');
+}
+function plot(g,f,x0,y0,w,h,color,sw){
+  let d='';
+  for(let i=0;i<=100;i++){
+    const t=i/100, x=x0+w*t, y=y0-h*f(t);
+    d+=(i?' L ':'M ')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  g.append('path').attr('d',d).attr('fill','none').attr('stroke',color).attr('stroke-width',sw||2.2);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arwGen').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5)
+    .attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary-strong)');
+  
+    const C = ['var(--primary)', 'var(--success)', 'var(--highlight)', 'var(--danger)'];
+    const head = ['指令格式：A 只是「形式地址」', '立即寻址 #A（0 次访存）', '直接寻址 EA=A（1 次访存）', '间接寻址 EA=(A)（2 次访存）', '寄存器 / 寄存器间接', '变址与相对寻址', '七种寻址方式对比'];
+    title(g, head[f]);
+
+    function nb(x, y, w, h, label, sub, color) {
+      g.append('rect').attr('x', x).attr('y', y).attr('width', w).attr('height', h).attr('rx', 10)
+        .attr('fill', color).attr('fill-opacity', 0.16).attr('stroke', color).attr('stroke-width', 2);
+      txt(g, x + w / 2, y + (sub ? h / 2 - 4 : h / 2 + 5), label, color, 13, 'middle', '700');
+      if (sub) txt(g, x + w / 2, y + h / 2 + 16, sub, 'var(--text-muted)', 10.5);
+    }
+    function badge(x, y, s, color) {
+      g.append('rect').attr('x', x).attr('y', y).attr('width', 152).attr('height', 30).attr('rx', 15)
+        .attr('fill', color).attr('fill-opacity', 0.18).attr('stroke', color).attr('stroke-width', 1.4);
+      txt(g, x + 76, y + 21, s, color, 12.5, 'middle', '700');
+    }
+    function chain(list, y) {
+      const w = 132, gap = 28, x0 = 62;
+      list.forEach(function (it, i) {
+        nb(x0 + i * (w + gap), y, w, 56, it[0], it[1], it[2]);
+        if (i < list.length - 1) arw(g, x0 + i * (w + gap) + w + 2, y + 28, x0 + (i + 1) * (w + gap) - 4, y + 28, 'var(--primary-strong)');
+      });
+      return x0 + list.length * (w + gap) - gap;
+    }
+
+    if (f === 0) {
+      nb(90, 92, 210, 60, '操作码 OP', '做什么运算', 'var(--primary)');
+      nb(312, 92, 170, 60, '寻址特征 M', '用哪种寻址方式', 'var(--highlight)');
+      nb(494, 92, 300, 60, '形式地址 A', '不是最终地址，只是「线索」', 'var(--success)');
+      arw(g, 452, 190, 452, 246, 'var(--highlight)');
+      nb(300, 250, 300, 56, '有效地址 EA', '真正要去访问的地址', 'var(--success)');
+      txt(g, 460, 342, '同一段机器码，M 不同 → 算出的 EA 不同 → 取到的操作数不同', 'var(--text-muted)', 12.5, 'middle');
+      txt(g, 460, 368, '考点：先看 M 字段，再套对应公式算 EA', 'var(--primary-strong)', 12.5, 'middle', '600');
+    }
+
+    if (f === 1) {
+      const end = chain([
+        ['指令 A 字段', 'A = 5', 'var(--primary)'],
+        ['操作数 = 5', '形式地址即操作数', 'var(--success)'],
+        ['参与运算', 'ADD R1, #5', 'var(--highlight)']
+      ], 150);
+      badge(62, 246, '访存次数：0 次（最快）', 'var(--success)');
+      txt(g, 460, 320, '优点：不用访存，速度最快；缺点：只能表示常量，范围受字段长度限制', 'var(--text-muted)', 12.5, 'middle');
+      txt(g, 460, 350, '典型：循环计数、常量赋值、与立即数比较', 'var(--primary-strong)', 12, 'middle');
+    }
+
+    if (f === 2) {
+      chain([
+        ['指令 A = 104', '形式地址 A', 'var(--primary)'],
+        ['EA = 104', '直接拿来当地址', 'var(--highlight)'],
+        ['主存[104] = 7', '访存 ①：取出操作数', 'var(--success)'],
+        ['操作数 7', '参与运算', 'var(--success)']
+      ], 150);
+      badge(62, 246, '访存次数：1 次', 'var(--highlight)');
+      txt(g, 460, 320, '优点：简单、只需一次访存；缺点：寻址范围受地址字段位数限制，程序无法浮动', 'var(--text-muted)', 12.5, 'middle');
+      txt(g, 460, 350, 'EA = A，是「最直白」的寻址', 'var(--primary-strong)', 12, 'middle');
+    }
+
+    if (f === 3) {
+      chain([
+        ['指令 A = 104', '形式地址', 'var(--primary)'],
+        ['主存[104] = 120', '访存 ①：拿到「真地址」', 'var(--highlight)'],
+        ['EA = 120', '再按 120 去访问', 'var(--highlight)'],
+        ['主存[120] = 7', '访存 ②：取出操作数', 'var(--success)']
+      ], 150);
+      badge(62, 246, '访存次数：2 次（最慢）', 'var(--danger)');
+      txt(g, 460, 320, '优点：EA 存在主存里可随时改 → 实现指针、函数指针、动态重定位', 'var(--text-muted)', 12.5, 'middle');
+      txt(g, 460, 350, '缺点：多一次访存；若再间接一层（多重间接）还会更慢', 'var(--danger)', 12, 'middle');
+    }
+
+    if (f === 4) {
+      g.append('rect').attr('x', 80).attr('y', 96).attr('width', 360).attr('height', 236).attr('rx', 12)
+        .attr('fill', 'var(--primary)').attr('fill-opacity', 0.07).attr('stroke', 'var(--primary)').attr('stroke-width', 1.6);
+      txt(g, 260, 122, '寄存器寻址：操作数就在寄存器里', 'var(--primary)', 12.5, 'middle', '700');
+      nb(110, 140, 140, 52, '指令 R1', '寻址特征=寄存器', 'var(--primary)');
+      arw(g, 254, 166, 288, 166, 'var(--primary-strong)');
+      nb(292, 140, 130, 52, 'R1 = 7', '寄存器内容即操作数', 'var(--success)');
+      txt(g, 260, 224, '0 次访存 —— 与立即寻址并列最快', 'var(--success)', 12, 'middle', '600');
+      txt(g, 260, 252, '指令字短（只需 3~5 位寄存器号）', 'var(--text-muted)', 11.5, 'middle');
+      txt(g, 260, 278, '常用于算术运算的操作数', 'var(--text-muted)', 11.5, 'middle');
+
+      g.append('rect').attr('x', 470).attr('y', 96).attr('width', 360).attr('height', 236).attr('rx', 12)
+        .attr('fill', 'var(--swap)').attr('fill-opacity', 0.07).attr('stroke', 'var(--swap)').attr('stroke-width', 1.6);
+      txt(g, 650, 122, '寄存器间接：寄存器里存的是「地址」', 'var(--swap)', 12.5, 'middle', '700');
+      nb(500, 140, 130, 52, '指令 R1', 'R1 内容是地址', 'var(--swap)');
+      arw(g, 634, 166, 668, 166, 'var(--swap)');
+      nb(672, 140, 130, 52, 'R1 = 120', '指向主存 120', 'var(--highlight)');
+      arw(g, 737, 196, 737, 230, 'var(--swap)');
+      nb(672, 232, 130, 52, '主存[120] = 7', '访存 1 次', 'var(--success)');
+      txt(g, 650, 306, '1 次访存，比间接寻址少一次（地址在寄存器里）', 'var(--text-muted)', 12, 'middle');
+    }
+
+    if (f === 5) {
+      g.append('rect').attr('x', 70).attr('y', 84).attr('width', 760).attr('height', 118).attr('rx', 12)
+        .attr('fill', 'var(--primary)').attr('fill-opacity', 0.06).attr('stroke', 'var(--primary)').attr('stroke-width', 1.4);
+      txt(g, 92, 108, '变址寻址：EA = A + (IX)', 'var(--primary)', 13, 'start', '700');
+      nb(120, 124, 120, 50, 'A = 1000', '数组首地址', 'var(--primary)');
+      txt(g, 258, 154, '+', 'var(--text)', 20, 'middle', '700');
+      nb(276, 124, 120, 50, 'IX = 4', '变址寄存器（可改）', 'var(--highlight)');
+      txt(g, 414, 154, '=', 'var(--text)', 20, 'middle', '700');
+      nb(432, 124, 130, 50, 'EA = 1004', '第 2 个元素', 'var(--success)');
+      txt(g, 586, 146, 'A 不变、IX 变 →', 'var(--text-muted)', 11.5, 'start');
+      txt(g, 586, 166, '天然适合遍历数组', 'var(--success)', 11.5, 'start', '600');
+
+      g.append('rect').attr('x', 70).attr('y', 218).attr('width', 760).attr('height', 118).attr('rx', 12)
+        .attr('fill', 'var(--swap)').attr('fill-opacity', 0.06).attr('stroke', 'var(--swap)').attr('stroke-width', 1.4);
+      txt(g, 92, 242, '相对寻址：EA = A + (PC)', 'var(--swap)', 13, 'start', '700');
+      nb(120, 258, 120, 50, 'A = +8', '带符号位移量', 'var(--swap)');
+      txt(g, 258, 288, '+', 'var(--text)', 20, 'middle', '700');
+      nb(276, 258, 120, 50, 'PC = 2000', '当前指令地址', 'var(--highlight)');
+      txt(g, 414, 288, '=', 'var(--text)', 20, 'middle', '700');
+      nb(432, 258, 130, 50, 'EA = 2008', '跳转目标', 'var(--success)');
+      txt(g, 586, 280, '位移量与位置无关 →', 'var(--text-muted)', 11.5, 'start');
+      txt(g, 586, 300, '程序整体搬家仍能跳对（浮动）', 'var(--swap)', 11.5, 'start', '600');
+      txt(g, 460, 366, '考点：变址面向「数组/循环」，相对面向「转移指令/程序浮动」', 'var(--primary-strong)', 12, 'middle', '600');
+    }
+
+    if (f === 6) {
+      const rows = [
+        ['立即寻址', 'A 就是操作数', '0', '常量、计数'],
+        ['寄存器寻址', 'R 的内容', '0', '算术运算操作数'],
+        ['直接寻址', 'EA = A', '1', '简单变量'],
+        ['寄存器间接', 'EA = (R)', '1', '指针（地址在寄存器）'],
+        ['间接寻址', 'EA = (A)', '2', '指针、动态重定位'],
+        ['变址寻址', 'EA = A + (IX)', '1~2', '数组、循环遍历'],
+        ['相对寻址', 'EA = A + (PC)', '1', '转移指令、程序浮动']
+      ];
+      txt(g, 86, 84, '寻址方式', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 250, 84, '有效地址 EA', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 470, 84, '访存次数', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 620, 84, '典型用途', 'var(--primary-strong)', 12.5, 'start', '700');
+      for (let i = 0; i < 7; i++) {
+        const y = 94 + i * 40;
+        const col = i < 2 ? 'var(--success)' : (i === 4 ? 'var(--danger)' : 'var(--primary)');
+        g.append('rect').attr('x', 76).attr('y', y).attr('width', 748).attr('height', 34).attr('rx', 6)
+          .attr('fill', col).attr('fill-opacity', 0.1).attr('stroke', 'var(--border)').attr('stroke-width', 1);
+        txt(g, 86, y + 22, rows[i][0], col, 12, 'start', '700');
+        txt(g, 250, y + 22, rows[i][1], 'var(--text)', 12, 'start');
+        txt(g, 480, y + 22, rows[i][2], col, 12, 'middle', '700');
+        txt(g, 620, y + 22, rows[i][3], 'var(--text-muted)', 12, 'start');
+      }
+    }
+  
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(function(){ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(function(l){return '<div class="katex-holder">$$'+l+'$$</div>';}).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(function(l){const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML='<p>'+(d.intuition_text||'')+'</p>';
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+'<p style="color:var(--success);margin-top:8px;">'+(d.exam_answer||'')+'</p>';
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map(function(q){
+    return '<div class="quiz-item"><p>'+q.question+'</p>'+q.options.map(function(o,oi){return '<span class="opt" data-correct="'+(oi===q.correct?1:0)+'">'+o+'</span>';}).join('')+'</div>';
+  }).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      const sib=opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(function(s){s.classList.remove('correct','wrong');});
+      if(opt.dataset.correct==='1'){opt.classList.add('correct');}else{opt.classList.add('wrong');}
+    });
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{
+    const r=await fetch('/api/skills/'+id);
+    if(!r.ok) return;
+    const s=await r.json();
+    if(s && s.skill_text){
+      document.getElementById('skill-section').style.display='block';
+      document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(function(x){return x.trim();}).map(function(x){return '<div style="margin:6px 0;">🎯 '+x+'</div>';}).join('');
+    }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',function(){
+  const c=document.documentElement.getAttribute('data-theme');
+  const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',function(){stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',function(){
+  initTheme();
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+</body>
+</html>

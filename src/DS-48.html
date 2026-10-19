@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMP 算法</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.stage { display:grid; grid-template-columns:1fr; gap:16px; min-height:460px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:8px 16px; border-radius:999px; font-size:14px; font-weight:600; text-align:center; margin-top:8px; }
+.cell { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; margin:2px; border:2px solid var(--border); border-radius:6px; font-size:18px; font-weight:700; font-family:monospace; background:var(--bg-elevated); color:var(--text); }
+.cell.hl { border-color:var(--highlight); background:rgba(255,176,32,0.2); color:var(--highlight); }
+.cell.match { border-color:var(--success); background:rgba(45,212,167,0.2); color:var(--success); }
+.cell.miss { border-color:var(--danger); background:rgba(255,92,122,0.2); color:var(--danger); }
+.cell.next { border-color:var(--primary); background:rgba(79,140,255,0.15); }
+.row-label { font-size:13px; color:var(--text-muted); margin-right:8px; font-weight:700; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1>KMP 算法（串的模式匹配）</h1>
+    <span class="badge">A级 · DS-48</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>朴素匹配一旦失配，主串指针要「回头」重新比较。KMP 的聪明之处：失配时主串指针**不回头**，利用已经匹配成功的部分，算出「模式串该往右滑多远」。这个「滑多远」由 next 数组提前算好。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <span class="speed-label">阶段
+        <button class="ctrl-btn" id="btn-mode" style="font-size:12px;padding:4px 12px;">求next ⇄ 匹配</button>
+      </span>
+    </div>
+    <div class="stage">
+      <div class="viz-panel" id="viz-container"></div>
+      <div class="subtitle-bar" id="subtitle">求 next 数组</div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="skill-section" style="display:none;">
+    <h2><span class="num">💡</span>做题技巧</h2>
+    <div id="skill-content" style="line-height:1.9;"></div>
+  </section>
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-48",
+  title: "KMP 算法（串的模式匹配）",
+  derivation: [
+    "next[j] = \\text{模式串 }P[0..j-1] \\text{ 的最长相等前后缀长度}",
+    "\\text{失配时，} j = next[j]，\\text{ 主串指针 } i \\text{ 不回溯}",
+    "\\text{时间复杂度：} O(n+m)，\\text{ 优于朴素 } O(nm)"
+  ],
+  exam_text: "<b>【真题】</b>模式串 P = \"ababaa\" 的 next 数组（next[1]=0）中，next[4] 的值是？",
+  exam_answer: "答案：2。P[0..3]=\"abab\" 的最长相等前后缀是 \"ab\"，长度为 2，故 next[4]=2。",
+  pitfall_list: [
+    "next 数组有两种定义（next[0]=-1 或 next[1]=0），做题要先看清下标约定。",
+    "next 求的是「最长相等前后缀」，不是「最长回文」。",
+    "KMP 主串指针 i 永不回溯，这是它 O(n+m) 的关键。"
+  ],
+  quiz_list: [
+    { question: "KMP 相比朴素匹配的核心优势是？", options: ["主串指针不回溯", "模式串更短", "不用比较", "只用一次"], correct: 0 },
+    { question: "next[j] 的含义是？", options: ["P[0..j-1]的最长相等前后缀长度", "P的长度", "主串长度", "失配次数"], correct: 0 },
+  ]
+};
+
+/* 模式串 P = "ababaa"，主串 T = "ababcababaa" */
+const P = 'ababaa';
+const T = 'ababcababaa';
+const NEXT = [-1, 0, 0, 1, 2, 3];  // next[0..5]，next[0]=-1
+
+let mode = 'next';  // 'next' 求next数组，'match' 匹配过程
+let stepIdx = 0, playing = false, playTimer = null;
+
+// 求 next 数组的步骤
+const NEXT_STEPS = [
+  { j:0, desc:'next[0] = -1（约定）' },
+  { j:1, desc:'P[0..0]="a"，无相等前后缀，next[1]=0' },
+  { j:2, desc:'P[0..1]="ab"，无相等前后缀，next[2]=0' },
+  { j:3, desc:'P[0..2]="aba"，最长相等前后缀"a"，next[3]=1' },
+  { j:4, desc:'P[0..3]="abab"，最长相等前后缀"ab"，next[4]=2' },
+  { j:5, desc:'P[0..4]="ababa"，最长相等前后缀"aba"，next[5]=3' },
+];
+
+// 匹配过程（主串 i 不回溯的关键演示）
+const MATCH_STEPS = [
+  { i:0, j:0, hl:'match', desc:'i=0,j=0：T[0]=P[0]="a" 匹配' },
+  { i:1, j:1, hl:'match', desc:'i=1,j=1：T[1]=P[1]="b" 匹配' },
+  { i:2, j:2, hl:'match', desc:'i=2,j=2：T[2]=P[2]="a" 匹配' },
+  { i:3, j:3, hl:'match', desc:'i=3,j=3：T[3]=P[3]="b" 匹配' },
+  { i:4, j:4, hl:'miss', desc:'i=4,j=4：T[4]="c"≠P[4]="a" 失配！' },
+  { i:4, j:2, hl:'next', desc:'KMP：j=next[4]=2，i 不回溯，从 P[2] 继续比' },
+  { i:4, j:2, hl:'miss', desc:'T[4]="c"≠P[2]="a"，继续 j=next[2]=0' },
+  { i:4, j:0, hl:'match', desc:'j=0：T[4]="c"≠P[0]="a"，i++ 后移' },
+  { i:5, j:0, hl:'match', desc:'i=5,j=0：重新匹配，最终在 i=6 处找到完整匹配' },
+];
+
+function currentSteps(){ return mode==='next' ? NEXT_STEPS : MATCH_STEPS; }
+
+function renderNext(step) {
+  const container = document.getElementById('viz-container');
+  let html = `<svg id="next-viz" style="width:100%;height:80px;margin-bottom:12px;"></svg>`;
+  html += `<div style="margin-bottom:12px;"><span class="row-label">模式串 P</span>`;
+  P.split('').forEach((ch, i) => {
+    let cls = 'cell';
+    if (i <= step.j) cls += ' next';
+    html += `<span class="${cls}">${ch}</span>`;
+  });
+  html += `</div>`;
+  html += `<div><span class="row-label">下标 j</span>`;
+  P.split('').forEach((ch, i) => {
+    html += `<span class="cell" style="font-size:13px;color:var(--text-muted);border-color:transparent;">${i}</span>`;
+  });
+  html += `</div>`;
+  html += `<div><span class="row-label">next值</span>`;
+  P.split('').forEach((ch, i) => {
+    const val = i <= step.j ? NEXT[i] : '?';
+    html += `<span class="cell" style="font-size:13px;color:var(--highlight);">${val}</span>`;
+  });
+  html += `</div>`;
+  html += `<div style="margin-top:16px;color:var(--highlight);font-weight:600;">${step.desc}</div>`;
+  container.innerHTML = html;
+  // 用 SVG 画 next 数组柱状图
+  drawNextChart(step.j);
+}
+
+function drawNextChart(upToJ) {
+  const svg = d3.select('#next-viz');
+  svg.selectAll('*').remove();
+  const W = 700, H = 80, pad = 20;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const n = P.length;
+  const bw = (W - pad*2) / n;
+  for (let i = 0; i <= Math.min(upToJ, n-1); i++) {
+    const val = NEXT[i] + 1; // 归一化到 >=0 便于画柱
+    const x = pad + i*bw + bw/2;
+    const h = val * 14;
+    const isCurrent = i === upToJ;
+    g.append('rect')
+      .attr('x', x - 12).attr('y', H - h - 10).attr('width', 24).attr('height', h)
+      .attr('rx', 4)
+      .attr('fill', isCurrent ? 'var(--highlight)' : 'var(--primary)')
+      .attr('class', isCurrent ? 'focus-pulse' : '');
+    g.append('text').attr('x', x).attr('y', H - h - 16).attr('text-anchor','middle')
+      .attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text(NEXT[i]);
+  }
+  g.append('text').attr('x', pad).attr('y', 16).attr('fill','var(--text-muted)').attr('font-size',11).text('next 数组可视化');
+}
+
+function renderMatch(step) {
+  const container = document.getElementById('viz-container');
+  // 主串 T
+  let html = `<svg id="match-viz" style="width:100%;height:60px;margin-bottom:8px;"></svg>`;
+  html += `<div style="margin-bottom:12px;"><span class="row-label">主串 T</span>`;
+  T.split('').forEach((ch, i) => {
+    let cls = 'cell';
+    if (i === step.i) cls += (step.hl==='miss' ? ' miss' : (step.hl==='match' ? ' match' : ' hl'));
+    html += `<span class="${cls}">${ch}</span>`;
+  });
+  html += `</div>`;
+  // 模式串 P（对齐到主串）
+  html += `<div style="margin-left:${28+step.i*48}px;white-space:nowrap;display:inline-block;">`;
+  P.split('').forEach((ch, i) => {
+    let cls = 'cell';
+    if (i === step.j) cls += (step.hl==='miss' ? ' miss' : (step.hl==='match' ? ' match' : ' hl'));
+    else if (step.hl==='next' && i === step.j) cls += ' next';
+    html += `<span class="${cls}">${ch}</span>`;
+  });
+  html += `</div>`;
+  html += `<div style="margin-top:16px;color:var(--highlight);font-weight:600;">${step.desc}</div>`;
+  container.innerHTML = html;
+  // SVG 指示当前主串指针位置
+  drawMatchPointer(step);
+}
+
+function drawMatchPointer(step) {
+  const svg = d3.select('#match-viz');
+  svg.selectAll('*').remove();
+  const W = 700, H = 60;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const n = T.length;
+  const bw = (W - 40) / n;
+  const x = 20 + step.i * bw + bw/2;
+  g.append('text').attr('x', 20).attr('y', 20).attr('fill','var(--text-muted)').attr('font-size',11).text('主串指针 i = ' + step.i);
+  g.append('polygon')
+    .attr('points', `${x},30 ${x-8},42 ${x+8},42`)
+    .attr('fill', step.hl==='miss' ? 'var(--danger)' : 'var(--highlight)')
+    .attr('class','focus-pulse');
+}
+
+function renderStep(i){
+  const s = currentSteps();
+  stepIdx = Math.max(0, Math.min(i, s.length-1));
+  const step = s[stepIdx];
+  if (mode==='next') renderNext(step); else renderMatch(step);
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function switchMode(){
+  mode = mode==='next'?'match':'next';
+  document.getElementById('btn-mode').textContent = mode==='next' ? '求next ⇄ 匹配' : '匹配 ⇄ 求next';
+  stepIdx=0; stopPlay(); renderStep(0);
+}
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=currentSteps().length-1){stopPlay();return;} stepNext(); }, 1200); }
+
+function renderDerive(){
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex){ el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent(){
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{ const sib=opt.parentElement.querySelectorAll('.opt'); sib.forEach(s=>s.classList.remove('correct','wrong')); opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong'); });
+  });
+}
+function initTheme(){
+  try{ const s=localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme',s); }catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme'); const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n); try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (typeof DATA !== 'undefined' && DATA && DATA.id) || (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/skills/' + id);
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s && s.skill_text) {
+      document.getElementById('skill-section').style.display = 'block';
+      document.getElementById('skill-content').innerHTML = s.skill_text
+        .split('\n').filter(x => x.trim())
+        .map(x => '<div style="margin:6px 0;">🎯 ' + x + '</div>').join('');
+    }
+  } catch(e) {}
+}
+
+function init(){
+  renderContent();
+  loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+  document.getElementById('btn-mode').addEventListener('click',switchMode);
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线索二叉树</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.stage { display:grid; grid-template-columns:1.5fr 1fr; gap:24px; min-height:440px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel svg { width:100%; height:100%; min-height:400px; }
+.data-panel { background:#0b0f18; border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-family:monospace; font-size:13px; }
+.data-panel .title { color:var(--highlight); font-weight:700; margin-bottom:8px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) { .stage { grid-template-columns:1fr; display:block; } .stage>* { margin-bottom:16px; } }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1>线索二叉树</h1>
+    <span class="badge">A级 · DS-21</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>普通二叉树的空指针域很多（n 个结点有 n+1 个空指针），白白浪费。线索二叉树把这些空指针「废物利用」，指向遍历时的前驱和后继，这样遍历就不用递归、不用栈，能直接「顺着线索」走。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="subtitle-bar" id="subtitle">普通二叉树：注意那些空指针</div>
+      </div>
+      <div class="data-panel" id="data-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-21",
+  title: "线索二叉树",
+  derivation: [
+    "n \\text{ 个结点的二叉树有 } 2n \\text{ 个指针域}",
+    "\\text{空指针域数 } = 2n - (n-1) = n+1",
+    "\\text{线索化：利用 } n+1 \\text{ 个空指针指向前驱/后继}"
+  ],
+  exam_text: "<b>【真题】</b>n 个结点的二叉树中，有多少个空指针域？",
+  exam_answer: "答案：n+1 个。2n 个指针域，其中 n-1 个指向子结点，故空指针域 = 2n-(n-1) = n+1。",
+  pitfall_list: [
+    "空指针域是 n+1 个，不是 n 个（这是线索化的基础）。",
+    "中序线索化最常用，因为中序线索能直接得到有序序列。",
+    "线索需区分「指向孩子」还是「指向线索」，用 ltag/rtag 标记。"
+  ],
+  quiz_list: [
+    { question: "n 个结点的二叉树有几个空指针域？", options: ["n+1", "n", "n-1", "2n"], correct: 0 },
+    { question: "线索二叉树利用什么存储前驱后继？", options: ["空指针域", "额外数组", "栈", "队列"], correct: 0 },
+  ]
+};
+
+/* 示例二叉树：A(B(D,E), C(F)) */
+const NODES = {
+  A:{x:360,y:60}, B:{x:220,y:160}, C:{x:500,y:160},
+  D:{x:120,y:270}, E:{x:320,y:270}, F:{x:500,y:270},
+};
+const EDGES = [['A','B'],['A','C'],['B','D'],['B','E'],['C','F']];
+// 中序序列：D B E A F C
+const INORDER = ['D','B','E','A','F','C'];
+
+const STEPS = [
+  { hl:[], sub:'普通二叉树：有 7 个空指针域（n=6，n+1=7）' },
+  { hl:['D'], sub:'中序第一个 D：左空指针 → 指向空（无前驱）' },
+  { hl:['D','B'], sub:'D 的右线索 → B（后继）' },
+  { hl:['E'], sub:'E 的左线索 → B（前驱），右线索 → A（后继）' },
+  { hl:['F'], sub:'F 的左线索 → A（前驱）' },
+  { hl:['C'], sub:'C 的右空指针 → 空（无后继），线索化完成！' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz() {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 700, H = 380;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+
+  // 边（实线=孩子指针）
+  EDGES.forEach(([a,b]) => {
+    const na = NODES[a], nb = NODES[b];
+    g.append('line').attr('x1',na.x).attr('y1',na.y).attr('x2',nb.x).attr('y2',nb.y)
+      .attr('stroke','var(--text-muted)').attr('stroke-width',2);
+  });
+
+  // 节点
+  Object.keys(NODES).forEach(key => {
+    const n = NODES[key];
+    const isHL = step.hl.includes(key);
+    const circle = g.append('g').attr('transform', `translate(${n.x},${n.y})`);
+    circle.append('circle').attr('r', 24)
+      .attr('fill', isHL ? 'var(--highlight)' : 'var(--primary)')
+      .attr('class', isHL ? 'focus-pulse' : '');
+    circle.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+      .attr('fill','#fff').attr('font-size',15).attr('font-weight','700').text(key);
+  });
+
+  // 线索（虚线）—— 展示已建立的线索
+  if (stepIdx >= 2) {
+    // D→B 右线索
+    drawThread(g, 'D', 'B');
+  }
+  if (stepIdx >= 3) {
+    drawThread(g, 'E', 'B'); drawThread(g, 'E', 'A');
+  }
+  if (stepIdx >= 4) {
+    drawThread(g, 'F', 'A');
+  }
+
+  document.getElementById('subtitle').textContent = step.sub;
+  document.getElementById('data-panel').innerHTML = `
+    <div class="title">中序序列：${INORDER.join(' → ')}</div>
+    <div style="margin-top:8px;color:var(--text-muted);">虚线 = 线索（指向遍历前驱/后继）</div>
+    <div style="margin-top:8px;color:var(--highlight);">已建线索：${stepIdx>=5?'D→B→E→A→F→C（完整）':stepIdx>=2?'部分建立':''}</div>`;
+}
+
+function drawThread(g, from, to) {
+  const na = NODES[from], nb = NODES[to];
+  // 用曲线虚线表示线索
+  const path = `M${na.x},${na.y} Q${(na.x+nb.x)/2},${(na.y+nb.y)/2-60} ${nb.x},${nb.y}`;
+  g.append('path').attr('d', path)
+    .attr('fill','none').attr('stroke','var(--danger)').attr('stroke-width',1.5)
+    .attr('stroke-dasharray','5,5').attr('marker-end','url(#thr)');
+  // 箭头
+  if (!g.select('#thr').size()) {
+    g.append('defs').append('marker').attr('id','thr').attr('viewBox','0 0 10 10')
+      .attr('refX','9').attr('refY','5').attr('markerWidth','6').attr('markerHeight','6').attr('orient','auto')
+      .append('path').attr('d','M0,0 L10,5 L0,10 Z').attr('fill','var(--danger)');
+  }
+}
+
+function renderStep(i){ stepIdx=Math.max(0,Math.min(i,STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); }, 1300); }
+
+function renderDerive(){
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex){ el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent(){
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{ const sib=opt.parentElement.querySelectorAll('.opt'); sib.forEach(s=>s.classList.remove('correct','wrong')); opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong'); });
+  });
+}
+function initTheme(){
+  try{ const s=localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme',s); }catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme'); const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n); try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最小生成树（Prim / Kruskal）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.stage { display:grid; grid-template-columns:1.5fr 1fr; gap:24px; min-height:440px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel svg { width:100%; height:100%; min-height:400px; }
+.data-panel { background:#0b0f18; border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-family:monospace; font-size:13px; }
+.data-panel .title { color:var(--highlight); font-weight:700; margin-bottom:8px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) { .stage { grid-template-columns:1fr; display:block; } .stage>* { margin-bottom:16px; } }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1>最小生成树（Prim / Kruskal）</h1>
+    <span class="badge">A级 · DS-37</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>要架设电缆把 6 个村庄都连通起来，且总造价最低——这就是最小生成树。Prim 算法「从一个点出发，每次连最近的点」；Kruskal 算法「把所有边按权值排序，每次选不构成环的最短边」。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <span class="speed-label">算法
+        <button class="ctrl-btn" id="btn-mode" style="font-size:12px;padding:4px 12px;">Prim ⇄ Kruskal</button>
+      </span>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="subtitle-bar" id="subtitle">Prim：从顶点 1 开始</div>
+      </div>
+      <div class="data-panel" id="data-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="skill-section" style="display:none;">
+    <h2><span class="num">💡</span>做题技巧</h2>
+    <div id="skill-content" style="line-height:1.9;"></div>
+  </section>
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-37",
+  title: "最小生成树（Prim / Kruskal）",
+  derivation: [
+    "\\text{Prim：} O(n^2) \\text{，适合稠密图}",
+    "\\text{Kruskal：} O(e\\log e) \\text{，适合稀疏图}",
+    "\\text{最小生成树：n 个顶点，n-1 条边，权值和最小}"
+  ],
+  exam_text: "<b>【真题】</b>n 个顶点的连通图，其最小生成树有多少条边？",
+  exam_answer: "答案：n-1 条。生成树是包含所有顶点、无环的连通子图，n 个顶点的树必有 n-1 条边。",
+  pitfall_list: [
+    "最小生成树不一定唯一（存在权值相同的边时可能多个），但权值和唯一最小。",
+    "Prim 从点出发 O(n²)，Kruskal 从边出发 O(e log e)，稠密图用 Prim、稀疏图用 Kruskal。",
+    "最小生成树有 n-1 条边，不是 n 条。"
+  ],
+  quiz_list: [
+    { question: "n 个顶点最小生成树有几条边？", options: ["n-1", "n", "n+1", "2n"], correct: 0 },
+    { question: "适合稠密图的最小生成树算法是？", options: ["Prim", "Kruskal", "两者都行", "都不行"], correct: 0 },
+  ]
+};
+
+const NODES = {
+  1:{x:200,y:120}, 2:{x:420,y:80}, 3:{x:640,y:120},
+  4:{x:200,y:300}, 5:{x:420,y:320}, 6:{x:640,y:300},
+};
+const EDGES = [
+  [1,2,6],[1,4,5],[2,3,5],[2,4,5],[2,5,6],[3,5,5],[3,6,4],[4,5,3],[5,6,6],
+];
+// Prim 选边顺序（从1开始）
+const PRIM_STEPS = [
+  { chosen:[], sub:'Prim：从顶点 1 开始', info:'已选边：无' },
+  { chosen:[[1,4,5]], sub:'选最近边 1-4（权5）', info:'加入 4' },
+  { chosen:[[1,4,5],[4,5,3]], sub:'选 4-5（权3）', info:'加入 5' },
+  { chosen:[[1,4,5],[4,5,3],[5,3,5]], sub:'选 5-3（权5）', info:'加入 3' },
+  { chosen:[[1,4,5],[4,5,3],[5,3,5],[3,6,4]], sub:'选 3-6（权4）', info:'加入 6' },
+  { chosen:[[1,4,5],[4,5,3],[5,3,5],[3,6,4],[4,2,5]], sub:'选 4-2（权5），完成！总权 22', info:'加入 2，MST 完成' },
+];
+// Kruskal 选边顺序
+const KRUSKAL_STEPS = [
+  { chosen:[], sub:'Kruskal：按权值从小到大排序', info:'边排序：4-5(3) < 3-6(4) < ...' },
+  { chosen:[[4,5,3]], sub:'选最短边 4-5（权3）', info:'不成环，选中' },
+  { chosen:[[4,5,3],[3,6,4]], sub:'选 3-6（权4）', info:'不成环，选中' },
+  { chosen:[[4,5,3],[3,6,4],[1,4,5]], sub:'选 1-4（权5）', info:'不成环，选中' },
+  { chosen:[[4,5,3],[3,6,4],[1,4,5],[3,5,5]], sub:'选 3-5（权5）', info:'不成环，选中' },
+  { chosen:[[4,5,3],[3,6,4],[1,4,5],[3,5,5],[4,2,5]], sub:'选 4-2（权5），完成！总权 22', info:'MST 完成' },
+];
+
+let mode = 'Prim';
+let stepIdx = 0, playing = false, playTimer = null;
+function currentSteps(){ return mode==='Prim' ? PRIM_STEPS : KRUSKAL_STEPS; }
+
+function renderViz() {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 840, H = 420;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = currentSteps()[stepIdx];
+  const chosenSet = new Set(step.chosen.map(e => e.slice(0,2).sort().join('-')));
+
+  // 所有边
+  EDGES.forEach(([a,b,w]) => {
+    const na = NODES[a], nb = NODES[b];
+    const key = [a,b].sort().join('-');
+    const isChosen = chosenSet.has(key);
+    g.append('line').attr('x1',na.x).attr('y1',na.y).attr('x2',nb.x).attr('y2',nb.y)
+      .attr('stroke', isChosen ? 'var(--success)' : 'var(--text-muted)')
+      .attr('stroke-width', isChosen ? 4 : 1.5)
+      .attr('opacity', isChosen ? 1 : 0.4);
+    const mx=(na.x+nb.x)/2, my=(na.y+nb.y)/2;
+    g.append('text').attr('x',mx).attr('y',my-6).attr('text-anchor','middle')
+      .attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text(w);
+  });
+
+  // 节点
+  Object.keys(NODES).forEach(key => {
+    const n = NODES[key];
+    const connected = step.chosen.some(e => e[0]===+key || e[1]===+key);
+    const circle = g.append('g').attr('transform', `translate(${n.x},${n.y})`);
+    circle.append('circle').attr('r', 24)
+      .attr('fill', connected ? 'var(--success)' : 'var(--primary)');
+    circle.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+      .attr('fill','#fff').attr('font-size',14).attr('font-weight','700').text(key);
+  });
+  document.getElementById('subtitle').textContent = step.sub;
+  document.getElementById('data-panel').innerHTML = `<div class="title">${mode} 算法</div><div style="margin:4px 0;">${step.info}</div><div style="margin-top:8px;color:var(--success);">已选边：${step.chosen.map(e=>`${e[0]}-${e[1]}(${e[2]})`).join(', ') || '无'}</div>`;
+}
+
+function renderStep(i){ const s=currentSteps(); stepIdx=Math.max(0,Math.min(i,s.length-1)); renderViz(); }
+function switchMode(){ mode = mode==='Prim'?'Kruskal':'Prim'; document.getElementById('btn-mode').textContent = mode + ' ⇄ 切换'; stepIdx=0; stopPlay(); renderStep(0); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=currentSteps().length-1){stopPlay();return;} stepNext(); }, 1400); }
+
+function renderDerive(){
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex){ el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent(){
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{ const sib=opt.parentElement.querySelectorAll('.opt'); sib.forEach(s=>s.classList.remove('correct','wrong')); opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong'); });
+  });
+}
+function initTheme(){
+  try{ const s=localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme',s); }catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme'); const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n); try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (typeof DATA !== 'undefined' && DATA && DATA.id) || (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/skills/' + id);
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s && s.skill_text) {
+      document.getElementById('skill-section').style.display = 'block';
+      document.getElementById('skill-content').innerHTML = s.skill_text
+        .split('\n').filter(x => x.trim())
+        .map(x => '<div style="margin:6px 0;">🎯 ' + x + '</div>').join('');
+    }
+  } catch(e) {}
+}
+
+function init(){
+  renderContent();
+  loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+  document.getElementById('btn-mode').addEventListener('click',switchMode);
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

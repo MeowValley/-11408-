@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虚拟存储器（页式虚拟存储）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root{--bg:#0f1420;--bg-panel:#161d2e;--bg-elevated:#1d263b;--border:#2a3550;--text:#e6ebf5;--text-muted:#8b96ad;--primary:#4f8cff;--primary-strong:#6ea8ff;--highlight:#ffb020;--success:#2dd4a7;--compare:#ff6b6b;--swap:#ff9f43;--danger:#ff5c7a;--radius:12px;--shadow:0 6px 24px rgba(0,0,0,.35);--font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif}
+[data-theme="light"]{--bg:#f5f7fa;--bg-panel:#fff;--bg-elevated:#f0f3f8;--border:#dde3ec;--text:#1a2333;--text-muted:#6b7688;--primary:#3b82f6;--primary-strong:#2563eb;--highlight:#f59e0b;--success:#10b981;--compare:#ef4444;--swap:#f97316;--danger:#ef4444;--shadow:0 4px 16px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+.page-wrap{max-width:1280px;margin:0 auto;padding:24px}
+header.course-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px}
+.course-header h1{font-size:22px;font-weight:700}
+.course-header .badge{font-size:12px;color:var(--primary-strong);border:1px solid var(--primary);padding:2px 10px;border-radius:999px}
+.section{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow)}
+.section h2{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section h2 .num{width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.focus-pulse{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,.7)}50%{box-shadow:0 0 0 10px rgba(255,176,32,0)}}
+.control-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;position:sticky;top:12px;z-index:10}
+.ctrl-btn{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;transition:all .15s ease}
+.ctrl-btn:hover{border-color:var(--primary);color:var(--primary-strong);transform:translateY(-1px)}
+.ctrl-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.viz-panel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;min-height:440px}
+.viz-panel svg{width:100%;height:100%;min-height:400px}
+.subtitle-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--highlight);color:var(--highlight);padding:6px 16px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap}
+.pitfall-list{padding-left:16px}.pitfall-list li{margin-bottom:8px}.pitfall-list li::marker{color:var(--danger)}
+.quiz-item{margin-bottom:16px}.quiz-item .opt{display:block;padding:8px 14px;margin-top:6px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}.quiz-item .opt:hover{border-color:var(--primary)}.quiz-item .opt.correct{border-color:var(--success);color:var(--success)}.quiz-item .opt.wrong{border-color:var(--danger);color:var(--danger)}
+.katex-holder{margin:6px 0}
+.theme-float{position:fixed;top:14px;right:14px;z-index:9999;font-size:20px;background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}
+@media(max-width:768px){.control-bar{position:static}}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>虚拟存储器（页式虚拟存储）</h1><span class="badge">A级 · CO-67</span></header>
+<section class="section" id="intuition-section"><h2><span class="num">1</span>直觉引入</h2><div id="intuition-text"><p>程序很大，内存很小。虚拟存储器让程序「以为」自己拥有连续的大内存，实际只有部分页面在物理内存里，其余在磁盘上。访问时通过<strong>页表</strong>把「虚拟页号」翻译成「物理页框号」，不在内存就触发<strong>缺页中断</strong>调入。</p></div></section>
+<section class="section" id="animation-section"><h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar"><button class="ctrl-btn primary" id="btn-play">▶ 播放</button><button class="ctrl-btn" id="btn-prev">⏮ 上一步</button><button class="ctrl-btn" id="btn-next">⏭ 下一步</button><button class="ctrl-btn" id="btn-reset">↺ 重置</button></div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle">虚拟地址：页号 + 页内偏移</div></div>
+</section>
+<section class="section" id="derive-section"><h2><span class="num">3</span>公式推导</h2><div id="derive-katex"></div></section>
+<section class="section" id="exam-section"><h2><span class="num">4</span>历年真题实战</h2><div id="exam-text"></div></section>
+<section class="section" id="pitfall-section"><h2><span class="num">5</span>易错点</h2><ul class="pitfall-list" id="pitfall-list"></ul></section>
+<section class="section" id="quiz-section"><h2><span class="num">6</span>自测</h2><div id="quiz-list"></div></section>
+</div>
+<button class="theme-float" id="theme-float-btn">🌙</button>
+<script>
+window.COURSEWARE_DATA={id:"CO-67",title:"虚拟存储器（页式虚拟存储）",intuition_text:"程序很大，内存很小。虚拟存储器让程序「以为」自己拥有连续的大内存，实际只有部分页面在物理内存里，其余在磁盘上。访问时通过<strong>页表</strong>把「虚拟页号」翻译成「物理页框号」，不在内存就触发<strong>缺页中断</strong>调入。",derivation:["\\text{虚拟地址} = \\text{页号} + \\text{页内偏移}","\\text{物理地址} = \\text{页框号} \\times \\text{页大小} + \\text{页内偏移}","\\text{页表项} = \\text{页框号} + \\text{有效位} + \\text{访问位等}"],exam_text:"<b>【真题】</b>页式虚拟存储中，虚拟地址 32 位，页大小 4KB，页表项中页框号占 20 位，则页内偏移占多少位？",exam_answer:"答案：12 位（4KB=2¹²）。虚拟地址 32 位 = 页号 20 位 + 页内偏移 12 位。",pitfall_list:["页内偏移不经过页表翻译，直接拼接到物理地址末尾。","缺页中断：访问的页面不在内存，需从磁盘调入。","页表本身存在内存，访问页表也要访存（可用 TLB 快表加速）。"],quiz_list:[{question:"页大小 4KB，页内偏移占几位？",options:["12位","10位","20位","32位"],correct:0},{question:"虚拟页号翻译成物理页框号靠？",options:["页表","栈","队列","Cache"],correct:0}]};
+
+/* 地址转换动画：虚拟地址 0x1234（页号1，偏移0x234），页表映射页号1→页框3 */
+const STEPS=[
+  {step:'虚拟地址拆分', hl:'va', desc:'虚拟地址 0x1234 = 页号 1 + 页内偏移 0x234'},
+  {step:'查页表', hl:'pt', desc:'用页号 1 查页表，找到对应页表项'},
+  {step:'得到页框号', hl:'frame', desc:'页表项：有效位=1，页框号=3'},
+  {step:'拼接物理地址', hl:'pa', desc:'物理地址 = 页框3×4KB + 偏移0x234 = 0x3234'},
+  {step:'缺页示例', hl:'miss', desc:'若有效位=0，说明页不在内存，触发缺页中断调入'},
+];
+let stepIdx=0,playing=false,playTimer=null;
+
+function renderViz(){
+  const svg=d3.select('#viz');svg.selectAll('*').remove();
+  const W=820,H=420;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const g=svg.append('g');
+  const step=STEPS[stepIdx];
+
+  // 三个区块：虚拟地址、页表、物理内存
+  const drawBox=(x,y,w,h,title,color,lines,hl)=>{
+    g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',8).attr('fill',color).attr('opacity',0.12).attr('stroke',color).attr('stroke-width',2).attr('class',hl?'focus-pulse':'');
+    g.append('text').attr('x',x+w/2).attr('y',y-8).attr('text-anchor','middle').attr('fill',color).attr('font-size',14).attr('font-weight','700').text(title);
+    lines.forEach((l,i)=>{
+      g.append('text').attr('x',x+16).attr('y',y+28+i*24).attr('fill','var(--text)').attr('font-size',13).text(l);
+    });
+  };
+
+  // 虚拟地址框
+  drawBox(30,80,200,140,'虚拟地址','var(--primary)',['页号 P = 1','偏移 W = 0x234'], step.hl==='va');
+  // 页表框
+  const pageTable=['页号0 → 页框2','页号1 → 页框3','页号2 → 无效'];
+  drawBox(310,80,200,140,'页表','var(--highlight)',pageTable, step.hl==='pt'||step.hl==='frame');
+  // 物理内存框
+  drawBox(590,80,200,140,'物理内存','var(--success)',['页框2','页框3 ←','页框5'], step.hl==='pa');
+
+  // 箭头
+  g.append('defs').append('marker').attr('id','arr').attr('viewBox','0 0 10 10').attr('refX','9').attr('refY','5').attr('markerWidth','7').attr('markerHeight','7').attr('orient','auto').append('path').attr('d','M0,0 L10,5 L0,10 Z').attr('fill','var(--text-muted)');
+  if(stepIdx>=1){g.append('line').attr('x1',230).attr('y1',150).attr('x2',310).attr('y2',150).attr('stroke','var(--text-muted)').attr('stroke-width',2).attr('marker-end','url(#arr)')}
+  if(stepIdx>=3){g.append('line').attr('x1',510).attr('y1',150).attr('x2',590).attr('y2',150).attr('stroke','var(--text-muted)').attr('stroke-width',2).attr('marker-end','url(#arr)')}
+
+  document.getElementById('subtitle').textContent=step.desc;
+}
+function renderStep(i){stepIdx=Math.max(0,Math.min(i,STEPS.length-1));renderViz()}
+function stepNext(){renderStep(stepIdx+1)}function stepPrev(){renderStep(stepIdx-1)}
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null}playing=false;document.getElementById('btn-play').textContent='▶ 播放'}
+function togglePlay(){if(playing){stopPlay();return}playing=true;document.getElementById('btn-play').textContent='⏸ 暂停';playTimer=setInterval(()=>{if(stepIdx>=STEPS.length-1){stopPlay();return}stepNext()},1400)}
+function renderDerive(){const el=document.getElementById('derive-katex');const lines=window.COURSEWARE_DATA.derivation;el.innerHTML=lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');if(window.renderMathInElement)window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});else if(window.katex){el.innerHTML='';lines.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true})})}}
+function renderContent(){const d=window.COURSEWARE_DATA;document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text}</p>`;document.getElementById('exam-text').innerHTML=d.exam_text+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;document.getElementById('pitfall-list').innerHTML=d.pitfall_list.map(x=>`<li>${x}</li>`).join('');document.getElementById('quiz-list').innerHTML=d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');renderDerive()}
+function bindQuiz(){document.querySelectorAll('.quiz-item .opt').forEach(opt=>{opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong')})})}
+function initTheme(){try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}document.getElementById('theme-float-btn').textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙'}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}document.getElementById('theme-float-btn').textContent=n==='light'?'☀️':'🌙'})
+function init(){renderContent();bindQuiz();renderStep(0);document.getElementById('btn-next').addEventListener('click',stepNext);document.getElementById('btn-prev').addEventListener('click',stepPrev);document.getElementById('btn-play').addEventListener('click',togglePlay);document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0)})}
+window.addEventListener('load',()=>{initTheme();if(window.gsap)gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});init()});
+</script>
+</body>
+</html>

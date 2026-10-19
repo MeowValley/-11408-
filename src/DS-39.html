@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拓扑排序</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.stage { display:grid; grid-template-columns:1.5fr 1fr; gap:24px; min-height:440px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel svg { width:100%; height:100%; min-height:400px; }
+.data-panel { background:#0b0f18; border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-family:monospace; font-size:13px; }
+.data-panel .title { color:var(--highlight); font-weight:700; margin-bottom:8px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) { .stage { grid-template-columns:1fr; display:block; } .stage>* { margin-bottom:16px; } }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1>拓扑排序</h1>
+    <span class="badge">A级 · DS-39</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>选课有先修关系：学「操作系统」前要先学「数据结构」，学「数据结构」前要先学「C语言」。拓扑排序就是把所有课排成一个顺序，保证「先修课在前」。方法是：反复找「入度为 0」（没有任何先修）的课先上，上完删除它。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+      <button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="subtitle-bar" id="subtitle">初始：C语言 入度为 0，先选它</div>
+      </div>
+      <div class="data-panel" id="data-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="skill-section" style="display:none;">
+    <h2><span class="num">💡</span>做题技巧</h2>
+    <div id="skill-content" style="line-height:1.9;"></div>
+  </section>
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-39",
+  title: "拓扑排序",
+  derivation: [
+    "\\text{拓扑排序：反复找入度为 0 的顶点并删除}",
+    "\\text{有向无环图（DAG）才有拓扑序列}",
+    "\\text{时间复杂度：} O(n+e)"
+  ],
+  exam_text: "<b>【真题】</b>下列哪种图一定能进行拓扑排序？",
+  exam_answer: "答案：有向无环图（DAG）。有向图存在环时，环内顶点入度永不为 0，无法完成拓扑排序。",
+  pitfall_list: [
+    "拓扑排序要求图是有向无环图（DAG），有环则无解。",
+    "拓扑序列不唯一（多个入度为 0 的顶点可选）。",
+    "拓扑排序可用队列或栈实现，结果可能不同。"
+  ],
+  quiz_list: [
+    { question: "哪种图能做拓扑排序？", options: ["有向无环图", "有向有环图", "无向图", "任意图"], correct: 0 },
+    { question: "拓扑排序的核心是反复找？", options: ["入度为0的顶点", "出度为0的顶点", "权值最小的边", "度最大的顶点"], correct: 0 },
+  ]
+};
+
+/* 课程先修关系：C→DS→OS，C→计组，DS→计组 */
+const NODES = {
+  'C': {x:300,y:80, name:'C语言'},
+  'DS': {x:160,y:210, name:'数据结构'},
+  '计组': {x:440,y:210, name:'计算机组成'},
+  'OS': {x:300,y:330, name:'操作系统'},
+};
+const EDGES = [['C','DS'],['C','计组'],['DS','OS'],['DS','计组']];
+// 拓扑序列（一种可能）：C → DS → 计组 → OS
+const SEQ = ['C','DS','计组','OS'];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderDataPanel(visited) {
+  const visitedSet = new Set(visited);
+  const panel = document.getElementById('data-panel');
+  // 计算当前各顶点入度
+  let html = `<div class="title">入度表（入度=先修课数）</div>`;
+  Object.keys(NODES).forEach(key => {
+    const isVisited = visitedSet.has(key);
+    // 计算入度（考虑已删除的边）
+    let inDeg = 0;
+    EDGES.forEach(([a,b]) => {
+      if (b === key && !visitedSet.has(a)) inDeg++;
+    });
+    const color = isVisited ? 'var(--success)' : (inDeg === 0 ? 'var(--highlight)' : 'var(--text)');
+    html += `<div style="margin:4px 0;color:${color};">${NODES[key].name}（${key}）：入度 ${isVisited ? '已选' : inDeg}${!isVisited && inDeg===0 ? ' ← 可选' : ''}</div>`;
+  });
+  html += `<div style="margin-top:10px;color:var(--success);font-weight:700;">已排序：${visited.join(' → ') || '无'}</div>`;
+  panel.innerHTML = html;
+}
+
+function renderViz(visited) {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 620, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const visitedSet = new Set(visited);
+
+  // 边（带箭头）
+  EDGES.forEach(([a,b]) => {
+    const na = NODES[a], nb = NODES[b];
+    const removed = visitedSet.has(a); // 起点已选则边已删除
+    if (removed) return;
+    g.append('line').attr('x1',na.x).attr('y1',na.y).attr('x2',nb.x).attr('y2',nb.y)
+      .attr('stroke','var(--text-muted)').attr('stroke-width',2)
+      .attr('marker-end','url(#arrow)');
+  });
+  // 箭头定义
+  g.append('defs').append('marker').attr('id','arrow').attr('viewBox','0 0 10 10')
+    .attr('refX','9').attr('refY','5').attr('markerWidth','7').attr('markerHeight','7').attr('orient','auto')
+    .append('path').attr('d','M0,0 L10,5 L0,10 Z').attr('fill','var(--text-muted)');
+
+  // 节点
+  Object.keys(NODES).forEach(key => {
+    const n = NODES[key];
+    const isVisited = visitedSet.has(key);
+    const isCurrent = visited[visited.length-1] === key;
+    const circle = g.append('g').attr('transform', `translate(${n.x},${n.y})`);
+    circle.append('circle').attr('r', 30)
+      .attr('fill', isCurrent ? 'var(--highlight)' : (isVisited ? 'var(--success)' : 'var(--primary)'))
+      .attr('class', isCurrent ? 'focus-pulse' : '');
+    circle.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+      .attr('fill','#fff').attr('font-size',13).attr('font-weight','700').text(n.name);
+  });
+  document.getElementById('subtitle').textContent = visited.length ? `已选：${visited.join(' → ')}` : '初始状态';
+  renderDataPanel(visited);
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, SEQ.length)); renderViz(SEQ.slice(0, stepIdx)); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=SEQ.length){stopPlay();return;} stepNext(); }, 1200); }
+
+function renderDerive(){
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex){ el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent(){
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{ const sib=opt.parentElement.querySelectorAll('.opt'); sib.forEach(s=>s.classList.remove('correct','wrong')); opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong'); });
+  });
+}
+function initTheme(){
+  try{ const s=localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme',s); }catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme'); const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n); try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (typeof DATA !== 'undefined' && DATA && DATA.id) || (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/skills/' + id);
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s && s.skill_text) {
+      document.getElementById('skill-section').style.display = 'block';
+      document.getElementById('skill-content').innerHTML = s.skill_text
+        .split('\n').filter(x => x.trim())
+        .map(x => '<div style="margin:6px 0;">🎯 ' + x + '</div>').join('');
+    }
+  } catch(e) {}
+}
+
+function init(){
+  renderContent();
+  loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

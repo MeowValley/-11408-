@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选择排序（简单选择/堆排序）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:340px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>选择排序（简单选择/堆排序）</h1><span class="badge">A级 · DS-51</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>选择排序每次从<strong>无序区选出最小</strong>元素放到有序区末尾。简单选择是线性扫描找最值 O(n²)，堆排序用<strong>堆</strong>结构快速找最值，降到 O(n log n)。下面动画演示简单选择排序。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "DS-51",
+  title: "选择排序（简单选择/堆排序）",
+  derivation: [
+    "\\text{简单选择：} O(n^2)，\\text{不稳定}",
+    "\\text{堆排序：} O(n\\log n)，\\text{不稳定}",
+    "\\text{堆排序空间 } O(1)"
+  ],
+  exam_text: "<b>【真题】</b>堆排序的时间复杂度是？它是稳定排序吗？",
+  exam_answer: "答案：O(n log n)，不稳定（建堆和堆调整过程中相等元素相对位置可能改变）。",
+  pitfall_list: [
+    "简单选择排序不稳定（交换会打乱相等元素顺序）。",
+    "堆排序 O(n log n) 且原地（O(1) 空间），但不稳定。",
+    "堆排序「建堆」是 O(n)，「n 次调整」是 O(n log n)。"
+  ],
+  quiz_list: [
+    { question: "堆排序时间复杂度？", options: ["O(n log n)", "O(n²)", "O(n)"], correct: 0 },
+    { question: "简单选择排序稳定吗？", options: ["不稳定", "稳定"], correct: 0 },
+  ]
+};
+
+/* ===== DS-51 专属动画：简单选择排序，无序区扫描找最小 ===== */
+const STEPS = [
+  { arr:[5,2,8,1,9,3], sorted:-1, minIdx:3, desc:'初始 [5,2,8,1,9,3]，扫描整个数组找最小' },
+  { arr:[1,2,8,5,9,3], sorted:0, minIdx:null, desc:'找到最小 1（位置3），与 a[0] 交换 → 1 就位' },
+  { arr:[1,2,8,5,9,3], sorted:0, minIdx:1, desc:'在 [2,8,5,9,3] 找最小，是 2（已在位置1）' },
+  { arr:[1,2,3,5,9,8], sorted:2, minIdx:null, desc:'继续找最小 3，与 a[2] 交换 → 1,2,3 就位' },
+  { arr:[1,2,3,5,8,9], sorted:5, minIdx:null, desc:'重复直到全部有序：简单选择 O(n²)，不稳定' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 220;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const cellW = 90, cellH = 60, left = 80, top = 70;
+
+  step.arr.forEach((v,i)=>{
+    const x = left + i*cellW;
+    const isSorted = i<=step.sorted;
+    const isMin = step.minIdx===i;
+    const fill = isMin ? 'var(--highlight)' : (isSorted ? 'var(--success)' : 'var(--primary)');
+    g.append('rect').attr('x',x).attr('y',top).attr('width',cellW-8).attr('height',cellH).attr('rx',8)
+      .attr('fill',fill).attr('opacity',isMin?0.9:0.4).attr('stroke',fill).attr('stroke-width',2);
+    if(isMin) g.append('rect').attr('x',x).attr('y',top).attr('width',cellW-8).attr('height',cellH).attr('rx',8).attr('fill','none').attr('stroke',fill).attr('stroke-width',2).classed('focus-pulse',true);
+    g.append('text').attr('x',x+(cellW-8)/2).attr('y',top+cellH/2+5).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',18).attr('font-weight','700').text(v);
+  });
+
+  // 有序区线
+  if(step.sorted>=0){
+    const x = left + step.sorted*cellW + (cellW-8);
+    g.append('line').attr('x1',x+2).attr('y1',top-10).attr('x2',x+2).attr('y2',top+cellH).attr('stroke','var(--success)').attr('stroke-width',2).attr('stroke-dasharray','4,4');
+    g.append('text').attr('x',x+4).attr('y',top-16).attr('fill','var(--success)').attr('font-size',12).text('有序');
+  }
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1600); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text||''}</p>`;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>
