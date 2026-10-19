@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>缓冲管理</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>缓冲管理</h1><span class="badge">B级 · OS-136</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>CPU 是飞毛腿，设备是慢郎中——直接对接会互相拖累。<strong>缓冲区</strong>就是两者之间的「中转仓」，作用有三：<strong>① 平滑速度差</strong>（设备慢慢往里倒，CPU 快速取走）；<strong>② 减少中断频率</strong>（攒够一批再一次中断，而不是每字一次）；<strong>③ 提高并行度</strong>（输入与计算可同时进行）。</p>
+<p>从简单到复杂：<strong>单缓冲</strong>（一块，读写仍要串行争用）→ <strong>双缓冲</strong>（两块交替，输入下一块与计算当前块并行）→ <strong>循环缓冲</strong>（多块环形队列）→ <strong>缓冲池</strong>（系统统一管理，按需取用）。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "OS-136",
+  title: "缓冲管理",
+  derivation: [
+    "\\text{缓冲三大作用}: \\; \\text{平滑速度差} + \\text{减少中断} + \\text{提高并行度}",
+    "\\text{单缓冲}: \\; T \\approx \\max(C,\\ T_{\\text{入}}) + T_{\\text{出}} \\;（输入与处理仍要争缓冲区）",
+    "\\text{双缓冲}: \\; T \\approx \\max\\!\\left(C,\\ T_{\\text{入}} + T_{\\text{出}}\\right) \\;（两条流水，方向相反）",
+    "\\text{演进}: \\; \\text{单缓冲} \\to \\text{双缓冲} \\to \\text{循环缓冲} \\to \\text{缓冲池}"
+  ],
+  exam_text: "<b>【2016 真题改编】</b>某系统采用双缓冲，磁盘读入一块数据耗时 T1、CPU 处理耗时 C、输出耗时 T2。若 C > T1 且 C > T2，处理一块数据的总时间约为多少？",
+  exam_answer: "答案：总时间 ≈ <b>max(C, T1+T2)</b>。双缓冲下两条流水方向相反：输入流水（设备→buf）与输出/处理流水（CPU→buf→设备）可以同时进行；当处理时间 C 大于输入与输出之和时，瓶颈在 CPU，每块耗时就是 C，设备时间被完全隐藏。若 CPU 快而设备慢（T1+T2 > C），则瓶颈在设备，每块耗时 T1+T2。",
+  pitfall_list: [
+    "单缓冲不能实现真正的「输入与处理并行」——输入和计算要争用同一块缓冲区，必须排队。",
+    "双缓冲的关键是「两块缓冲区交替使用」：输入 buf1 的同时 CPU 处理 buf0，两个流水方向相反。",
+    "缓冲池不是「更大的缓冲区」，而是系统统一管理的一组缓冲区，按空缓冲/输入缓冲/输出缓冲等队列组织，是通用方案。"
+  ],
+  quiz_list: [
+    { question: "引入缓冲技术的目的不包括？", options: ["提高 CPU 主频", "平滑 CPU 与设备的速度差", "减少中断次数"], correct: 0 },
+    { question: "双缓冲实现并行的关键在于？", options: ["缓冲区更大", "两块缓冲区交替使用、两条流水反向并行", "使用内存映射"], correct: 1 },
+    { question: "若 CPU 处理时间 C 大于输入 T1 与输出 T2 之和，双缓冲下每块耗时约为？", options: ["T1+C+T2", "C", "T1+T2"], correct: 1 },
+  ]
+};
+
+/* ===== OS-136 专属动画：单缓冲 vs 双缓冲流水线 ===== */
+const STEPS = [
+  { focus:0, desc:'缓冲三作用：平滑速度差 / 减少中断 / 提高并行度' },
+  { focus:1, desc:'单缓冲：输入→计算→输出 三段串行，CPU 大量空闲等待' },
+  { focus:2, desc:'双缓冲：两块交替——输入 buf1 与计算 buf0 同时进行（并行）' },
+  { focus:3, desc:'循环缓冲：多块环形队列，in/out 指针循环移动' },
+  { focus:4, desc:'缓冲池：系统统一管理空缓冲/输入/输出三种队列，按需取用' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700')
+    .text(['缓冲三作用','单缓冲（串行）','双缓冲（并行）','循环缓冲','缓冲池'][f]);
+
+  if(f===0){
+    const items = [
+      {t:'平滑速度差', s:'设备慢慢倒，CPU 快速取', c:'var(--primary)'},
+      {t:'减少中断', s:'攒够一批再一次中断，而非每字一次', c:'var(--success)'},
+      {t:'提高并行度', s:'输入与计算可同时进行', c:'var(--highlight)'},
+    ];
+    items.forEach((it,i)=>{
+      const y = 70+i*100;
+      g.append('rect').attr('x',110).attr('y',y).attr('width',680).attr('height',80).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',it.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',140).attr('y',y+36).attr('fill',it.c).attr('font-size',17).attr('font-weight','700').text(it.t);
+      g.append('text').attr('x',140).attr('y',y+62).attr('fill','var(--text)').attr('font-size',13).text(it.s);
+    });
+  }
+
+  if(f===1){
+    /* 单缓冲串行时间轴 */
+    const segs = [
+      {t:'输入 T1', x:80,  w:200, c:'var(--success)'},
+      {t:'计算 C',  x:290, w:240, c:'var(--primary)'},
+      {t:'输出 T2', x:540, w:180, c:'var(--swap)'},
+    ];
+    segs.forEach(s2=>{
+      g.append('rect').attr('x',s2.x).attr('y',100).attr('width',s2.w).attr('height',56).attr('rx',8)
+        .attr('fill','var(--bg-panel)').attr('stroke',s2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',s2.x+s2.w/2).attr('y',134).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',15).attr('font-weight','700').text(s2.t);
+    });
+    g.append('path').attr('d','M 80 170 L 720 170').attr('stroke','var(--border)').attr('stroke-width',2).attr('marker-end','url(#arr136)');
+    g.append('text').attr('x',450).attr('y',205).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',13.5).attr('font-weight','700').text('三段完全串行：CPU 在输入、输出时段只能干等');
+    g.append('text').attr('x',450).attr('y',233).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('一块缓冲区被输入、计算、输出轮番争用');
+    /* 空闲示意 */
+    g.append('rect').attr('x',80).attr('y',260).attr('width',200).attr('height',30).attr('rx',6).attr('fill','var(--danger)').attr('fill-opacity',0.25).attr('stroke','var(--danger)').attr('stroke-width',1.5);
+    g.append('text').attr('x',180).attr('y',280).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('CPU 空闲');
+    g.append('rect').attr('x',540).attr('y',260).attr('width',180).attr('height',30).attr('rx',6).attr('fill','var(--danger)').attr('fill-opacity',0.25).attr('stroke','var(--danger)').attr('stroke-width',1.5);
+    g.append('text').attr('x',630).attr('y',280).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('CPU 空闲');
+  }
+
+  if(f===2){
+    /* 双缓冲：两条流水 */
+    /* buf0 / buf1 */
+    g.append('rect').attr('x',300).attr('y',80).attr('width',140).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',370).attr('y',110).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',14).attr('font-weight','700').text('缓冲区 0');
+    g.append('rect').attr('x',300).attr('y',230).attr('width',140).attr('height',50).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2.5);
+    g.append('text').attr('x',370).attr('y',260).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',14).attr('font-weight','700').text('缓冲区 1');
+    /* 上流水：设备→buf1 */
+    g.append('rect').attr('x',80).attr('y',240).attr('width',160).attr('height',36).attr('rx',6).attr('fill','var(--success)').attr('fill-opacity',0.25).attr('stroke','var(--success)').attr('stroke-width',2);
+    g.append('text').attr('x',160).attr('y',263).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('磁盘输入中');
+    g.append('path').attr('d','M 240 258 L 296 258').attr('stroke','var(--success)').attr('stroke-width',2.5).attr('marker-end','url(#arr136g)');
+    /* 下流水：CPU→buf0 */
+    g.append('rect').attr('x',500).attr('y',86).attr('width',160).attr('height',36).attr('rx',6).attr('fill','var(--primary)').attr('fill-opacity',0.25).attr('stroke','var(--primary)').attr('stroke-width',2);
+    g.append('text').attr('x',580).attr('y',109).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('CPU 计算中');
+    g.append('path').attr('d','M 444 104 L 496 104').attr('stroke','var(--primary)').attr('stroke-width',2.5).attr('marker-end','url(#arr136b)');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13.5).attr('font-weight','700').text('两条流水同时进行：输入 buf1 的同时 CPU 计算 buf0');
+    g.append('text').attr('x',450).attr('y',356).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('装满后交换角色，设备时间被 CPU 时间「隐藏」');
+  }
+
+  if(f===3){
+    /* 循环缓冲：环形 */
+    const cx=330, cy=210, r=110;
+    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill','none').attr('stroke','var(--border)').attr('stroke-width',2);
+    for(let i=0;i<6;i++){
+      const a = -Math.PI/2 + i*Math.PI/3;
+      const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+      g.append('circle').attr('cx',x).attr('cy',y).attr('r',24).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2);
+      g.append('text').attr('x',x).attr('y',y+5).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('buf'+i);
+      if(i<5){
+        const a2 = -Math.PI/2 + (i+1)*Math.PI/3;
+        g.append('path').attr('d',`M ${x+24*Math.cos(a+0.3)} ${y+24*Math.sin(a+0.3)} L ${cx+(r-24)*Math.cos(a2-0.25)} ${cy+(r-24)*Math.sin(a2-0.25)}`).attr('stroke','var(--text-muted)').attr('stroke-width',1.5).attr('marker-end','url(#arr136)');
+      }
+    }
+    g.append('text').attr('x',620).attr('y',130).attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('in 指针：输入写入位置');
+    g.append('text').attr('x',620).attr('y',158).attr('fill','var(--primary)').attr('font-size',13).attr('font-weight','700').text('out 指针：取走位置');
+    g.append('text').attr('x',620).attr('y',186).attr('fill','var(--text-muted)').attr('font-size',12).text('两指针沿环形循环移动');
+    g.append('text').attr('x',620).attr('y',208).attr('fill','var(--text-muted)').attr('font-size',12).text('满则 in 停，空则 out 停');
+  }
+
+  if(f===4){
+    const queues = [
+      {t:'空缓冲队列', s:'可供分配的空闲缓冲', c:'var(--text-muted)'},
+      {t:'输入缓冲队列', s:'装满待处理的数据', c:'var(--success)'},
+      {t:'输出缓冲队列', s:'待写到设备的数据', c:'var(--swap)'},
+    ];
+    queues.forEach((q,i)=>{
+      const x = 80+i*270;
+      g.append('rect').attr('x',x).attr('y',90).attr('width',240).attr('height',90).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',q.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+120).attr('y',130).attr('text-anchor','middle').attr('fill',q.c).attr('font-size',15).attr('font-weight','700').text(q.t);
+      g.append('text').attr('x',x+120).attr('y',158).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).text(q.s);
+      for(let k=0;k<3;k++){
+        g.append('rect').attr('x',x+20+k*70).attr('y',210).attr('width',56).attr('height',22).attr('rx',4).attr('fill',q.c).attr('fill-opacity',0.2).attr('stroke',q.c).attr('stroke-width',1);
+      }
+    });
+    g.append('text').attr('x',450).attr('y',290).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text('工作流程：取「空缓冲」装数据 → 挂「输入队列」→ 处理完挂「输出队列」→ 写完回收');
+    g.append('text').attr('x',450).attr('y',318).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('缓冲池是通用方案：四种缓冲（空/输入/输出/过程）由系统统一管理');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr136').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--text-muted)');
+  defs.append('marker').attr('id','arr136g').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--success)');
+  defs.append('marker').attr('id','arr136b').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse').append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

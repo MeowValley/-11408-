@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>矛盾规律（对立统一规律）</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root {
+  --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550;
+  --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff;
+  --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a;
+  --dim-opacity:0.22; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35);
+  --font:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.dimmed { opacity:var(--dim-opacity); filter:grayscale(0.6); transition:all .4s ease; }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.slider-group { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); }
+.slider-group input[type="range"] { accent-color:var(--highlight); width:180px; }
+.slider-val { font-family:var(--mono); color:var(--highlight); font-weight:700; min-width:30px; }
+.stage { display:grid; grid-template-columns:1.2fr 1fr; gap:24px; min-height:400px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel svg { width:100%; height:380px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; }
+.principle-panel { background:#0b0f18; border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-size:14px; line-height:1.9; }
+.principle-panel .p-line { padding:6px 10px; border-radius:6px; transition:all .3s; }
+.principle-panel .p-line.active { background:rgba(255,176,32,0.18); color:var(--highlight); font-weight:600; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+/* 响应式：平板/手机自适应堆叠 */
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) {
+  .stage, .page-wrap { grid-template-columns:1fr !important; }
+  .stage { display:block !important; }
+  .stage > * { margin-bottom:16px; }
+  .control-bar { position:static !important; }
+}
+@media (max-width:375px) {
+  .course-header h1 { font-size:18px !important; }
+  .section { padding:16px !important; }
+}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1 id="course-title">矛盾规律（对立统一规律）</h1>
+    <span class="badge">POL-08 · 唯物辩证法 · 政治</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>一个天平，两边放着「主要矛盾」和「次要矛盾」。正常情况下主要矛盾更重，天平向它倾斜；但条件是会变的——当形势变化，次要矛盾可能上升为主要矛盾，天平就会反过来倾斜。这就是「两点论与重点论」：既要看到全部矛盾（两点论），又要抓住主要矛盾（重点论）。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <div class="slider-group">
+        <span>主要矛盾权重</span>
+        <input type="range" id="slider-w" min="0" max="100" step="1" value="70">
+        <span class="slider-val" id="val-w">70</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <svg id="viz"></svg>
+        <div class="subtitle-bar" id="subtitle">主要矛盾占主导</div>
+      </div>
+      <div class="principle-panel" id="principle-panel"></div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="skill-section" style="display:none;">
+    <h2><span class="num">💡</span>做题技巧</h2>
+    <div id="skill-content" style="line-height:1.9;"></div>
+  </section>
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "POL-08",
+  title: "矛盾规律（对立统一规律）",
+  intuition_text: "一个天平，两边放着「主要矛盾」和「次要矛盾」。正常情况下主要矛盾更重，天平向它倾斜；但条件是会变的——当形势变化，次要矛盾可能上升为主要矛盾，天平就会反过来倾斜。这就是「两点论与重点论」：既要看到全部矛盾（两点论），又要抓住主要矛盾（重点论）。",
+  derivation: [
+    "\\text{矛盾 = 对立 + 统一（斗争性 + 同一性）}",
+    "\\text{主要矛盾：支配地位，决定事物性质}",
+    "\\text{次要矛盾：从属地位，影响主要矛盾}",
+    "\\text{两点论：兼顾主次；重点论：抓主要矛盾}"
+  ],
+  exam_text: "<b>【真题·典型】</b>运用矛盾分析法（两点论与重点论），分析中国式现代化进程中「经济发展与生态文明」的关系。",
+  exam_answer: "答案：① 两点论：发展与生态是对立统一的矛盾双方，既要经济发展，也要保护生态，两者不可偏废；② 重点论：当前主要矛盾是人民日益增长的美好生活需要（含优美生态环境）与不平衡不充分发展的矛盾，故把高质量发展作为首要任务；③ 矛盾双方在一定条件下转化：绿水青山可转化为金山银山。",
+  pitfall_list: [
+    "「两点论」不是「两点平均论」——不是主次矛盾同等对待，而是有重点地兼顾。",
+    "「重点论」不是「一点论」——抓主要矛盾不等于忽略次要矛盾。",
+    "主要矛盾与次要矛盾的地位在一定条件下会相互转化，不是固定不变的。",
+    "矛盾的同一性与斗争性不能割裂：只讲斗争不讲统一，或只讲统一不讲斗争，都是错的。"
+  ],
+  quiz_list: [
+    { question: "「两点论与重点论」中，两点论强调的是？", options: ["抓住主要矛盾", "全面看问题、兼顾主次矛盾", "只解决次要矛盾"], correct: 1 },
+    { question: "主要矛盾与次要矛盾的关系是？", options: ["固定不变", "在一定条件下可以相互转化", "互不影响"], correct: 1 },
+    { question: "「抓主要矛盾」体现的是？", options: ["重点论", "两点论", "均衡论"], correct: 0 }
+  ]
+};
+
+/* ============ 专属动画：天平（主要矛盾 vs 次要矛盾） ============ */
+let w = 70;   // 主要矛盾权重 0-100
+
+function renderPrinciple() {
+  const panel = document.getElementById('principle-panel');
+  const mainW = w, subW = 100 - w;
+  const mainIsDominant = mainW >= subW;
+  panel.innerHTML = `
+    <div style="margin-bottom:10px;font-weight:700;color:var(--highlight);">辩证法原理（随权重联动）</div>
+    <div class="p-line ${mainIsDominant?'active':''}">① 主要矛盾（权重 ${mainW}%）——支配地位，决定事物性质</div>
+    <div class="p-line ${!mainIsDominant?'active':''}">② 次要矛盾（权重 ${subW}%）——从属地位，影响主要矛盾</div>
+    <div class="p-line">③ 两点论：兼顾主次，全面看问题</div>
+    <div class="p-line active">④ 重点论：抓住${mainIsDominant?'主要':'上升后的主要'}矛盾</div>
+  `;
+}
+
+function renderViz() {
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 520, H = 380;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+
+  // 天平支点与横梁
+  const pivotX = W/2, pivotY = 200;
+  const mainW = w, subW = 100 - w;
+  // 横梁倾斜角度：主要矛盾重则左边下沉（左低右高）
+  const tilt = (subW - mainW) / 100 * 0.3;   // -0.3 ~ +0.3 弧度
+  const beamLen = 180;
+  const leftX = pivotX - beamLen * Math.cos(tilt);
+  const leftY = pivotY + beamLen * Math.sin(tilt);
+  const rightX = pivotX + beamLen * Math.cos(tilt);
+  const rightY = pivotY - beamLen * Math.sin(tilt);
+
+  // 底座
+  g.append('rect').attr('x',pivotX-8).attr('y',pivotY-20).attr('width',16).attr('height',40).attr('fill','var(--text-muted)');
+  g.append('rect').attr('x',pivotX-40).attr('y',pivotY+18).attr('width',80).attr('height',10).attr('rx',4).attr('fill','var(--text-muted)');
+  g.append('circle').attr('cx',pivotX).attr('cy',pivotY-22).attr('r',8).attr('fill','var(--highlight)');
+
+  // 横梁（用 GSAP 平滑旋转）
+  const beam = g.append('line').attr('x1',leftX).attr('y1',leftY).attr('x2',rightX).attr('y2',rightY)
+    .attr('stroke','var(--text)').attr('stroke-width',5).attr('stroke-linecap','round');
+
+  // 左盘：主要矛盾（红色，重量=mainW）
+  const leftPan = g.append('g');
+  const mainColor = mainW >= subW ? 'var(--danger)' : 'var(--swap)';
+  const mainR = 18 + mainW * 0.4;   // 重量越大圆越大
+  leftPan.append('circle').attr('cx',leftX).attr('cy',leftY+22).attr('r',mainR)
+    .attr('fill',mainColor).attr('opacity',0.75).attr('stroke',mainColor).attr('stroke-width',2);
+  leftPan.append('text').attr('x',leftX).attr('y',leftY+26).attr('text-anchor','middle')
+    .attr('fill','#fff').attr('font-size',13).attr('font-weight','700').text('主');
+  leftPan.append('text').attr('x',leftX).attr('y',leftY+60).attr('text-anchor','middle')
+    .attr('fill',mainColor).attr('font-size',12).text(`主要矛盾 ${mainW}%`);
+
+  // 右盘：次要矛盾（蓝色，重量=subW）
+  const rightPan = g.append('g');
+  const subColor = subW >= mainW ? 'var(--danger)' : 'var(--primary)';
+  const subR = 18 + subW * 0.4;
+  rightPan.append('circle').attr('cx',rightX).attr('cy',rightY+22).attr('r',subR)
+    .attr('fill',subColor).attr('opacity',0.75).attr('stroke',subColor).attr('stroke-width',2);
+  rightPan.append('text').attr('x',rightX).attr('y',rightY+26).attr('text-anchor','middle')
+    .attr('fill','#fff').attr('font-size',13).attr('font-weight','700').text('次');
+  rightPan.append('text').attr('x',rightX).attr('y',rightY+60).attr('text-anchor','middle')
+    .attr('fill',subColor).attr('font-size',12).text(`次要矛盾 ${subW}%`);
+
+  // 焦点暗化：非主导的一方降低透明度（规范1）
+  if (mainW >= subW) {
+    rightPan.attr('opacity', 0.35);
+    leftPan.classed('focus-pulse', true);
+  } else {
+    leftPan.attr('opacity', 0.35);
+    rightPan.classed('focus-pulse', true);
+  }
+
+  // 字幕
+  const sub = document.getElementById('subtitle');
+  if (mainW >= subW) sub.textContent = '主要矛盾占主导（重点论：抓主要矛盾）';
+  else sub.textContent = '条件变化：次要矛盾上升为主要矛盾（转化）';
+  document.getElementById('val-w').textContent = mainW + '%';
+}
+
+function renderAll() {
+  renderViz();
+  renderPrinciple();
+}
+
+function renderDerive() {
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l => `<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex) { el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent() {
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('course-title').textContent = d.title;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p id="exam-answer" style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz() {
+  document.querySelectorAll('.quiz-item .opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const sib = opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(s=>s.classList.remove('correct','wrong'));
+      opt.dataset.correct==='1' ? opt.classList.add('correct') : opt.classList.add('wrong');
+    });
+  });
+}
+
+// 自动播放：主次矛盾权重此消彼长，演示转化
+let autoPlaying = false, autoTimer = null, direction = -1;
+function autoPlay() {
+  autoPlaying = !autoPlaying;
+  document.getElementById('btn-play').textContent = autoPlaying ? '⏸ 暂停' : '▶ 播放';
+  if (autoPlaying) {
+    autoTimer = setInterval(() => {
+      w += direction * 1.5;
+      if (w <= 5) { w = 5; direction = 1; }
+      if (w >= 95) { w = 95; direction = -1; }
+      document.getElementById('slider-w').value = w;
+      renderAll();
+    }, 60);
+  } else if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+}
+
+
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (typeof DATA !== 'undefined' && DATA && DATA.id) || (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/skills/' + id);
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s && s.skill_text) {
+      document.getElementById('skill-section').style.display = 'block';
+      document.getElementById('skill-content').innerHTML = s.skill_text
+        .split('\n').filter(x => x.trim())
+        .map(x => '<div style="margin:6px 0;">🎯 ' + x + '</div>').join('');
+    }
+  } catch(e) {}
+}
+
+function init() {
+  renderContent();
+  loadSkill();
+  bindQuiz();
+  renderAll();
+  document.getElementById('slider-w').addEventListener('input', e => { w = +e.target.value; renderAll(); });
+  document.getElementById('btn-play').addEventListener('click', autoPlay);
+  document.getElementById('btn-reset').addEventListener('click', ()=>{ w=70; document.getElementById('slider-w').value=70; renderAll(); });
+}
+window.addEventListener('load', ()=>{
+  if (window.gsap) gsap.from('.section', { opacity:0, y:20, duration:0.6, stagger:0.12, ease:'power2.out' });
+  init();
+});
+</script>
+
+<button class="theme-float" id="theme-float-btn" title="切换主题">🌙</button>
+<script>
+(function(){
+  var btn = document.getElementById('theme-float-btn');
+  try { var s = localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme', s); } catch(e){}
+  function upd(){ var d = document.documentElement.getAttribute('data-theme')!=='light'; btn.textContent = d?'🌙':'☀️'; }
+  upd();
+  btn.addEventListener('click', function(){
+    var c = document.documentElement.getAttribute('data-theme');
+    var n = c==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', n);
+    try { localStorage.setItem('theme', n); } catch(e){}
+    upd();
+  });
+})();
+</script>
+</body>
+</html>

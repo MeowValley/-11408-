@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件共享与保护</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>文件共享与保护</h1><span class="badge">B级 · OS-132</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>多个用户想用同一个文件（比如团队共享一份资料），两种做法：<strong>基于索引结点的共享（硬链接）</strong>：各用户的目录项直接指向<strong>同一个 inode</strong>，inode 里记一个「链接计数 count」；<strong>基于符号链的共享（软链接）</strong>：新建一个特殊的 link 文件，里面存目标文件的<strong>路径字符串</strong>，访问时顺着路径去找。</p>
+<p>共享带来安全需求，文件保护三大手段：<strong>口令/密码</strong>（访问前输入）、<strong>加密</strong>（内容密文存储）、<strong>访问控制</strong>（最常用：给文件设 RWX 权限位，区分属主/同组/其他人）。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "OS-132",
+  title: "文件共享与保护",
+  derivation: [
+    "\\text{硬链接}: \\; n_{\\text{个目录项}} \\rightarrow \\text{同一 inode}, \\; \\text{count} = n",
+    "\\text{删除链接}: \\; \\text{count} \\leftarrow \\text{count} - 1, \\; \\text{count} = 0 \\text{ 才真正删除文件}",
+    "\\text{软链接}: \\; \\text{link 文件内容} = \\text{目标路径字符串}",
+    "\\text{访问控制}: \\; \\underbrace{(r,w,x)}_{\\text{属主}} \\; \\underbrace{(r,w,x)}_{\\text{同组}} \\; \\underbrace{(r,w,x)}_{\\text{其他人}}"
+  ],
+  exam_text: "<b>【2021 真题改编】</b>某 Unix 系统中文件 report.pdf 有 3 个硬链接。当其中一个链接被删除后，下列说法正确的是？",
+  exam_answer: "答案：文件<strong>不会被删除</strong>——硬链接删除只使 inode 的链接计数从 3 减为 2，count 未归 0，文件内容与其他两个链接照常可访问。只有当所有链接都被删除（count=0）时，系统才真正释放文件占用的磁盘块。若是<b>软链接</b>则相反：删除目标文件后，软链接变成「断链」，访问它会报错。",
+  pitfall_list: [
+    "硬链接不能跨文件系统、不能链接目录；软链接（符号链接）可以——这是两者最重要的区别之一。",
+    "删除硬链接的原文件，其他硬链接依然可访问（count 未归 0）；删除软链接的目标文件，软链接立刻失效。",
+    "访问权限按「属主 → 同组 → 其他」顺序匹配，只要你是属主，就按属主权限判断，不再看组权限。"
+  ],
+  quiz_list: [
+    { question: "关于硬链接，下列说法正确的是？", options: ["删除一个链接文件就消失", "所有链接共享同一 inode 和链接计数", "可以跨文件系统"], correct: 1 },
+    { question: "软链接文件中保存的是？", options: ["目标文件的 inode 号", "目标文件的路径字符串", "目标文件的内容副本"], correct: 1 },
+    { question: "Unix 访问控制权限位 rwx 的三种检查顺序是？", options: ["属主→同组→其他", "其他→同组→属主", "同组→属主→其他"], correct: 0 },
+  ]
+};
+
+/* ===== OS-132 专属动画：硬链接 / 软链接 / 删除场景 / 权限 ===== */
+const STEPS = [
+  { focus:0, desc:'共享需求：user1 与 user2 都要访问同一个 report.pdf' },
+  { focus:1, desc:'硬链接：两个目录项指向同一 inode，链接计数 count = 2' },
+  { focus:2, desc:'删除 user1 的链接：count 从 2 减到 1，文件内容与其他链接不受影响' },
+  { focus:3, desc:'软链接：link.pdf 里存的是路径字符串，访问时顺着路径找过去' },
+  { focus:4, desc:'删除原文件后：软链接「断链」报错 ✘，硬链接依然完好 ✔' },
+  { focus:5, desc:'文件保护：访问控制 rwx 三元组（属主 / 同组 / 其他）' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function dirEntry(g,x,y,label,color){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',130).attr('height',40).attr('rx',7)
+    .attr('fill','var(--bg-panel)').attr('stroke',color).attr('stroke-width',2);
+  g.append('text').attr('x',x+65).attr('y',y+25).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text(label);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700')
+    .text(['共享需求','硬链接（count=2）','删除硬链接','软链接（路径）','删除原文件后对比','访问控制权限'][f]);
+
+  if(f===0){
+    dirEntry(g,120,90,'user1/report.pdf','var(--primary)');
+    dirEntry(g,120,200,'user2/report.pdf','var(--primary)');
+    g.append('text').attr('x',185).attr('y',150).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('都要访问');
+    g.append('text').attr('x',185).attr('y',172).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('同一个文件');
+    g.append('rect').attr('x',330).attr('y',130).attr('width',260).attr('height',80).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2);
+    g.append('text').attr('x',460).attr('y',165).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('同一份磁盘数据');
+    g.append('text').attr('x',460).attr('y',190).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('如何让两条路径都指向它？');
+  }
+
+  if(f===1 || f===2){
+    dirEntry(g,80,90,'user1/report.pdf','var(--primary)');
+    dirEntry(g,80,230,'user2/report.pdf','var(--primary)');
+    const inodeOn = true;
+    g.append('rect').attr('x',430).attr('y',140).attr('width',220).attr('height',70).attr('rx',10)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',540).attr('y',168).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('inode（元数据+块地址）');
+    const cnt = f===1 ? 2 : 1;
+    g.append('text').attr('x',540).attr('y',194).attr('text-anchor','middle').attr('fill', f===2?'var(--highlight)':'var(--text)').attr('font-size',13).attr('font-weight','700').text('链接计数 count = '+cnt);
+    g.append('path').attr('d','M 210 110 L 430 155').attr('stroke','var(--primary)').attr('stroke-width',2).attr('marker-end','url(#arr132)');
+    g.append('path').attr('d','M 210 250 L 430 195').attr('stroke','var(--primary)').attr('stroke-width',2).attr('marker-end','url(#arr132)');
+    if(f===2){
+      g.append('text').attr('x',150).attr('y',285).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',12).attr('font-weight','700').text('✘ 已删除');
+      g.append('line').attr('x1',95).attr('y1',95).attr('x2',195).attr('y2',125).attr('stroke','var(--danger)').attr('stroke-width',2.5);
+      g.append('text').attr('x',540).attr('y',240).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('count 2 → 1，文件仍然可访问 ✔');
+    }
+    g.append('rect').attr('x',680).attr('y',140).attr('width',150).attr('height',70).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5).attr('opacity',0.9);
+    g.append('text').attr('x',755).attr('y',168).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('磁盘数据块');
+    g.append('text').attr('x',755).attr('y',190).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('report.pdf 内容');
+    g.append('path').attr('d','M 650 175 L 680 175').attr('stroke','var(--success)').attr('stroke-width',2).attr('marker-end','url(#arr132)');
+  }
+
+  if(f===3 || f===4){
+    dirEntry(g,70,110,'user2/link.pdf','var(--swap)');
+    g.append('rect').attr('x',260).attr('y',80).attr('width',300).attr('height',64).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--swap)').attr('stroke-width',2);
+    g.append('text').attr('x',410).attr('y',105).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).attr('font-weight','700').text('link.pdf（软链接文件）');
+    g.append('text').attr('x',410).attr('y',127).attr('text-anchor','middle').attr('fill','var(--swap)').attr('font-size',12).text('内容 = "/home/user1/report.pdf"');
+    g.append('path').attr('d','M 200 125 L 260 115').attr('stroke','var(--swap)').attr('stroke-width',2).attr('marker-end','url(#arr132)');
+    if(f===3){
+      dirEntry(g,620,80,'user1/report.pdf','var(--primary)');
+      g.append('path').attr('d','M 560 112 L 620 108').attr('stroke','var(--swap)').attr('stroke-width',2).attr('marker-end','url(#arr132)');
+      g.append('text').attr('x',590).attr('y',70).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('顺着路径找到');
+      g.append('rect').attr('x',620).attr('y',150).attr('width',160).attr('height',56).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2);
+      g.append('text').attr('x',700).attr('y',182).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12).attr('font-weight','700').text('磁盘数据块');
+    }
+    if(f===4){
+      g.append('text').attr('x',410).attr('y',190).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',13).attr('font-weight','700').text('原文件已删除 → 软链接断链 ✘');
+      g.append('text').attr('x',410).attr('y',214).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('访问 link.pdf 会报错：No such file');
+      g.append('text').attr('x',410).attr('y',248).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',13).attr('font-weight','700').text('若改用硬链接：count 未归 0，数据完好 ✔');
+    }
+  }
+
+  if(f===5){
+    const px=140, py=70;
+    g.append('rect').attr('x',px).attr('y',py).attr('width',560).attr('height',70).attr('rx',10).attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',px+280).attr('y',py+28).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('report.pdf 权限：rwx rw- r--');
+    g.append('text').attr('x',px+280).attr('y',py+52).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('8 进制 746 = rwxrw-r--');
+    const groups=[{t:'属主（owner）',p:'rwx',x:px+10,c:'var(--primary)'},{t:'同组（group）',p:'rw-',x:px+195,c:'var(--success)'},{t:'其他人（other）',p:'r--',x:px+375,c:'var(--swap)'}];
+    groups.forEach((gr,i)=>{
+      g.append('rect').attr('x',gr.x).attr('y',170).attr('width',170).attr('height',80).attr('rx',10)
+        .attr('fill','var(--bg-panel)').attr('stroke',gr.c).attr('stroke-width',2);
+      g.append('text').attr('x',gr.x+85).attr('y',196).attr('text-anchor','middle').attr('fill',gr.c).attr('font-size',13).attr('font-weight','700').text(gr.t);
+      g.append('text').attr('x',gr.x+85).attr('y',224).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',20).attr('font-weight','700').attr('font-family','monospace').text(gr.p);
+      g.append('text').attr('x',gr.x+85).attr('y',243).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',10.5).text(i===0?'读/写/执行':(i===1?'读/写':'只读'));
+    });
+    g.append('text').attr('x',450).attr('y',290).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('判定顺序：先看你是不是属主 → 再看同组 → 最后其他');
+    g.append('text').attr('x',450).attr('y',318).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12.5).attr('font-weight','700').text('另两种保护手段：口令 / 加密');
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr132').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

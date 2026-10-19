@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>目录结构</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>目录结构</h1><span class="badge">C级 · OS-127</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>目录结构经历了四次演进，每次都在解决上一个结构的痛点：</p>
+<p><strong>① 单级目录</strong>：整个系统一张表——简单，但两个用户不能给文件起同名；<strong>② 两级目录</strong>：为每个用户建一张目录（MFD→UFD），解决重名但缺乏层次；<strong>③ 树形目录</strong>：多级层次、路径定位，现代 OS 的主流；<strong>④ 无环图目录</strong>：在树形基础上允许共享，同一文件有多条路径可达（如 Windows 快捷方式、Unix 硬链接）。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "OS-127",
+  title: "目录结构",
+  derivation: [
+    "\\text{路径} = \\text{从根（或当前目录）到目标的一系列目录名}",
+    "\\text{绝对路径}: \\; /\\text{home}/\\text{user}/\\text{a.txt} \\;（从根目录 \\texttt{/} 出发）",
+    "\\text{相对路径}: \\; \\texttt{./a.txt} \\;（从当前目录出发，省去公共前缀）",
+    "\\text{树形目录除根外每个结点有唯一父目录} \\Rightarrow \\text{唯一绝对路径}"
+  ],
+  exam_text: "<b>【2022 真题改编】</b>在多级树形目录结构中，文件 photo.jpg 的路径为 /home/user/docs/photo.jpg，下列说法正确的是？",
+  exam_answer: "答案：这是<b>绝对路径</b>（从根目录 / 出发）；当前目录若为 /home/user，则该文件可用相对路径 docs/photo.jpg 访问。树形目录中每个文件（除根外）有唯一父目录，因而有唯一绝对路径；引入共享（无环图）后，同一文件可有多条路径。",
+  pitfall_list: [
+    "树形目录中叶子结点不一定是文件——目录本身也是文件（目录文件），树中结点可以是目录也可以是文件。",
+    "区分绝对路径与相对路径的唯一标准：是否从根目录出发，而不是路径长短。",
+    "无环图目录实现共享时，删除文件必须等共享计数减为 0 才真正回收空间，否则其他用户会拿到「悬空」目录项。"
+  ],
+  quiz_list: [
+    { question: "树形目录中，除根结点外，每个文件/目录有？", options: ["唯一的一个父目录", "多个父目录", "没有父目录"], correct: 0 },
+    { question: "路径 ./docs/a.txt 属于？", options: ["绝对路径", "相对路径", "网络路径"], correct: 1 },
+    { question: "无环图目录结构相对于树形目录的主要优势是？", options: ["支持文件共享", "查找更快", "节省磁盘空间存储目录"], correct: 0 },
+  ]
+};
+
+/* ===== OS-127 专属动画：四种目录结构演进 ===== */
+const STEPS = [
+  { focus:0, desc:'单级目录：全系统一张表——两个文件都叫 a.txt，重名冲突（红色告警）' },
+  { focus:1, desc:'两级目录：MFD 主目录按用户分，每人一张 UFD——重名问题解决' },
+  { focus:2, desc:'树形目录：多级层次 /home/user/docs，路径定位成为主流' },
+  { focus:3, desc:'无环图目录：user1 与 user2 共享同一文件，共享计数 + 虚线共享边' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function nodeBox(g,x,y,w,h,label,color,op){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',8)
+    .attr('fill',color).attr('fill-opacity',op||0.18).attr('stroke',color).attr('stroke-width',2);
+  g.append('text').attr('x',x+w/2).attr('y',y+h/2+5).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','700').text(label);
+}
+function link(g,x1,y1,x2,y2,color,dash){
+  g.append('path').attr('d',`M ${x1} ${y1} L ${x2} ${y2}`).attr('stroke',color||'var(--border)').attr('stroke-width',1.8).attr('stroke-dasharray',dash||'');
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const show = n => step.focus >= n;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700')
+    .text(['① 单级目录','② 两级目录','③ 树形目录','④ 无环图目录'][step.focus]);
+
+  if(show(0)){
+    const g1 = g.append('g');
+    g1.append('rect').attr('x',250).attr('y',70).attr('width',400).attr('height',230).attr('rx',10)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',2);
+    g1.append('text').attr('x',450).attr('y',94).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text('唯一的一张目录表');
+    const names = ['user1/a.txt','user2/a.txt','data.bin','game.exe'];
+    names.forEach((n,i)=>{
+      const y=112+i*44, dup = i<2;
+      g1.append('rect').attr('x',290).attr('y',y).attr('width',320).attr('height',34).attr('rx',6)
+        .attr('fill', dup?'var(--danger)':'var(--bg-elevated)').attr('fill-opacity',dup?0.22:1)
+        .attr('stroke', dup?'var(--danger)':'var(--border)').attr('stroke-width',dup?2:1);
+      if(dup) g1.append('rect').attr('x',290).attr('y',y).attr('width',320).attr('height',34).attr('rx',6).attr('fill','none').attr('stroke','var(--danger)').attr('stroke-width',2.5).classed('focus-pulse',true);
+      g1.append('text').attr('x',306).attr('y',y+22).attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text(n);
+    });
+    g1.append('text').attr('x',450).attr('y',322).attr('text-anchor','middle').attr('fill','var(--danger)').attr('font-size',13).attr('font-weight','700').text('⚠ 两个用户不能重名 —— 单级目录的致命缺陷');
+  }
+
+  if(show(1)){
+    const g2 = g.append('g');
+    nodeBox(g2,60,80,120,50,'MFD 主目录','var(--primary)');
+    nodeBox(g2,360,80,110,44,'UFD: user1','var(--success)');
+    nodeBox(g2,360,150,110,44,'UFD: user2','var(--swap)');
+    nodeBox(g2,360,220,110,44,'UFD: user3','var(--compare)');
+    link(g2,180,105,360,102,'var(--primary)');
+    link(g2,180,105,360,172,'var(--primary)');
+    link(g2,180,105,360,242,'var(--primary)');
+    nodeBox(g2,580,80,90,34,'a.txt','var(--success)',0.3);
+    nodeBox(g2,580,120,90,34,'b.txt','var(--success)',0.3);
+    nodeBox(g2,580,168,90,34,'a.txt','var(--swap)',0.3);
+    link(g2,470,102,580,97,'var(--success)');
+    link(g2,470,102,580,137,'var(--success)');
+    link(g2,470,172,580,185,'var(--swap)');
+    g2.append('text').attr('x',535).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('user1 与 user2 各有一个 a.txt，互不冲突');
+  }
+
+  if(show(2)){
+    const g3 = g.append('g');
+    nodeBox(g3,400,60,100,44,'/ 根','var(--primary)');
+    nodeBox(g3,250,140,110,40,'home','var(--primary)',0.4);
+    nodeBox(g3,560,140,110,40,'etc','var(--primary)',0.4);
+    nodeBox(g3,170,210,100,36,'user','var(--success)',0.4);
+    nodeBox(g3,360,210,110,36,'docs','var(--highlight)',0.4);
+    nodeBox(g3,510,210,100,36,'guest','var(--primary)',0.25);
+    nodeBox(g3,300,290,110,36,'report.pdf','var(--highlight)',0.5);
+    link(g3,450,104,305,140,'var(--border)');
+    link(g3,450,104,615,140,'var(--border)');
+    link(g3,305,180,220,210,'var(--border)');
+    link(g3,305,180,415,210,'var(--border)');
+    link(g3,305,180,560,210,'var(--border)');
+    link(g3,415,246,355,290,'var(--border)');
+    g3.append('text').attr('x',430).attr('y',352).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',13).attr('font-weight','700').text('绝对路径：/home/user/docs/report.pdf');
+  }
+
+  if(show(3)){
+    const g4 = g.append('g');
+    nodeBox(g4,300,60,110,44,'root','var(--primary)');
+    nodeBox(g4,190,140,110,40,'user1','var(--success)',0.4);
+    nodeBox(g4,420,140,110,40,'user2','var(--compare)',0.4);
+    link(g4,355,104,245,140,'var(--border)');
+    link(g4,355,104,475,140,'var(--border)');
+    const shareY = 240;
+    nodeBox(g4,290,shareY,150,50,'share.zip（同一结点）','var(--highlight)',0.45);
+    link(g4,245,180,330,shareY,'var(--success)');
+    link(g4,475,180,400,shareY,'var(--compare)');
+    link(g4,245,180,400,shareY,'var(--highlight)', '5,5');
+    g4.append('text').attr('x',455).attr('y',225).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',12).attr('font-weight','700').text('共享边（虚线）');
+    g4.append('text').attr('x',455).attr('y',322).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).attr('font-weight','600').text('共享计数 = 2，删除任一路径只减 1，为 0 才真正删除');
+  }
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I/O 管理概述</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>I/O 管理概述</h1><span class="badge">C级 · OS-133</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text"><p>I/O 设备五花八门，按用途分三大类：<strong>人机交互类</strong>（键盘、鼠标、显示器——慢）、<strong>存储类</strong>（磁盘、U盘、磁带——快且海量）、<strong>通信类</strong>（网卡、Modem）。按传输速度又分低、中、高三档。</p>
+<p>关键结构认知：设备 ≠ 一块铁。它分成<strong>机械部分</strong>（设备本体，干粗活）和<strong>电子部分</strong>（<strong>设备控制器/适配器</strong>，一块插在主板上的芯片）。CPU 通过读写控制器里的<strong>数据/状态/控制三类寄存器</strong>来操纵设备，而不是直接摆弄机械设备。I/O 软件的设计目标有四个：<strong>设备独立性、统一命名、错误处理、缓冲管理</strong>。</p></div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "OS-133",
+  title: "I/O 管理概述",
+  derivation: [
+    "\\text{设备分类（按用途）}: \\; \\text{人机交互类} + \\text{存储类} + \\text{通信类}",
+    "\\text{按速度}: \\; \\text{低速（键鼠）} < \\text{中速（打印机）} < \\text{高速（磁盘）}",
+    "\\text{设备} = \\underbrace{\\text{电子部件（设备控制器）}}_{\\text{CPU 直接接口}} + \\underbrace{\\text{机械部件（设备本体）}}_{\\text{执行机构}}",
+    "\\text{I/O 软件目标}: \\; \\text{设备独立性} + \\text{统一命名} + \\text{错误处理} + \\text{缓冲管理}"
+  ],
+  exam_text: "<b>【2019 真题改编】</b>什么是设备独立性？它给应用程序带来什么好处？",
+  exam_answer: "答案：设备独立性（设备无关性）指应用程序使用<b>逻辑设备名</b>（如 PRN、LPT）申请设备，具体使用哪台<b>物理设备</b>由操作系统负责映射和分配。好处：① 程序与具体设备解耦，换设备不用改程序；② 系统可以灵活调度物理设备，提高利用率；③ 同名逻辑设备可重定向到不同物理设备。",
+  pitfall_list: [
+    "设备独立性不等于「用统一设备」——而是「逻辑设备名与物理设备解耦」，映射工作由 OS 完成。",
+    "CPU 不直接操作机械部件，而是通过设备控制器中的数据/状态/控制三类寄存器间接控制。",
+    "「独占 / 共享 / 虚拟设备」是按「分配方式」分类，与「低/中/高速」是两套不同的分类维度，不要混淆。"
+  ],
+  quiz_list: [
+    { question: "应用程序通过逻辑设备名申请设备、由 OS 映射到物理设备，这称为？", options: ["设备独立性", "设备虚拟化", "SPOOLing 技术"], correct: 0 },
+    { question: "CPU 与设备之间的接口部件是？", options: ["设备控制器", "设备缓冲池", "中断向量表"], correct: 0 },
+    { question: "下列哪项不是 I/O 软件的设计目标？", options: ["进程调度", "统一命名", "错误处理"], correct: 0 },
+  ]
+};
+
+/* ===== OS-133 专属动画：设备分类 + CPU-控制器-设备三层结构 ===== */
+const STEPS = [
+  { focus:0, desc:'I/O 设备按用途分三类：人机交互类 / 存储类 / 通信类' },
+  { focus:1, desc:'按速度分档：低速（键鼠）→ 中速（打印机）→ 高速（磁盘）' },
+  { focus:2, desc:'三层结构：CPU → 设备控制器（电子）→ 设备本体（机械）' },
+  { focus:3, desc:'设备控制器内的三类寄存器：数据 / 状态 / 控制' },
+  { focus:4, desc:'I/O 软件四大目标：设备独立性、统一命名、错误处理、缓冲管理' },
+];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+
+  g.append('text').attr('x', W/2).attr('y', 28).attr('text-anchor','middle')
+    .attr('fill','var(--primary-strong)').attr('font-size',16).attr('font-weight','700')
+    .text(['设备三分类','速度分档','三层结构','控制器寄存器','I/O 软件四目标'][f]);
+
+  if(f===0){
+    const cats = [
+      {t:'人机交互类', e:'键盘 / 鼠标 / 显示器', c:'var(--primary)'},
+      {t:'存储类', e:'磁盘 / U盘 / 磁带', c:'var(--success)'},
+      {t:'通信类', e:'网卡 / 调制解调器', c:'var(--swap)'},
+    ];
+    cats.forEach((c2,i)=>{
+      const x = 60+i*280;
+      g.append('rect').attr('x',x).attr('y',80).attr('width',250).attr('height',170).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',c2.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+125).attr('y',130).attr('text-anchor','middle').attr('fill',c2.c).attr('font-size',17).attr('font-weight','700').text(c2.t);
+      g.append('text').attr('x',x+125).attr('y',170).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text(c2.e);
+      g.append('text').attr('x',x+125).attr('y',200).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11.5).text(['慢速、突发','高速、大容量','网络传输'][i]);
+    });
+    g.append('text').attr('x',450).attr('y',300).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('分类维度可以叠加：如「存储类 + 高速 + 共享设备」');
+  }
+
+  if(f===1){
+    const bars = [
+      {t:'低速设备', e:'键盘、鼠标', v:0.15, c:'var(--compare)'},
+      {t:'中速设备', e:'打印机、激光', v:0.5, c:'var(--swap)'},
+      {t:'高速设备', e:'磁盘、SSD', v:0.95, c:'var(--success)'},
+    ];
+    bars.forEach((b,i)=>{
+      const y = 80+i*90;
+      g.append('text').attr('x',70).attr('y',y+30).attr('fill','var(--text)').attr('font-size',14).attr('font-weight','700').text(b.t);
+      g.append('rect').attr('x',200).attr('y',y).attr('width',560).attr('height',44).attr('rx',8).attr('fill','var(--bg-panel)').attr('stroke','var(--border)').attr('stroke-width',1.5);
+      g.append('rect').attr('x',206).attr('y',y+6).attr('width',548*b.v).attr('height',32).attr('rx',6).attr('fill',b.c).attr('fill-opacity',0.75);
+      g.append('text').attr('x',210).attr('y',y+28).attr('fill','#fff').attr('font-size',12.5).attr('font-weight','700').text(b.e);
+    });
+    g.append('text').attr('x',450).attr('y',360).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12.5).text('速度差是后面「缓冲技术」存在的根本原因');
+  }
+
+  if(f===2){
+    g.append('rect').attr('x',330).attr('y',60).attr('width',240).attr('height',64).attr('rx',10)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--primary)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',88).attr('text-anchor','middle').attr('fill','var(--primary-strong)').attr('font-size',15).attr('font-weight','700').text('CPU');
+    g.append('text').attr('x',450).attr('y',110).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('读寄存器、发命令');
+    g.append('rect').attr('x',330).attr('y',170).attr('width',240).attr('height',64).attr('rx',10)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--highlight)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',198).attr('text-anchor','middle').attr('fill','var(--highlight)').attr('font-size',15).attr('font-weight','700').text('设备控制器');
+    g.append('text').attr('x',450).attr('y',220).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('电子芯片，接 CPU 命令');
+    g.append('rect').attr('x',330).attr('y',280).attr('width',240).attr('height',64).attr('rx',10)
+      .attr('fill','var(--bg-panel)').attr('stroke','var(--success)').attr('stroke-width',2.5);
+    g.append('text').attr('x',450).attr('y',308).attr('text-anchor','middle').attr('fill','var(--success)').attr('font-size',15).attr('font-weight','700').text('设备本体（机械）');
+    g.append('text').attr('x',450).attr('y',330).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',11).text('磁头/马达/打印头等');
+    g.append('path').attr('d','M 450 124 L 450 170').attr('stroke','var(--primary)').attr('stroke-width',2.5).attr('marker-end','url(#arr133)');
+    g.append('path').attr('d','M 450 234 L 450 280').attr('stroke','var(--highlight)').attr('stroke-width',2.5).attr('marker-end','url(#arr133)');
+    g.append('text').attr('x',590).attr('y',100).attr('fill','var(--text-muted)').attr('font-size',12).text('CPU 只读寄存器、发命令');
+    g.append('text').attr('x',590).attr('y',210).attr('fill','var(--text-muted)').attr('font-size',12).text('电子芯片，接收命令并驱动');
+    g.append('text').attr('x',590).attr('y',310).attr('fill','var(--text-muted)').attr('font-size',12).text('真正干粗活的机械结构');
+  }
+
+  if(f===3){
+    const regs = [
+      {t:'数据寄存器', s:'存放要传输的数据', c:'var(--primary)'},
+      {t:'状态寄存器', s:'忙/就绪/故障状态', c:'var(--highlight)'},
+      {t:'控制寄存器', s:'CPU 写入的控制命令', c:'var(--success)'},
+    ];
+    regs.forEach((r,i)=>{
+      const x = 90+i*250;
+      g.append('rect').attr('x',x).attr('y',90).attr('width',210).attr('height',130).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',r.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+105).attr('y',140).attr('text-anchor','middle').attr('fill',r.c).attr('font-size',16).attr('font-weight','700').text(r.t);
+      g.append('text').attr('x',x+105).attr('y',175).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',12.5).text(r.s);
+    });
+    g.append('text').attr('x',450).attr('y',270).attr('text-anchor','middle').attr('fill','var(--text)').attr('font-size',13).text('CPU 通过这三类寄存器与设备「对话」');
+    g.append('text').attr('x',450).attr('y',298).attr('text-anchor','middle').attr('fill','var(--text-muted)').attr('font-size',12).text('每个寄存器有独立的 I/O 端口地址');
+  }
+
+  if(f===4){
+    const goals = [
+      {t:'设备独立性', s:'逻辑设备名 ↔ 物理设备解耦', c:'var(--primary)'},
+      {t:'统一命名', s:'设备名与文件路径风格一致', c:'var(--success)'},
+      {t:'错误处理', s:'出错重试/上报，不让 CPU 卡死', c:'var(--swap)'},
+      {t:'缓冲管理', s:'平滑速度差、减少中断', c:'var(--highlight)'},
+    ];
+    goals.forEach((gl,i)=>{
+      const x = 70+(i%2)*400, y = 70+Math.floor(i/2)*140;
+      g.append('rect').attr('x',x).attr('y',y).attr('width',370).attr('height',110).attr('rx',12)
+        .attr('fill','var(--bg-panel)').attr('stroke',gl.c).attr('stroke-width',2.5);
+      g.append('text').attr('x',x+22).attr('y',y+44).attr('fill',gl.c).attr('font-size',16).attr('font-weight','700').text(gl.t);
+      g.append('text').attr('x',x+22).attr('y',y+78).attr('fill','var(--text)').attr('font-size',12.5).text(gl.s);
+    });
+  }
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arr133').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary)');
+
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(()=>{ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer||''}</p>`;
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong');});
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{ const r=await fetch('/api/skills/'+id); if(!r.ok) return; const s=await r.json();
+    if(s && s.skill_text){ document.getElementById('skill-section').style.display='block'; document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(x=>x.trim()).map(x=>'<div style="margin:6px 0;">🎯 '+x+'</div>').join(''); }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{
+  const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',()=>{stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',()=>{ initTheme(); if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'}); init(); });
+</script>
+</body>
+</html>
