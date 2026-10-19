@@ -1,0 +1,28 @@
+{
+  "name": "11408-courseware",
+  "version": "1.0.0",
+  "description": "考研11408（数学一+408+英语一+政治）动画课件 + 在线刷题系统",
+  "author": "喵谷（喵酱）",
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "verify": "node tools/verify.js",
+    "migrate": "node tools/migrate.js",
+    "expand": "node tools/expand-database.js",
+    "build-nav": "node tools/build-nav.js"
+  },
+  "keywords": [
+    "11408",
+    "考研",
+    "courseware",
+    "animation",
+    "quiz"
+  ],
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
+  },
+  "devDependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}
