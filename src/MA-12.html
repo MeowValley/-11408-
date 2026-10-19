@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微分中值定理</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root{--bg:#0f1420;--bg-panel:#161d2e;--bg-elevated:#1d263b;--border:#2a3550;--text:#e6ebf5;--text-muted:#8b96ad;--primary:#4f8cff;--primary-strong:#6ea8ff;--highlight:#ffb020;--success:#2dd4a7;--compare:#ff6b6b;--swap:#ff9f43;--danger:#ff5c7a;--radius:12px;--shadow:0 6px 24px rgba(0,0,0,.35);--font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif}
+[data-theme="light"]{--bg:#f5f7fa;--bg-panel:#fff;--bg-elevated:#f0f3f8;--border:#dde3ec;--text:#1a2333;--text-muted:#6b7688;--primary:#3b82f6;--primary-strong:#2563eb;--highlight:#f59e0b;--success:#10b981;--compare:#ef4444;--swap:#f97316;--danger:#ef4444;--shadow:0 4px 16px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+.page-wrap{max-width:1280px;margin:0 auto;padding:24px}
+header.course-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px}
+.course-header h1{font-size:22px;font-weight:700}
+.course-header .badge{font-size:12px;color:var(--primary-strong);border:1px solid var(--primary);padding:2px 10px;border-radius:999px}
+.section{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow)}
+.section h2{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section h2 .num{width:26px;height:26px;border-radius:8px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.focus-pulse{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,.7)}50%{box-shadow:0 0 0 10px rgba(255,176,32,0)}}
+.control-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;position:sticky;top:12px;z-index:10}
+.ctrl-btn{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;transition:all .15s ease}
+.ctrl-btn:hover{border-color:var(--primary);color:var(--primary-strong);transform:translateY(-1px)}
+.ctrl-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.slider-group{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+.slider-group input[type=range]{accent-color:var(--highlight);width:160px}
+.slider-val{font-family:monospace;color:var(--highlight);font-weight:700;min-width:40px}
+.viz-panel{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;min-height:440px}
+.viz-panel svg{width:100%;height:100%;min-height:400px}
+.subtitle-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--highlight);color:var(--highlight);padding:6px 16px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap}
+.pitfall-list{padding-left:16px}.pitfall-list li{margin-bottom:8px}.pitfall-list li::marker{color:var(--danger)}
+.quiz-item{margin-bottom:16px}.quiz-item .opt{display:block;padding:8px 14px;margin-top:6px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}.quiz-item .opt:hover{border-color:var(--primary)}.quiz-item .opt.correct{border-color:var(--success);color:var(--success)}.quiz-item .opt.wrong{border-color:var(--danger);color:var(--danger)}
+.katex-holder{margin:6px 0}
+.theme-float{position:fixed;top:14px;right:14px;z-index:9999;font-size:20px;background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:6px 12px;cursor:pointer;box-shadow:var(--shadow)}
+@media(max-width:768px){.control-bar{position:static}}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>微分中值定理（罗尔/拉格朗日）</h1><span class="badge">A级 · MA-12</span></header>
+<section class="section" id="intuition-section"><h2><span class="num">1</span>直觉引入</h2><div id="intuition-text"><p>从 A 点开车到 B 点，平均速度是 60km/h，那么途中<strong>一定有某个瞬间</strong>瞬时速度恰好等于 60。拉格朗日中值定理就是这个道理：曲线上总存在一点，该点的切线斜率 = 两端点连线的斜率（平均变化率）。</p></div></section>
+<section class="section" id="animation-section"><h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar"><button class="ctrl-btn primary" id="btn-play">▶ 播放</button><button class="ctrl-btn" id="btn-reset">↺ 重置</button><div class="slider-group"><span>ξ 位置</span><input type="range" id="slider-xi" min="0" max="100" step="1" value="50"><span class="slider-val" id="val-xi">50%</span></div></div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle">拖动滑块，找切线平行于弦的那个点</div></div>
+</section>
+<section class="section" id="derive-section"><h2><span class="num">3</span>公式推导</h2><div id="derive-katex"></div></section>
+<section class="section" id="exam-section"><h2><span class="num">4</span>历年真题实战</h2><div id="exam-text"></div></section>
+<section class="section" id="pitfall-section"><h2><span class="num">5</span>易错点</h2><ul class="pitfall-list" id="pitfall-list"></ul></section>
+<section class="section" id="quiz-section"><h2><span class="num">6</span>自测</h2><div id="quiz-list"></div></section>
+</div>
+<button class="theme-float" id="theme-float-btn">🌙</button>
+<script>
+window.COURSEWARE_DATA={id:"MA-12",title:"微分中值定理（罗尔/拉格朗日）",intuition_text:"从 A 点开车到 B 点，平均速度是 60km/h，那么途中<strong>一定有某个瞬间</strong>瞬时速度恰好等于 60。拉格朗日中值定理就是这个道理：曲线上总存在一点，该点的切线斜率 = 两端点连线的斜率（平均变化率）。",derivation:["\\text{拉格朗日：} f'(\\xi) = \\frac{f(b)-f(a)}{b-a}","\\text{罗尔（特例）：} f(a)=f(b) \\Rightarrow f'(\\xi)=0","\\text{几何意义：曲线上某点切线平行于弦}"],exam_text:"<b>【真题】</b>设 f(x) 在 [a,b] 连续、(a,b) 可导，f(a)=f(b)，则至少存在一点 ξ∈(a,b) 使 f'(ξ)=？",exam_answer:"答案：0。这是罗尔定理（拉格朗日的特例），两端函数值相等时，必有某点切线水平。",pitfall_list:["罗尔定理三条件缺一不可：闭区间连续、开区间可导、端点值相等。","拉格朗日是罗尔的推广，不要求端点值相等。","ξ 在开区间 (a,b) 内，不是端点。"],quiz_list:[{question:"拉格朗日中值定理的几何意义是？",options:["某点切线平行于弦","某点切线水平","曲线过原点","切线斜率为0"],correct:0},{question:"罗尔定理是拉格朗日的什么情况？",options:["f(a)=f(b)的特例","a=b的特例","f可导的特例","b-a=1的特例"],correct:0}]};
+
+/* f(x) = x² - 2x + 1 在 [0,2]，找切线平行于弦的点 */
+const A=0, B=2;
+const f = x => x*x - 2*x + 1;
+const df = x => 2*x - 2;
+let xi = 0.5; // ξ 在 [0,1] 的比例
+
+function renderViz(){
+  const svg=d3.select('#viz');svg.selectAll('*').remove();
+  const W=760,H=440;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const g=svg.append('g');
+  const cx=W/2, cy=H/2, scale=140; // 数学坐标到屏幕
+  const toX = x => cx + (x-1)*scale;
+  const toY = y => cy - y*scale;
+
+  // 坐标轴
+  g.append('line').attr('x1',30).attr('y1',cy).attr('x2',W-30).attr('y2',cy).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+  g.append('line').attr('x1',cx).attr('y1',20).attr('x2',cx).attr('y2',H-20).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+  g.append('text').attr('x',W-40).attr('y',cy-8).attr('fill','var(--text-muted)').attr('font-size',12).text('x');
+  g.append('text').attr('x',cx+8).attr('y',24).attr('fill','var(--text-muted)').attr('font-size',12).text('y');
+
+  // 函数曲线 f(x)=x²-2x+1，x∈[0,2]
+  const path=[];
+  for(let x=0;x<=2;x+=0.02){ path.push([toX(x), toY(f(x))]); }
+  g.append('path').attr('d', path.map((p,i)=>`${i?'L':'M'}${p[0]},${p[1]}`).join('')).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',3);
+
+  // 端点 A(0,f(0)) B(2,f(2))，f(0)=1, f(2)=1
+  const ax=toX(0), ay=toY(f(0)), bx=toX(2), by=toY(f(2));
+  g.append('circle').attr('cx',ax).attr('cy',ay).attr('r',5).attr('fill','var(--highlight)');
+  g.append('circle').attr('cx',bx).attr('cy',by).attr('r',5).attr('fill','var(--highlight)');
+  // 弦 AB（绿色）
+  g.append('line').attr('x1',ax).attr('y1',ay).attr('x2',bx).attr('y2',by).attr('stroke','var(--success)').attr('stroke-width',2).attr('stroke-dasharray','6,4');
+
+  // 切点 ξ（随滑块移动）
+  const xiX = A + xi*(B-A);
+  const xix = toX(xiX), xiy = toY(f(xiX));
+  const slope = df(xiX);
+  // 切线（红色）
+  const tl=80;
+  g.append('line').attr('x1',xix-tl).attr('y1',xiy-slope*tl).attr('x2',xix+tl).attr('y2',xiy+slope*tl).attr('stroke','var(--danger)').attr('stroke-width',2.5);
+  g.append('circle').attr('cx',xix).attr('cy',xiy).attr('r',6).attr('fill','var(--danger)').attr('class','focus-pulse');
+
+  // 显示斜率对比
+  const chordSlope = (f(B)-f(A))/(B-A); // =0
+  g.append('text').attr('x',20).attr('y',40).attr('fill','var(--success)').attr('font-size',14).attr('font-weight','700').text('弦斜率 = ' + chordSlope.toFixed(2));
+  g.append('text').attr('x',20).attr('y',64).attr('fill','var(--danger)').attr('font-size',14).attr('font-weight','700').text('切线斜率 = ' + slope.toFixed(2));
+
+  const near = Math.abs(slope - chordSlope) < 0.1;
+  document.getElementById('subtitle').textContent = near ? '🎉 找到 ξ！切线平行于弦（斜率相等）' : '拖动滑块，使切线斜率 = 弦斜率 ' + chordSlope.toFixed(2);
+  document.getElementById('val-xi').textContent = xiX.toFixed(2);
+}
+function renderAll(){renderViz()}
+function renderDerive(){const el=document.getElementById('derive-katex');const lines=window.COURSEWARE_DATA.derivation;el.innerHTML=lines.map(l=>`<div class="katex-holder">$$${l}$$</div>`).join('');if(window.renderMathInElement)window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});else if(window.katex){el.innerHTML='';lines.forEach(l=>{const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true})})}}
+function renderContent(){const d=window.COURSEWARE_DATA;document.getElementById('intuition-text').innerHTML=`<p>${d.intuition_text}</p>`;document.getElementById('exam-text').innerHTML=d.exam_text+`<p style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;document.getElementById('pitfall-list').innerHTML=d.pitfall_list.map(x=>`<li>${x}</li>`).join('');document.getElementById('quiz-list').innerHTML=d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');renderDerive()}
+function bindQuiz(){document.querySelectorAll('.quiz-item .opt').forEach(opt=>{opt.addEventListener('click',()=>{const sib=opt.parentElement.querySelectorAll('.opt');sib.forEach(s=>s.classList.remove('correct','wrong'));opt.dataset.correct==='1'?opt.classList.add('correct'):opt.classList.add('wrong')})})}
+function initTheme(){try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s)}catch(e){}document.getElementById('theme-float-btn').textContent=document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙'}
+document.getElementById('theme-float-btn').addEventListener('click',()=>{const c=document.documentElement.getAttribute('data-theme');const n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}document.getElementById('theme-float-btn').textContent=n==='light'?'☀️':'🌙'})
+function init(){renderContent();bindQuiz();renderAll();document.getElementById('slider-xi').addEventListener('input',e=>{xi=+e.target.value/100;renderAll()});document.getElementById('btn-play').addEventListener('click',()=>{let p=0;const t=setInterval(()=>{p=(p+1)%101;document.getElementById('slider-xi').value=p;xi=p/100;renderAll()},50)});document.getElementById('btn-reset').addEventListener('click',()=>{xi=0.5;document.getElementById('slider-xi').value=50;renderAll()})}
+window.addEventListener('load',()=>{initTheme();if(window.gsap)gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});init()});
+</script>
+</body>
+</html>

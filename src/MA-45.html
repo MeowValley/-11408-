@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二重积分的极坐标转换</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root {
+  --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550;
+  --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff;
+  --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a;
+  --dim-opacity:0.22; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35);
+  --font:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.dimmed { opacity:var(--dim-opacity); filter:grayscale(0.6); transition:all .4s ease; }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.slider-group { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); }
+.slider-group input[type="range"] { accent-color:var(--highlight); width:120px; }
+.slider-val { font-family:var(--mono); color:var(--highlight); font-weight:700; min-width:36px; }
+.stage { display:grid; grid-template-columns:1fr 1fr; gap:24px; min-height:400px; }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:8px; position:relative; }
+.viz-panel .viz-title { text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:4px; }
+.viz-panel svg { width:100%; height:340px; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+
+[data-theme="light"] {
+  --bg:#f5f7fa; --bg-panel:#ffffff; --bg-elevated:#f0f3f8; --border:#dde3ec;
+  --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb;
+  --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444;
+  --shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+/* 响应式：平板/手机自适应堆叠 */
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media (max-width:768px) {
+  .stage, .page-wrap { grid-template-columns:1fr !important; }
+  .stage { display:block !important; }
+  .stage > * { margin-bottom:16px; }
+  .control-bar { position:static !important; }
+}
+@media (max-width:375px) {
+  .course-header h1 { font-size:18px !important; }
+  .section { padding:16px !important; }
+}
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header class="course-header">
+    <h1 id="course-title">二重积分的极坐标转换</h1>
+    <span class="badge">MA-45 · 多元函数积分学 · 数学一</span>
+  </header>
+
+  <section class="section" id="intuition-section">
+    <h2><span class="num">1</span>直觉引入</h2>
+    <div id="intuition-text"><p>在直角坐标里，一个圆域要用「竖条」去切很别扭；但换成极坐标，圆就变成了「一圈圈 + 一扇扇」的自然网格。关键是：极坐标下那一小块面积不是 <b>dr·dθ</b>，而是 <b>r·dr·dθ</b>——因为越往外，同一角度张开的小扇形越大，这个「r」就是面积微元的放大因子。</p></div>
+  </section>
+
+  <section class="section" id="animation-section">
+    <h2><span class="num">2</span>核心动画</h2>
+    <div class="control-bar">
+      <button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+      <button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+      <div class="slider-group">
+        <span>半径 r</span>
+        <input type="range" id="slider-r" min="0.3" max="1.0" step="0.01" value="0.6">
+        <span class="slider-val" id="val-r">0.60</span>
+      </div>
+      <div class="slider-group">
+        <span>角度 θ</span>
+        <input type="range" id="slider-theta" min="0" max="90" step="1" value="45">
+        <span class="slider-val" id="val-theta">45°</span>
+      </div>
+      <div class="slider-group">
+        <span>微元 dθ</span>
+        <input type="range" id="slider-dtheta" min="5" max="60" step="1" value="20">
+        <span class="slider-val" id="val-dtheta">20°</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="viz-panel">
+        <div class="viz-title">直角坐标（圆域难切）</div>
+        <svg id="viz-xy"></svg>
+      </div>
+      <div class="viz-panel" id="viz-polar-panel">
+        <div class="viz-title">极坐标（扇形微元，面积 = r·dr·dθ）</div>
+        <svg id="viz-polar"></svg>
+        <div class="subtitle-bar" id="subtitle">拖动滑块观察面积微元</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="derive-section">
+    <h2><span class="num">3</span>公式推导</h2>
+    <div id="derive-katex"></div>
+  </section>
+
+  <section class="section" id="exam-section">
+    <h2><span class="num">4</span>历年真题实战</h2>
+    <div id="exam-text"></div>
+  </section>
+
+  <section class="section" id="skill-section" style="display:none;">
+    <h2><span class="num">💡</span>做题技巧</h2>
+    <div id="skill-content" style="line-height:1.9;"></div>
+  </section>
+  <section class="section" id="pitfall-section">
+    <h2><span class="num">5</span>易错点</h2>
+    <ul class="pitfall-list" id="pitfall-list"></ul>
+  </section>
+
+  <section class="section" id="quiz-section">
+    <h2><span class="num">6</span>自测</h2>
+    <div id="quiz-list"></div>
+  </section>
+</div>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "MA-45",
+  title: "二重积分的极坐标转换",
+  intuition_text: "在直角坐标里，一个圆域要用「竖条」去切很别扭；但换成极坐标，圆就变成了「一圈圈 + 一扇扇」的自然网格。关键是：极坐标下那一小块面积不是 <b>dr·dθ</b>，而是 <b>r·dr·dθ</b>——因为越往外，同一角度张开的小扇形越大，这个「r」就是面积微元的放大因子。",
+  derivation: [
+    "x = r\\cos\\theta,\\quad y = r\\sin\\theta",
+    "\\text{雅可比行列式 } J = \\dfrac{\\partial(x,y)}{\\partial(r,\\theta)} = \\begin{vmatrix}\\cos\\theta & -r\\sin\\theta \\\\ \\sin\\theta & r\\cos\\theta\\end{vmatrix} = r",
+    "\\iint_D f(x,y)\\,dx\\,dy = \\iint_{D'} f(r\\cos\\theta, r\\sin\\theta)\\, r\\,dr\\,d\\theta",
+    "\\text{圆域 } D: x^2+y^2\\le a^2 \\Rightarrow 0\\le r\\le a,\\; 0\\le\\theta\\le 2\\pi"
+  ],
+  exam_text: "<b>【真题·典型】</b>计算 <code>∬<sub>D</sub> e<sup>-(x²+y²)</sup> dxdy</code>，其中 D 为圆域 x²+y² ≤ 1。",
+  exam_answer: "答案：换极坐标 x=rcosθ, y=rsinθ，面积微元 r·dr·dθ，积分限 0≤r≤1, 0≤θ≤2π，得 ∫₀²ᵖⁱ∫₀¹ e^(-r²)·r dr dθ = π(1 - e⁻¹)。",
+  pitfall_list: [
+    "换极坐标后必须乘 r（雅可比行列式），漏乘 r 是最常见错误。",
+    "圆域 x²+y²≤a² 的 r 范围是 0 到 a（不是 0 到 √a）。",
+    "θ 的范围要按圆域位置定：整圆是 0~2π，上半圆是 0~π。",
+    "不是所有积分都适合极坐标——只有被积函数含 x²+y² 或积分域是圆/扇形时才划算。"
+  ],
+  quiz_list: [
+    { question: "极坐标下面积微元 dxdy 等于？", options: ["dr·dθ", "r·dr·dθ", "r²·dr·dθ"], correct: 1 },
+    { question: "圆域 x²+y²≤4 换极坐标后 r 的范围是？", options: ["0 ≤ r ≤ 2", "0 ≤ r ≤ 4", "0 ≤ r ≤ √2"], correct: 0 },
+    { question: "哪个积分最适合用极坐标？", options: ["∬ sin(xy) dxdy（矩形域）", "∬ e^(x²+y²) dxdy（圆域）", "∬ x dxdy（三角形域）"], correct: 1 }
+  ]
+};
+
+/* ============ 专属动画：双坐标系 + 面积微元 ============ */
+let r = 0.6, theta = 45, dtheta = 20;   // 当前参数（归一化 r，角度制）
+
+function renderXY() {
+  const svg = d3.select('#viz-xy');
+  svg.selectAll('*').remove();
+  const W = 400, H = 340, cx = W/2, cy = H/2, R = 120;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+
+  // 坐标轴
+  g.append('line').attr('x1',cx-R-30).attr('y1',cy).attr('x2',cx+R+30).attr('y2',cy).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+  g.append('line').attr('x1',cx).attr('y1',cy-R-30).attr('x2',cx).attr('y2',cy+R+30).attr('stroke','var(--text-muted)').attr('stroke-width',1);
+
+  // 单位圆
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','none').attr('stroke','var(--primary)').attr('stroke-width',2);
+
+  // 直角坐标的"竖条"切割（体现难切）
+  const x0 = cx - R + r*2*R;   // 当前 x 位置
+  g.append('line').attr('x1',x0).attr('y1',cy-R).attr('x2',x0).attr('y2',cy+R)
+    .attr('stroke','var(--swap)').attr('stroke-width',1.5).attr('stroke-dasharray','4,4').attr('opacity',0.7);
+
+  // 点 (x,y) 映射
+  const px = cx + r*R*Math.cos(theta*Math.PI/180);
+  const py = cy - r*R*Math.sin(theta*Math.PI/180);
+  g.append('circle').attr('cx',px).attr('cy',py).attr('r',5).attr('fill','var(--highlight)').attr('class','focus-pulse');
+  g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',px).attr('y2',py).attr('stroke','var(--highlight)').attr('stroke-width',1.5);
+
+  // 标签
+  g.append('text').attr('x',px+10).attr('y',py-8).attr('fill','var(--highlight)').attr('font-size',12).text(`(${ (r*Math.cos(theta*Math.PI/180)).toFixed(2) }, ${(r*Math.sin(theta*Math.PI/180)).toFixed(2) })`);
+  g.append('text').attr('x',cx+R+10).attr('y',cy+20).attr('fill','var(--text-muted)').attr('font-size',11).text('x²+y²=1');
+}
+
+function renderPolar() {
+  const svg = d3.select('#viz-polar');
+  svg.selectAll('*').remove();
+  const W = 400, H = 340, cx = W/2, cy = H/2, R = 130;
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g');
+
+  // 同心圆（r 网格）
+  for (let i = 1; i <= 4; i++) {
+    g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R*i/4)
+      .attr('fill','none').attr('stroke','var(--text-muted)').attr('stroke-width',0.8).attr('opacity',0.5);
+  }
+  // 辐射线（θ 网格）
+  for (let a = 0; a < 360; a += 30) {
+    const rad = a*Math.PI/180;
+    g.append('line').attr('x1',cx).attr('y1',cy)
+      .attr('x2',cx+R*Math.cos(rad)).attr('y2',cy-R*Math.sin(rad))
+      .attr('stroke','var(--text-muted)').attr('stroke-width',0.8).attr('opacity',0.5);
+  }
+
+  // 面积微元（扇形环）：r 到 r+dr，θ 到 θ+dθ
+  const thetaRad = theta*Math.PI/180;
+  const dthetaRad = dtheta*Math.PI/180;
+  const rOuter = r*R;
+
+  // 用 path 画扇形环（面积微元）
+  const arc = d3.arc()
+    .innerRadius(rOuter).outerRadius(Math.min(rOuter + 18, R))
+    .startAngle(-thetaRad - dthetaRad).endAngle(-thetaRad);
+
+  const sector = g.append('path')
+    .attr('d', arc()).attr('transform', `translate(${cx},${cy})`)
+    .attr('fill', 'var(--highlight)').attr('opacity', 0.55)
+    .attr('stroke', 'var(--highlight)').attr('stroke-width', 2)
+    .attr('class', 'focus-pulse');
+
+  // 标注 r 和 dθ
+  const midTheta = thetaRad + dthetaRad/2;
+  const labelR = rOuter + 9;
+  g.append('text').attr('x',cx + labelR*Math.cos(-midTheta)).attr('y',cy + labelR*Math.sin(-midTheta))
+    .attr('fill','var(--highlight)').attr('font-size',12).attr('text-anchor','middle')
+    .text('dA');
+
+  // 实时数值刻度（规范6）
+  const area = (rOuter/130) * 18 * (dthetaRad) * 130; // 近似面积（像素）
+  const areaNorm = (r * 18 * (dtheta*Math.PI/180)).toFixed(3);
+  document.getElementById('subtitle').textContent =
+    `dA ≈ r·dr·dθ = ${r.toFixed(2)} × dr × ${(dtheta*Math.PI/180).toFixed(2)} rad`;
+
+  // 更新数值
+  document.getElementById('val-r').textContent = r.toFixed(2);
+  document.getElementById('val-theta').textContent = theta + '°';
+  document.getElementById('val-dtheta').textContent = dtheta + '°';
+}
+
+function renderAll() {
+  renderXY();
+  renderPolar();
+}
+
+function renderDerive() {
+  const el = document.getElementById('derive-katex');
+  const lines = window.COURSEWARE_DATA.derivation;
+  el.innerHTML = lines.map(l => `<div class="katex-holder">$$${l}$$</div>`).join('');
+  if (window.renderMathInElement) window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true}] });
+  else if (window.katex) { el.innerHTML=''; lines.forEach(l=>{ const d=document.createElement('div'); d.className='katex-holder'; el.appendChild(d); window.katex.render(l,d,{displayMode:true}); }); }
+}
+function renderContent() {
+  const d = window.COURSEWARE_DATA;
+  document.getElementById('course-title').textContent = d.title;
+  document.getElementById('intuition-text').innerHTML = `<p>${d.intuition_text}</p>`;
+  document.getElementById('exam-text').innerHTML = d.exam_text + `<p id="exam-answer" style="color:var(--success);margin-top:8px;">${d.exam_answer}</p>`;
+  document.getElementById('pitfall-list').innerHTML = d.pitfall_list.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('quiz-list').innerHTML = d.quiz_list.map((q,qi)=>`<div class="quiz-item"><p>${q.question}</p>${q.options.map((o,oi)=>`<span class="opt" data-correct="${oi===q.correct?1:0}">${o}</span>`).join('')}</div>`).join('');
+  renderDerive();
+}
+function bindQuiz() {
+  document.querySelectorAll('.quiz-item .opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const sib = opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(s=>s.classList.remove('correct','wrong'));
+      opt.dataset.correct==='1' ? opt.classList.add('correct') : opt.classList.add('wrong');
+    });
+  });
+}
+
+// 自动播放：缓慢扫过 θ，展示扇形微元"拉伸"
+let autoPlaying = false, autoTimer = null;
+function autoPlay() {
+  autoPlaying = !autoPlaying;
+  document.getElementById('btn-play').textContent = autoPlaying ? '⏸ 暂停' : '▶ 播放';
+  if (autoPlaying) {
+    autoTimer = setInterval(() => {
+      theta = (theta + 2) % 90;
+      document.getElementById('slider-theta').value = theta;
+      renderAll();
+    }, 80);
+  } else if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+}
+
+
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (typeof DATA !== 'undefined' && DATA && DATA.id) || (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if (!id) return;
+  try {
+    const r = await fetch('/api/skills/' + id);
+    if (!r.ok) return;
+    const s = await r.json();
+    if (s && s.skill_text) {
+      document.getElementById('skill-section').style.display = 'block';
+      document.getElementById('skill-content').innerHTML = s.skill_text
+        .split('\n').filter(x => x.trim())
+        .map(x => '<div style="margin:6px 0;">🎯 ' + x + '</div>').join('');
+    }
+  } catch(e) {}
+}
+
+function init() {
+  renderContent();
+  loadSkill();
+  bindQuiz();
+  renderAll();
+  document.getElementById('slider-r').addEventListener('input', e => { r = +e.target.value; renderAll(); });
+  document.getElementById('slider-theta').addEventListener('input', e => { theta = +e.target.value; renderAll(); });
+  document.getElementById('slider-dtheta').addEventListener('input', e => { dtheta = +e.target.value; renderAll(); });
+  document.getElementById('btn-play').addEventListener('click', autoPlay);
+  document.getElementById('btn-reset').addEventListener('click', ()=>{ r=0.6; theta=45; dtheta=20; document.getElementById('slider-r').value=0.6; document.getElementById('slider-theta').value=45; document.getElementById('slider-dtheta').value=20; renderAll(); });
+}
+window.addEventListener('load', ()=>{
+  if (window.gsap) gsap.from('.section', { opacity:0, y:20, duration:0.6, stagger:0.12, ease:'power2.out' });
+  init();
+});
+</script>
+
+<button class="theme-float" id="theme-float-btn" title="切换主题">🌙</button>
+<script>
+(function(){
+  var btn = document.getElementById('theme-float-btn');
+  try { var s = localStorage.getItem('theme'); if(s) document.documentElement.setAttribute('data-theme', s); } catch(e){}
+  function upd(){ var d = document.documentElement.getAttribute('data-theme')!=='light'; btn.textContent = d?'🌙':'☀️'; }
+  upd();
+  btn.addEventListener('click', function(){
+    var c = document.documentElement.getAttribute('data-theme');
+    var n = c==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', n);
+    try { localStorage.setItem('theme', n); } catch(e){}
+    upd();
+  });
+})();
+</script>
+</body>
+</html>

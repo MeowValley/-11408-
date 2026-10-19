@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<!--
+  考研 11408 动画课件 + 在线刷题系统
+  Copyright (C) 2026 喵谷（喵酱）
+  代码授权：PolyForm Noncommercial 1.0.0 ｜ 内容授权：CC BY-NC-SA 4.0
+  两者均禁止商业使用；商业授权请联系作者。详见 LICENSE / LICENSE-CODE / LICENSE-CONTENT
+-->
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正项级数审敛法</title>
+<link rel="stylesheet" href="libs/katex.min.css">
+<script defer src="libs/katex.min.js"></script>
+<script defer src="libs/auto-render.min.js"></script>
+<script src="libs/gsap.min.js"></script>
+<script src="libs/d3.min.js"></script>
+<style>
+:root { --bg:#0f1420; --bg-panel:#161d2e; --bg-elevated:#1d263b; --border:#2a3550; --text:#e6ebf5; --text-muted:#8b96ad; --primary:#4f8cff; --primary-strong:#6ea8ff; --highlight:#ffb020; --success:#2dd4a7; --compare:#ff6b6b; --swap:#ff9f43; --danger:#ff5c7a; --radius:12px; --shadow:0 6px 24px rgba(0,0,0,0.35); --font:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; }
+[data-theme="light"] { --bg:#f5f7fa; --bg-panel:#fff; --bg-elevated:#f0f3f8; --border:#dde3ec; --text:#1a2333; --text-muted:#6b7688; --primary:#3b82f6; --primary-strong:#2563eb; --highlight:#f59e0b; --success:#10b981; --compare:#ef4444; --swap:#f97316; --danger:#ef4444; --shadow:0 4px 16px rgba(0,0,0,0.08); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); line-height:1.65; -webkit-font-smoothing:antialiased; }
+.page-wrap { max-width:1280px; margin:0 auto; padding:24px; }
+header.course-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:24px; }
+.course-header h1 { font-size:22px; font-weight:700; }
+.course-header .badge { font-size:12px; color:var(--primary-strong); border:1px solid var(--primary); padding:2px 10px; border-radius:999px; }
+.section { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:24px; box-shadow:var(--shadow); }
+.section h2 { font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.section h2 .num { width:26px; height:26px; border-radius:8px; background:var(--primary); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.focus-pulse { animation:breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0.7);} 50%{box-shadow:0 0 0 10px rgba(255,176,32,0);} }
+.control-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:16px; position:sticky; top:12px; z-index:10; }
+.ctrl-btn { font-family:var(--font); font-size:14px; font-weight:600; color:var(--text); background:var(--bg-panel); border:1px solid var(--border); border-radius:8px; padding:8px 16px; cursor:pointer; transition:all .15s ease; }
+.ctrl-btn:hover { border-color:var(--primary); color:var(--primary-strong); transform:translateY(-1px); }
+.ctrl-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.viz-panel { background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; position:relative; min-height:440px; }
+.viz-panel svg { width:100%; height:auto; }
+.subtitle-bar { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:var(--bg-elevated); border:1px solid var(--highlight); color:var(--highlight); padding:6px 16px; border-radius:999px; font-size:14px; font-weight:600; white-space:nowrap; max-width:92%; overflow:hidden; text-overflow:ellipsis; }
+.pitfall-list { padding-left:16px; } .pitfall-list li { margin-bottom:8px; } .pitfall-list li::marker { color:var(--danger); }
+.quiz-item { margin-bottom:16px; }
+.quiz-item .opt { display:block; padding:8px 14px; margin-top:6px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .15s; }
+.quiz-item .opt:hover { border-color:var(--primary); }
+.quiz-item .opt.correct { border-color:var(--success); color:var(--success); }
+.quiz-item .opt.wrong { border-color:var(--danger); color:var(--danger); }
+.katex-holder { margin:6px 0; }
+.theme-float { position:fixed; top:14px; right:14px; z-index:9999; font-size:20px; background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:6px 12px; cursor:pointer; box-shadow:var(--shadow); }
+@media(max-width:768px){ .control-bar{position:static;} }
+
+/* ===== 移动端适配补丁（统一追加：公式可横向滚动、标题栏可换行、字幕可换行） ===== */
+.katex-holder{overflow-x:auto;overflow-y:hidden}
+.katex-display{margin:0.4em 0}
+header.course-header{flex-wrap:wrap;gap:8px}
+header.course-header h1{min-width:0;word-break:break-word}
+@media(max-width:768px){
+  .page-wrap{padding:12px}
+  .section{padding:16px}
+  .control-bar{position:static;gap:6px;padding:10px 12px}
+  .ctrl-btn{padding:7px 12px;font-size:13px}
+  .subtitle-bar{white-space:normal;max-width:94%;line-height:1.35;font-size:12.5px;text-align:center}
+  header.course-header h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<header class="course-header"><h1>正项级数审敛法</h1><span class="badge">A级 · MA-56</span></header>
+
+<section class="section" id="intuition-section">
+<h2><span class="num">1</span>直觉引入</h2>
+<div id="intuition-text">判断正项级数「加起来是有限还是无穷」。关键看<strong>通项衰减快不快</strong>：像 1/n² 衰减快，加起来收敛；1/n 衰减慢，加起来发散（调和级数）。p 级数 Σ1/n^p：p>1 收敛，p≤1 发散。</div>
+</section>
+
+<section class="section" id="animation-section">
+<h2><span class="num">2</span>核心动画</h2>
+<div class="control-bar">
+<button class="ctrl-btn primary" id="btn-play">▶ 播放</button>
+<button class="ctrl-btn" id="btn-prev">⏮ 上一步</button>
+<button class="ctrl-btn" id="btn-next">⏭ 下一步</button>
+<button class="ctrl-btn" id="btn-reset">↺ 重置</button>
+</div>
+<div class="viz-panel"><svg id="viz"></svg><div class="subtitle-bar" id="subtitle"></div></div>
+</section>
+
+<section class="section" id="derive-section">
+<h2><span class="num">3</span>公式推导</h2>
+<div id="derive-katex"></div>
+</section>
+
+<section class="section" id="exam-section">
+<h2><span class="num">4</span>历年真题实战</h2>
+<div id="exam-text"></div>
+</section>
+
+<section class="section" id="skill-section" style="display:none;">
+<h2><span class="num">💡</span>做题技巧</h2>
+<div id="skill-content" style="line-height:1.9;"></div>
+</section>
+<section class="section" id="pitfall-section">
+<h2><span class="num">5</span>易错点</h2>
+<ul class="pitfall-list" id="pitfall-list"></ul>
+</section>
+
+<section class="section" id="quiz-section">
+<h2><span class="num">6</span>自测</h2>
+<div id="quiz-list"></div>
+</section>
+</div>
+
+<button class="theme-float" id="theme-float-btn">🌙</button>
+
+<script>
+window.COURSEWARE_DATA = {
+  id: "MA-56",
+  title: "正项级数审敛法",
+  derivation: ["p\\text{级数 } \\sum \\frac{1}{n^p}：\\begin{cases} p>1 \\text{ 收敛} \\\\ p\\le 1 \\text{ 发散} \\end{cases}","\\text{比值判别法：} \\lim \\frac{a_{n+1}}{a_n} = \\rho \\begin{cases} <1 \\text{ 收敛} \\\\ >1 \\text{ 发散} \\end{cases}","\\text{比较判别法：与已知级数比较}"],
+  exam_text: "<b>【真题】</b>级数 Σ 1/n² 的敛散性是？",
+  exam_answer: "答案：收敛。p=2>1，p 级数收敛（和 = π²/6，著名的巴塞尔问题）。",
+  pitfall_list: ["调和级数 Σ1/n 发散，虽然通项趋于 0（通项趋于0是必要非充分条件）。","p 级数 p>1 收敛、p≤1 发散，这是最基本的判别标准。","比值判别法 ρ=1 时失效，需用其他方法。"],
+  quiz_list: [{"question":"Σ1/n（调和级数）的敛散性？","options":["发散","收敛","条件收敛","不确定"],"correct":0},{"question":"p级数 Σ1/n^p，p>1 时？","options":["收敛","发散","不确定","条件收敛"],"correct":0}],
+  intuition_text: "判断正项级数「加起来是有限还是无穷」。关键看通项衰减快不快：像 1/n² 衰减快，加起来收敛；1/n 衰减慢，加起来发散（调和级数）。p 级数 Σ1/n^p：p>1 收敛，p≤1 发散。"
+};
+
+/* ===== MA-56 专属动画：正项级数审敛法 ===== */
+const STEPS = [{"focus":0,"desc":"正项级数的部分和 Sₙ 单调递增 —— 所以「收敛」等价于「Sₙ 有上界」"},{"focus":1,"desc":"对比：Σ1/n² 的部分和趋于有限值；Σ1/n 的部分和一直往上爬（发散）"},{"focus":2,"desc":"比较判别法：小的收敛则大的收敛；大的发散则小的发散（同向传递）"},{"focus":3,"desc":"比值判别法：ρ = lim aₙ₊₁/aₙ，ρ<1 收敛、ρ>1 发散、ρ=1 失效"},{"focus":4,"desc":"根值判别法：ρ = lim ⁿ√aₙ，判据与比值法完全一致"},{"focus":5,"desc":"选择流程：先看通项形态 → 阶乘/幂选比值，n 次方选根值，分式选比较"}];
+
+let stepIdx = 0, playing = false, playTimer = null;
+
+/* —— 通用几何工具（仅坐标/样式辅助，每个知识点的动画编排均为独立手写） —— */
+function box(g,x,y,w,h,stroke,fillOp,rx){
+  g.append('rect').attr('x',x).attr('y',y).attr('width',w).attr('height',h).attr('rx',rx===undefined?8:rx)
+    .attr('fill',stroke).attr('fill-opacity',fillOp===undefined?0.1:fillOp).attr('stroke',stroke).attr('stroke-width',2);
+}
+function txt(g,x,y,s,fill,size,anchor,weight){
+  g.append('text').attr('x',x).attr('y',y).attr('text-anchor',anchor||'middle')
+    .attr('fill',fill||'var(--text)').attr('font-size',size||13).attr('font-weight',weight||400).text(s);
+}
+function ln(g,x1,y1,x2,y2,stroke,sw,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',stroke).attr('stroke-width',sw||1.6).attr('stroke-dasharray',dash||'');
+}
+function arw(g,x1,y1,x2,y2,color,dash){
+  g.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2)
+    .attr('stroke',color).attr('stroke-width',2).attr('stroke-dasharray',dash||'').attr('marker-end','url(#arwGen)');
+}
+function circ(g,cx,cy,r,fill,stroke,sw){
+  g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill',fill)
+    .attr('stroke',stroke||'none').attr('stroke-width',sw||0);
+}
+function chip(g,x,y,w,h,label,color,sub){
+  box(g,x,y,w,h,color,0.14);
+  txt(g,x+w/2,y+(sub?h/2-4:h/2+5),label,color,13,'middle','700');
+  if(sub) txt(g,x+w/2,y+h/2+14,sub,'var(--text-muted)',10.5);
+}
+function title(g,s){
+  txt(g,450,28,s,'var(--primary-strong)',15,'middle','700');
+}
+function plot(g,f,x0,y0,w,h,color,sw){
+  let d='';
+  for(let i=0;i<=100;i++){
+    const t=i/100, x=x0+w*t, y=y0-h*f(t);
+    d+=(i?' L ':'M ')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  g.append('path').attr('d',d).attr('fill','none').attr('stroke',color).attr('stroke-width',sw||2.2);
+}
+
+function renderViz(){
+  const svg = d3.select('#viz');
+  svg.selectAll('*').remove();
+  const W = 900, H = 400;
+  svg.attr('viewBox', '0 0 ' + W + ' ' + H);
+  const g = svg.append('g');
+  const step = STEPS[stepIdx];
+  const f = step.focus;
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arwGen').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5)
+    .attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','var(--primary-strong)');
+  
+    const C = ['var(--primary)', 'var(--success)', 'var(--highlight)', 'var(--danger)'];
+    const head = ['部分和 Sₙ 单调递增', '收敛 vs 发散', '比较判别法', '比值判别法（达朗贝尔）', '根值判别法（柯西）', '拿到级数怎么选方法'];
+    title(g, head[f]);
+
+    if (f === 0) {
+      const x0 = 100, y0 = 330, w = 660, h = 240;
+      ln(g, x0, y0, x0 + w, y0, 'var(--text-muted)', 1.6);
+      ln(g, x0, y0, x0, y0 - h, 'var(--text-muted)', 1.6);
+      txt(g, x0 + w + 8, y0 + 4, 'n', 'var(--text-muted)', 12, 'start');
+      txt(g, x0 - 8, y0 - h - 6, 'Sₙ', 'var(--text-muted)', 12, 'end');
+      // 阶梯柱
+      let s = 0;
+      for (let n = 1; n <= 20; n++) {
+        s += 1 / (n * n);
+        const x = x0 + n * 30;
+        g.append('rect').attr('x', x - 12).attr('y', y0 - s / 1.7 * h).attr('width', 22)
+          .attr('height', s / 1.7 * h).attr('fill', 'var(--primary)').attr('fill-opacity', 0.35);
+        if (n % 4 === 0) txt(g, x, y0 + 18, n, 'var(--text-muted)', 10, 'middle');
+      }
+      ln(g, x0, y0 - 1.65 / 1.7 * h, x0 + w, y0 - 1.65 / 1.7 * h, 'var(--success)', 2, '7,5');
+      txt(g, x0 + w - 4, y0 - 1.65 / 1.7 * h - 8, '上界（如 π²/6≈1.645）', 'var(--success)', 11.5, 'end', '600');
+      txt(g, 460, 96, 'Sₙ 只增不减；只要它「顶不破某个天花板」就收敛', 'var(--primary-strong)', 12.5, 'middle', '600');
+      txt(g, 460, 372, '单调有界准则：单调递增 + 有上界 ⟺ 收敛', 'var(--text-muted)', 12, 'middle');
+    }
+
+    if (f === 1) {
+      const x0 = 90, y0 = 320, w = 700, h = 230;
+      ln(g, x0, y0, x0 + w, y0, 'var(--text-muted)', 1.6);
+      ln(g, x0, y0, x0, y0 - h, 'var(--text-muted)', 1.6);
+      txt(g, x0 + w + 8, y0 + 4, 'n', 'var(--text-muted)', 12, 'start');
+      let s1 = 0, s2 = 0;
+      let d1 = '', d2 = '';
+      const p1 = [], p2 = [];
+      for (let i = 0; i <= 300; i++) {
+        const n = 1 + i * 0.1;
+        // 用积分近似：S_n^(2) ≈ π²/6 - 1/n；S_n^(1) ≈ ln n + γ
+        const a = 1.6449 - 1 / n;
+        const b = Math.log(n) + 0.5772;
+        p1.push([x0 + i / 300 * w, y0 - a / 1.7 * h]);
+        p2.push([x0 + i / 300 * w, y0 - Math.min(b, 1.7) / 1.7 * h]);
+      }
+      p1.forEach(function (p, i) { d1 += (i ? ' L ' : 'M ') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); });
+      p2.forEach(function (p, i) { d2 += (i ? ' L ' : 'M ') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); });
+      g.append('path').attr('d', d1).attr('fill', 'none').attr('stroke', 'var(--success)').attr('stroke-width', 2.6);
+      g.append('path').attr('d', d2).attr('fill', 'none').attr('stroke', 'var(--danger)').attr('stroke-width', 2.6);
+      txt(g, 540, 150, 'Σ1/n² 收敛（有界）', 'var(--success)', 12.5, 'start', '700');
+      txt(g, 540, 120, 'Σ1/n 发散（无界）', 'var(--danger)', 12.5, 'start', '700');
+      txt(g, 460, 366, '同为正项级数，一个「爬得越来越慢但仍封顶」，一个「永远在爬」', 'var(--text-muted)', 12, 'middle');
+    }
+
+    if (f === 2) {
+      // 两个堆叠
+      function stack(x, base, arr, color, label, sub) {
+        let y = base;
+        arr.forEach(function (v) {
+          const hh = v * 46;
+          g.append('rect').attr('x', x).attr('y', y - hh).attr('width', 150).attr('height', hh - 2).attr('rx', 3)
+            .attr('fill', color).attr('fill-opacity', 0.3).attr('stroke', color).attr('stroke-width', 1.4);
+          y -= hh;
+        });
+        txt(g, x + 75, base + 24, label, color, 13, 'middle', '700');
+        txt(g, x + 75, base + 46, sub, 'var(--text-muted)', 11, 'middle');
+      }
+      stack(140, 320, [1, 0.7, 0.5, 0.36, 0.26, 0.18], 'var(--success)', 'Σ bₙ（已知收敛）', '如 Σ1/n²');
+      stack(400, 320, [1.3, 0.95, 0.7, 0.5, 0.36, 0.26], 'var(--primary)', 'Σ aₙ（待判）', '且 aₙ ≤ bₙ');
+      txt(g, 690, 140, 'aₙ ≤ bₙ 时：', 'var(--highlight)', 12.5, 'start', '700');
+      txt(g, 690, 172, '大的收敛 → 小的必收敛', 'var(--success)', 12, 'start', '600');
+      txt(g, 690, 204, '小的发散 → 大的必发散', 'var(--danger)', 12, 'start', '600');
+      txt(g, 690, 244, '记忆：水桶理论', 'var(--text-muted)', 11.5, 'start');
+      txt(g, 690, 270, '小桶装得下 → 大桶也装得下', 'var(--text-muted)', 11.5, 'start');
+      txt(g, 460, 372, '比较对象：p 级数 Σ1/nᵖ、几何级数 Σqⁿ（|q|<1 收敛）', 'var(--text-muted)', 11.5, 'middle');
+    }
+
+    if (f === 3) {
+      const y = 210;
+      arw(g, 90, y, 830, y, 'var(--text-muted)');
+      [['0', 120, 'var(--text-muted)'], ['1', 520, 'var(--highlight)'], ['ρ', 700, 'var(--text-muted)']].forEach(function (t) {
+        txt(g, t[1], y + 26, t[0], t[2], 13, 'middle', '700');
+      });
+      g.append('rect').attr('x', 120).attr('y', y - 40).attr('width', 400).attr('height', 80).attr('rx', 8)
+        .attr('fill', 'var(--success)').attr('fill-opacity', 0.16);
+      txt(g, 320, y + 6, 'ρ < 1 → 收敛', 'var(--success)', 15, 'middle', '700');
+      g.append('rect').attr('x', 520).attr('y', y - 40).attr('width', 180).attr('height', 80).attr('rx', 8)
+        .attr('fill', 'var(--danger)').attr('fill-opacity', 0.16);
+      txt(g, 610, y + 6, 'ρ > 1 → 发散', 'var(--danger)', 15, 'middle', '700');
+      txt(g, 520, y - 62, 'ρ = 1：本方法失效，另想办法', 'var(--highlight)', 12, 'middle', '600');
+      txt(g, 460, 100, 'ρ = lim (n→∞) aₙ₊₁ / aₙ', 'var(--primary-strong)', 15, 'middle', '700');
+      txt(g, 460, 300, '比值法的本质：和几何级数比 —— 相邻项缩小得比 1 快就收敛', 'var(--text-muted)', 12, 'middle');
+      txt(g, 460, 332, 'ρ=1 的典型：Σ1/n 与 Σ1/n² 都判不出来（一个散一个收）', 'var(--highlight)', 11.5, 'middle');
+      txt(g, 460, 364, '含阶乘、n 次幂、连乘 → 优先用比值法（相邻相除会大量约掉）', 'var(--primary-strong)', 12, 'middle', '600');
+    }
+
+    if (f === 4) {
+      txt(g, 460, 100, 'ρ = lim (n→∞) ⁿ√aₙ', 'var(--primary-strong)', 15, 'middle', '700');
+      const cards = [
+        ['ρ < 1', '收敛', 'var(--success)', '因为 aₙ 最终小于某个 qⁿ（q<1）'],
+        ['ρ > 1', '发散', 'var(--danger)', 'aₙ 最终大于 1，通项不趋于 0'],
+        ['ρ = 1', '失效', 'var(--highlight)', '需改用比较法或积分法']
+      ];
+      cards.forEach(function (c, i) {
+        const y = 130 + i * 76;
+        g.append('rect').attr('x', 150).attr('y', y).attr('width', 600).attr('height', 62).attr('rx', 10)
+          .attr('fill', c[2]).attr('fill-opacity', 0.12).attr('stroke', c[2]).attr('stroke-width', 1.8);
+        txt(g, 180, y + 38, c[0], c[2], 15, 'start', '700');
+        txt(g, 300, y + 38, c[1], c[2], 15, 'start', '700');
+        txt(g, 430, y + 38, c[3], 'var(--text-muted)', 11.5, 'start');
+      });
+      txt(g, 460, 378, '适用：通项是「n 次方」形态，如 (n/(2n+1))ⁿ、(1+1/n)ⁿ²', 'var(--text-muted)', 11.5, 'middle');
+    }
+
+    if (f === 5) {
+      const rows = [
+        ['含 n!、连乘、n 的 n 次方', '比值法：lim aₙ₊₁/aₙ', 'var(--primary)'],
+        ['通项是「整体 n 次方」', '根值法：lim ⁿ√aₙ', 'var(--success)'],
+        ['分式、根式、与 p 级数同阶', '比较法 / 极限比较法', 'var(--highlight)'],
+        ['通项是单调递减函数 f(n)', '积分判别法 ∫f(x)dx', 'var(--swap)'],
+        ['形如 Σ1/(n lnᵖn)', '积分判别法（p>1 收敛）', 'var(--danger)']
+      ];
+      txt(g, 90, 92, '看到什么形态', 'var(--primary-strong)', 12.5, 'start', '700');
+      txt(g, 400, 92, '优先选什么方法', 'var(--primary-strong)', 12.5, 'start', '700');
+      rows.forEach(function (r, i) {
+        const y = 106 + i * 52;
+        g.append('rect').attr('x', 80).attr('y', y).attr('width', 740).attr('height', 44).attr('rx', 7)
+          .attr('fill', r[2]).attr('fill-opacity', 0.1).attr('stroke', 'var(--border)').attr('stroke-width', 1);
+        txt(g, 94, y + 28, r[0], 'var(--text)', 12, 'start');
+        txt(g, 400, y + 28, r[1], r[2], 12, 'start', '700');
+      });
+      txt(g, 450, 380, '记住 p 级数：p>1 收敛、p≤1 发散 —— 它是所有比较法的「标尺」', 'var(--highlight)', 12, 'middle', '600');
+    }
+  
+  document.getElementById('subtitle').textContent = step.desc;
+}
+
+function renderStep(i){ stepIdx = Math.max(0, Math.min(i, STEPS.length-1)); renderViz(); }
+function stepNext(){ renderStep(stepIdx+1); }
+function stepPrev(){ renderStep(stepIdx-1); }
+function stopPlay(){ if(playTimer){clearInterval(playTimer);playTimer=null;} playing=false; document.getElementById('btn-play').textContent='▶ 播放'; }
+function togglePlay(){ if(playing){stopPlay();return;} playing=true; document.getElementById('btn-play').textContent='⏸ 暂停'; playTimer=setInterval(function(){ if(stepIdx>=STEPS.length-1){stopPlay();return;} stepNext(); },1900); }
+
+function renderDerive(){
+  const el=document.getElementById('derive-katex');
+  el.innerHTML = window.COURSEWARE_DATA.derivation.map(function(l){return '<div class="katex-holder">$$'+l+'$$</div>';}).join('');
+  if(window.renderMathInElement) window.renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}]});
+  else if(window.katex){ el.innerHTML=''; window.COURSEWARE_DATA.derivation.forEach(function(l){const d=document.createElement('div');d.className='katex-holder';el.appendChild(d);window.katex.render(l,d,{displayMode:true});}); }
+}
+function renderContent(){
+  const d=window.COURSEWARE_DATA;
+  document.getElementById('intuition-text').innerHTML='<p>'+(d.intuition_text||'')+'</p>';
+  document.getElementById('exam-text').innerHTML=(d.exam_text||'')+'<p style="color:var(--success);margin-top:8px;">'+(d.exam_answer||'')+'</p>';
+  document.getElementById('pitfall-list').innerHTML=(d.pitfall_list||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  document.getElementById('quiz-list').innerHTML=(d.quiz_list||[]).map(function(q){
+    return '<div class="quiz-item"><p>'+q.question+'</p>'+q.options.map(function(o,oi){return '<span class="opt" data-correct="'+(oi===q.correct?1:0)+'">'+o+'</span>';}).join('')+'</div>';
+  }).join('');
+  renderDerive();
+}
+function bindQuiz(){
+  document.querySelectorAll('.quiz-item .opt').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      const sib=opt.parentElement.querySelectorAll('.opt');
+      sib.forEach(function(s){s.classList.remove('correct','wrong');});
+      if(opt.dataset.correct==='1'){opt.classList.add('correct');}else{opt.classList.add('wrong');}
+    });
+  });
+}
+async function loadSkill(){
+  if(location.protocol==='file:') return; // 双击本地打开时没有服务端，跳过技巧拉取，避免控制台报错
+  const id = (window.COURSEWARE_DATA && window.COURSEWARE_DATA.id) || '';
+  if(!id) return;
+  try{
+    const r=await fetch('/api/skills/'+id);
+    if(!r.ok) return;
+    const s=await r.json();
+    if(s && s.skill_text){
+      document.getElementById('skill-section').style.display='block';
+      document.getElementById('skill-content').innerHTML=s.skill_text.split('\n').filter(function(x){return x.trim();}).map(function(x){return '<div style="margin:6px 0;">🎯 '+x+'</div>';}).join('');
+    }
+  }catch(e){}
+}
+function initTheme(){
+  try{const s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = document.documentElement.getAttribute('data-theme')==='light'?'☀️':'🌙';
+}
+document.getElementById('theme-float-btn').addEventListener('click',function(){
+  const c=document.documentElement.getAttribute('data-theme');
+  const n=c==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',n);
+  try{localStorage.setItem('theme',n);}catch(e){}
+  document.getElementById('theme-float-btn').textContent = n==='light'?'☀️':'🌙';
+});
+function init(){
+  renderContent(); loadSkill(); bindQuiz(); renderStep(0);
+  document.getElementById('btn-next').addEventListener('click',stepNext);
+  document.getElementById('btn-prev').addEventListener('click',stepPrev);
+  document.getElementById('btn-play').addEventListener('click',togglePlay);
+  document.getElementById('btn-reset').addEventListener('click',function(){stepIdx=0;stopPlay();renderStep(0);});
+}
+window.addEventListener('load',function(){
+  initTheme();
+  if(window.gsap) gsap.from('.section',{opacity:0,y:20,duration:0.6,stagger:0.12,ease:'power2.out'});
+  init();
+});
+</script>
+</body>
+</html>
